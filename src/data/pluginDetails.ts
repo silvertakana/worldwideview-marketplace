@@ -3,26 +3,11 @@ import type { PluginCard } from "./plugins";
 export interface PluginDetail extends PluginCard {
   longDescription: string;
   capabilities: string[];
-  format: string;
-  trust: string;
   compatibility: string;
   repository?: string;
   changelog: string;
 }
 
-/** Human-readable labels for capability strings */
-export const CAPABILITY_LABELS: Record<string, { emoji: string; label: string }> = {
-  "data:own": { emoji: "📊", label: "Own Data" },
-  "network:fetch": { emoji: "🌐", label: "Network Fetch" },
-  "storage:write": { emoji: "💾", label: "Storage Write" },
-  "storage:read": { emoji: "📖", label: "Storage Read" },
-  "ui:detail-panel": { emoji: "🖼️", label: "Detail Panel" },
-  "ui:sidebar": { emoji: "📐", label: "Sidebar" },
-  "ui:toolbar": { emoji: "🔧", label: "Toolbar" },
-  "ui:settings": { emoji: "⚙️", label: "Settings" },
-  "globe:overlay": { emoji: "🌍", label: "Globe Overlay" },
-  "globe:camera": { emoji: "🎥", label: "Camera Control" },
-};
 
 export const PLUGIN_DETAILS: Record<string, PluginDetail> = {
   aviation: {
@@ -32,8 +17,12 @@ export const PLUGIN_DETAILS: Record<string, PluginDetail> = {
     category: "Aviation",
     icon: "✈️",
     installs: 1_240,
+    author: "WorldWideView",
+    version: "1.0.0",
     format: "bundle",
     trust: "built-in",
+    tags: ["real-time", "tracking", "aircraft", "opensky"],
+    updatedAt: "2026-03-10",
     capabilities: ["data:own", "network:fetch", "storage:write"],
     compatibility: ">=0.1.0",
     changelog: "v1.0.0 — Initial release with live tracking, altitude coloring, and 3D model rendering.",
@@ -47,8 +36,12 @@ export const PLUGIN_DETAILS: Record<string, PluginDetail> = {
     category: "Maritime",
     icon: "🚢",
     installs: 870,
+    author: "WorldWideView",
+    version: "1.0.0",
     format: "bundle",
     trust: "built-in",
+    tags: ["real-time", "tracking", "vessels", "ais"],
+    updatedAt: "2026-03-10",
     capabilities: ["data:own", "network:fetch"],
     compatibility: ">=0.1.0",
     changelog: "v1.0.0 — Initial release with AIS-based vessel tracking and ship-type filtering.",
@@ -62,8 +55,12 @@ export const PLUGIN_DETAILS: Record<string, PluginDetail> = {
     category: "Aviation",
     icon: "🛡️",
     installs: 620,
+    author: "WorldWideView",
+    version: "1.0.0",
     format: "bundle",
     trust: "built-in",
+    tags: ["real-time", "tracking", "military", "adsb"],
+    updatedAt: "2026-03-12",
     capabilities: ["data:own", "network:fetch"],
     compatibility: ">=0.1.0",
     changelog: "v1.0.0 — Initial release with adsb.fi military feed integration.",
@@ -77,8 +74,12 @@ export const PLUGIN_DETAILS: Record<string, PluginDetail> = {
     category: "Natural Disaster",
     icon: "🔥",
     installs: 510,
+    author: "WorldWideView",
+    version: "1.0.0",
     format: "bundle",
     trust: "built-in",
+    tags: ["fire", "nasa", "satellite", "viirs"],
+    updatedAt: "2026-03-08",
     capabilities: ["data:own", "network:fetch"],
     compatibility: ">=0.1.0",
     changelog: "v1.0.0 — Initial release with VIIRS fire detection and confidence-based rendering.",
@@ -92,8 +93,12 @@ export const PLUGIN_DETAILS: Record<string, PluginDetail> = {
     category: "Infrastructure",
     icon: "📷",
     installs: 430,
+    author: "WorldWideView",
+    version: "1.0.0",
     format: "bundle",
     trust: "built-in",
+    tags: ["cameras", "live", "streaming", "infrastructure"],
+    updatedAt: "2026-03-09",
     capabilities: ["data:own", "network:fetch"],
     compatibility: ">=0.1.0",
     changelog: "v1.0.0 — Initial release with curated public camera feeds.",
@@ -107,8 +112,12 @@ export const PLUGIN_DETAILS: Record<string, PluginDetail> = {
     category: "Custom",
     icon: "🗺️",
     installs: 380,
+    author: "WorldWideView",
+    version: "1.0.0",
     format: "bundle",
     trust: "built-in",
+    tags: ["borders", "labels", "countries", "overlay"],
+    updatedAt: "2026-03-06",
     capabilities: ["data:own"],
     compatibility: ">=0.1.0",
     changelog: "v1.0.0 — Initial release with GeoJSON-based political boundaries.",
@@ -122,8 +131,12 @@ export const PLUGIN_DETAILS: Record<string, PluginDetail> = {
     category: "Custom",
     icon: "📄",
     installs: 290,
+    author: "WorldWideView",
+    version: "1.0.0",
     format: "bundle",
     trust: "built-in",
+    tags: ["geojson", "import", "custom-data", "visualization"],
+    updatedAt: "2026-03-05",
     capabilities: ["data:own"],
     compatibility: ">=0.1.0",
     changelog: "v1.0.0 — Initial release with drag-and-drop GeoJSON import.",

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CATEGORIES, type Category } from "@/data/plugins";
 import { usePlugins } from "@/hooks/usePlugins";
+import PluginCard from "@/components/PluginCard";
 import styles from "./page.module.css";
 
 export default function BrowsePage() {
@@ -34,22 +35,11 @@ export default function BrowsePage() {
       ) : (
         <div className={styles.grid}>
           {plugins.map((plugin) => (
-            <article key={plugin.id} className={styles.card}>
-              <div className={styles.cardHeader}>
-                <span className={styles.cardIcon}>{plugin.icon}</span>
-                <span className={styles.cardName}>{plugin.name}</span>
-              </div>
-              <p className={styles.cardDesc}>{plugin.description}</p>
-              <div className={styles.cardFooter}>
-                <span className={styles.categoryBadge}>{plugin.category}</span>
-                <span className={styles.installs}>
-                  {plugin.installs.toLocaleString()} installs
-                </span>
-              </div>
-            </article>
+            <PluginCard key={plugin.id} plugin={plugin} />
           ))}
         </div>
       )}
     </div>
   );
 }
+

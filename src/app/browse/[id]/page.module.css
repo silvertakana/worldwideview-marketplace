@@ -1,0 +1,160 @@
+.page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-2xl) var(--space-lg);
+}
+
+.backLink {
+  display: inline-block;
+  font-size: 0.88rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xl);
+  transition: color var(--transition-fast);
+}
+.backLink:hover {
+  color: var(--color-accent);
+}
+
+/* ── Hero ── */
+.hero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+.heroIcon {
+  font-size: 2.8rem;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+.heroInfo { flex: 1; }
+.heroName {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+.heroAuthor {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xs);
+}
+.badges {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+.badgeVersion,
+.badgeFormat,
+.badgeTrust {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.badgeVersion {
+  background: var(--color-accent-glow);
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+}
+.badgeFormat {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+.badgeTrust {
+  background: rgba(22, 163, 74, 0.1);
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+/* ── Stats ── */
+.stats {
+  display: flex;
+  gap: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2xl);
+}
+.stat { text-align: center; flex: 1; }
+.statValue {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Sections ── */
+.section { margin-bottom: var(--space-xl); }
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+.description {
+  font-size: 0.92rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+.changelog {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  line-height: 1.6;
+}
+
+/* ── Capabilities ── */
+.capList {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.capBadge {
+  font-size: 0.82rem;
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+}
+
+/* ── Install ── */
+.installBtn {
+  display: block;
+  width: 100%;
+  padding: var(--space-md);
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  color: var(--color-text-muted);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: not-allowed;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+@media (max-width: 640px) {
+  .hero { flex-direction: column; text-align: center; }
+  .badges { justify-content: center; }
+  .stats { flex-direction: column; gap: var(--space-md); }
+  .heroName { font-size: 1.3rem; }
+}
