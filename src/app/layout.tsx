@@ -5,9 +5,25 @@ import Footer from "@/components/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "WorldWideView Marketplace",
+  title: {
+    default: "WorldWideView Marketplace",
+    template: "%s | WWV Marketplace",
+  },
   description:
     "Browse, publish, and install data source plugins for WorldWideView — the real-time 3D globe intelligence platform.",
+  icons: { icon: "/favicon.svg" },
+  openGraph: {
+    title: "WorldWideView Marketplace",
+    description:
+      "Browse, publish, and install data source plugins for the real-time 3D globe intelligence platform.",
+    siteName: "WorldWideView Marketplace",
+    type: "website",
+    locale: "en_US",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

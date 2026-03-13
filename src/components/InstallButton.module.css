@@ -1,0 +1,44 @@
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-xl);
+    background: var(--color-accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    min-width: 180px;
+}
+
+.btn:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.installed {
+    background: var(--color-success);
+    cursor: default;
+}
+
+.loading {
+    background: var(--color-accent);
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.error {
+    color: var(--color-danger);
+    font-size: 0.8rem;
+    margin-top: var(--space-sm);
+    text-align: center;
+}

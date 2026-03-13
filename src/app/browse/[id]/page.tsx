@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { PLUGIN_DETAILS } from "@/data/pluginDetails";
 import { CAPABILITY_LABELS } from "@/data/capabilityLabels";
+import InstallButton from "@/components/InstallButton";
 import styles from "./page.module.css";
 
 interface Props {
@@ -77,9 +78,7 @@ export default async function PluginDetailPage({ params }: Props) {
       </section>
 
       {/* ── Install Button ── */}
-      <button className={styles.installBtn} disabled title="Coming in Stage 4">
-        Install Plugin
-      </button>
+      <InstallButton pluginId={plugin.id} version={plugin.version} />
     </div>
   );
 }
