@@ -1,24 +1,26 @@
-/* ───────── Design Tokens ────────── */
+/* ───────── Design Tokens — Light (default) ────────── */
 :root {
   /* Colors */
-  --color-bg: #0a0a0f;
-  --color-bg-elevated: #12121a;
-  --color-bg-card: #1a1a2e;
-  --color-bg-card-hover: #222240;
-  --color-border: #2a2a3e;
-  --color-border-hover: #3a3a5e;
+  --color-bg: #f8f9fa;
+  --color-bg-elevated: #ffffff;
+  --color-bg-card: #ffffff;
+  --color-bg-card-hover: #f0f2f5;
+  --color-border: #e0e0e0;
+  --color-border-hover: #c0c0c0;
 
-  --color-text-primary: #e8e8f0;
-  --color-text-secondary: #8888a8;
-  --color-text-muted: #5a5a7a;
+  --color-text-primary: #111111;
+  --color-text-secondary: #555555;
+  --color-text-muted: #888888;
 
-  --color-accent: #6366f1;
-  --color-accent-hover: #818cf8;
-  --color-accent-glow: rgba(99, 102, 241, 0.15);
+  --color-accent: #8b2232;
+  --color-accent-hover: #a82d3e;
+  --color-accent-glow: rgba(139, 34, 50, 0.10);
 
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+
+  --header-bg: rgba(255, 255, 255, 0.85);
 
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -40,15 +42,47 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
   --shadow-glow: 0 0 20px var(--color-accent-glow);
 
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
   --transition-slow: 400ms ease;
+
+  color-scheme: light;
+}
+
+/* ───────── Design Tokens — Dark ────────── */
+[data-theme="dark"] {
+  --color-bg: #0d0d0d;
+  --color-bg-elevated: #161616;
+  --color-bg-card: #1c1c1c;
+  --color-bg-card-hover: #252525;
+  --color-border: #2a2a2a;
+  --color-border-hover: #404040;
+
+  --color-text-primary: #e8e8e8;
+  --color-text-secondary: #999999;
+  --color-text-muted: #666666;
+
+  --color-accent: #c43c4c;
+  --color-accent-hover: #d95565;
+  --color-accent-glow: rgba(196, 60, 76, 0.12);
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  --header-bg: rgba(13, 13, 13, 0.85);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  color-scheme: dark;
 }
 
 /* ───────── Reset & Base ────────── */
@@ -60,10 +94,6 @@
   padding: 0;
 }
 
-html {
-  color-scheme: dark;
-}
-
 body {
   font-family: var(--font-sans);
   background: var(--color-bg);
@@ -71,6 +101,8 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background var(--transition-base),
+    color var(--transition-base);
 }
 
 a {

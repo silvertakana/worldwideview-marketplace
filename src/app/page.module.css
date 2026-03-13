@@ -13,7 +13,7 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   margin-bottom: var(--space-md);
-  background: linear-gradient(135deg, var(--color-accent), #a78bfa, #f472b6);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover), #e88a98);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -24,6 +24,29 @@
   color: var(--color-text-secondary);
   max-width: 600px;
   margin-bottom: var(--space-xl);
+}
+
+.browseBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-xl);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-accent);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.browseBtn:hover {
+  background: var(--color-accent-hover);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-2px);
+  color: #fff;
 }
 
 .badge {
@@ -64,13 +87,13 @@
   align-items: center;
 }
 
-.stat-value {
+.statValue {
   font-size: 2rem;
   font-weight: 700;
   color: var(--color-accent);
 }
 
-.stat-label {
+.statLabel {
   font-size: 0.85rem;
   color: var(--color-text-muted);
 }

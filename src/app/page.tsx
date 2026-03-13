@@ -1,14 +1,19 @@
+import Link from "next/link";
 import styles from "./page.module.css";
 
 export default function Home() {
   return (
-    <main className={styles.hero}>
+    <section className={styles.hero}>
       <span className={styles.badge}>Marketplace</span>
       <h1>WorldWideView Marketplace</h1>
       <p>
         Browse, publish, and install data source plugins for the real-time 3D
         globe intelligence platform.
       </p>
+
+      <Link href="/browse" className={styles.browseBtn}>
+        Browse Plugins →
+      </Link>
 
       <div className={styles.stats}>
         <div className={styles.stat}>
@@ -24,6 +29,6 @@ export default function Home() {
           <span className={styles.statLabel}>Formats</span>
         </div>
       </div>
-    </main>
+    </section>
   );
 }
