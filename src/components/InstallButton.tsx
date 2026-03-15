@@ -53,7 +53,7 @@ export default function InstallButton({ pluginId, version }: Props) {
             capabilities: ["data:own"], category: "Custom", icon: "📦",
         };
         const manifest = getInstallManifest(detail);
-        const manifestB64 = btoa(JSON.stringify(manifest));
+        const manifestB64 = btoa(unescape(encodeURIComponent(JSON.stringify(manifest))));
         const redirectTo = window.location.href.split("?")[0]; // current page, no params
 
         const url = new URL(`${instanceUrl}/api/marketplace/install-redirect`);

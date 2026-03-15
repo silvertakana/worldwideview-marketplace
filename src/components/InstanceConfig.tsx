@@ -7,9 +7,11 @@ import styles from "./InstanceConfig.module.css";
 interface Props {
     onConfigured: () => void;
     onCancel: () => void;
+    /** Page to return to after WWV issues the token (defaults to current URL) */
+    returnPath?: string;
 }
 
-export default function InstanceConfig({ onConfigured, onCancel }: Props) {
+export default function InstanceConfig({ onConfigured, onCancel, returnPath }: Props) {
     const [url, setUrl] = useState("");
     const [status, setStatus] = useState<"idle" | "testing" | "success" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
@@ -40,7 +42,12 @@ export default function InstanceConfig({ onConfigured, onCancel }: Props) {
 
     function handleSave() {
         setInstanceUrl(url);
-        onConfigured();
+        // Redirect to WWV to obtain a marketplace token via session auth.
+        // WWV will redirect back to returnPath with ?token=<jwt>.
+        const returnTo = returnPath ?? window.location.href.split("?")[0];
+        const grantUrl = new URL(`${url.replace(/\/+$/, "")}/api/marketplace/grant-token`);
+        grantUrl.searchParams.set("redirectTo", returnTo);
+        window.location.href = grantUrl.toString();
     }
 
     return (

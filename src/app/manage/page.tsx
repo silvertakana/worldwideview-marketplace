@@ -1,15 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useInstalledPlugins } from "@/hooks/useInstalledPlugins";
 import InstalledPluginCard from "@/components/InstalledPluginCard";
 import InstanceConfig from "@/components/InstanceConfig";
+import { setMarketplaceToken } from "@/lib/instanceStore";
 import styles from "./page.module.css";
 
 export default function ManagePage() {
   const { plugins, loading, error, configured, refetch } = useInstalledPlugins();
   const [showConfig, setShowConfig] = useState(false);
+
+  // Detect ?token= returned from WWV grant-token redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (token) {
+      setMarketplaceToken(token);
+      const clean = new URL(window.location.href);
+      clean.searchParams.delete("token");
+      window.history.replaceState({}, "", clean.toString());
+      refetch();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleConfigured() {
     setShowConfig(false);
@@ -43,6 +58,7 @@ export default function ManagePage() {
         <InstanceConfig
           onConfigured={handleConfigured}
           onCancel={() => setShowConfig(false)}
+          returnPath={typeof window !== "undefined" ? window.location.origin + "/manage" : "/manage"}
         />
       )}
 

@@ -36,7 +36,9 @@ export const PLUGIN_MANIFESTS: Record<string, ManifestTemplate> = {
 
 /** Get the install manifest for a plugin, or a minimal fallback. */
 export function getInstallManifest(detail: PluginDetail): ManifestTemplate {
-  return PLUGIN_MANIFESTS[detail.id] ?? {
+  if (PLUGIN_MANIFESTS[detail.id]) return PLUGIN_MANIFESTS[detail.id];
+
+  const base: ManifestTemplate = {
     id: detail.id,
     name: detail.name,
     version: detail.version,
@@ -47,4 +49,14 @@ export function getInstallManifest(detail: PluginDetail): ManifestTemplate {
     category: detail.category,
     icon: detail.icon,
   };
+
+  // Bundle plugins require an entry field to pass validateManifest.
+  // For built-in bundles the plugin code is already in WWV, so we use
+  // the plugin ID as a stable placeholder.
+  if (detail.format === "bundle") {
+    base.entry = detail.id;
+  }
+
+  return base;
 }
+
