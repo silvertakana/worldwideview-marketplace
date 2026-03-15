@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { getInstanceConfig } from "@/lib/instanceStore";
+import { PLUGIN_DETAILS } from "@/data/pluginDetails";
+import { getInstallManifest } from "@/data/pluginManifests";
 import InstanceConfig from "./InstanceConfig";
 import styles from "./InstallButton.module.css";
 
@@ -54,7 +56,13 @@ export default function InstallButton({ pluginId, version }: Props) {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${config.token}`,
                 },
-                body: JSON.stringify({ pluginId, version }),
+                body: JSON.stringify({
+                    pluginId,
+                    version,
+                    manifest: getInstallManifest(
+                        PLUGIN_DETAILS[pluginId] ?? { id: pluginId, version, format: "bundle", trust: "unverified", capabilities: [], category: "Custom", icon: "📦" }
+                    ),
+                }),
                 signal: AbortSignal.timeout(10000),
             });
 

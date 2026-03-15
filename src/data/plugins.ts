@@ -129,4 +129,18 @@ export const PLUGINS: PluginCard[] = [
     tags: ["geojson", "import", "custom-data", "visualization"],
     updatedAt: "2026-03-05",
   },
+  {
+    id: "military-bases",
+    name: "Military Bases — Global",
+    description: "Worldwide military bases, airfields, and barracks from OSM",
+    category: "Custom",
+    icon: "🏛️",
+    installs: 150,
+    author: "WorldWideView",
+    version: "1.0.0",
+    format: "static",
+    trust: "verified",
+    tags: ["military", "bases", "airfields", "geojson", "static"],
+    updatedAt: "2026-03-15",
+  },
 ];

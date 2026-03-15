@@ -143,4 +143,23 @@ export const PLUGIN_DETAILS: Record<string, PluginDetail> = {
     longDescription:
       "Import your own GeoJSON files via drag-and-drop or file picker. Supports Point, LineString, Polygon, and MultiPolygon geometries with automatic color assignment and layer management.",
   },
+  "military-bases": {
+    id: "military-bases",
+    name: "Military Bases — Global",
+    description: "Worldwide military bases, airfields, and barracks from OSM",
+    category: "Custom",
+    icon: "🏛️",
+    installs: 150,
+    author: "WorldWideView",
+    version: "1.0.0",
+    format: "static",
+    trust: "verified",
+    tags: ["military", "bases", "airfields", "geojson", "static"],
+    updatedAt: "2026-03-15",
+    capabilities: ["data:own"],
+    compatibility: ">=0.1.0",
+    changelog: "v1.0.0 — Initial release with global military facility data from OpenStreetMap.",
+    longDescription:
+      "Visualize military bases, airfields, barracks, and installations worldwide using curated OpenStreetMap data. Each facility is rendered as a point on the globe with name and type labels. This is a static GeoJSON plugin — no API keys or live data required.",
+  },
 };
