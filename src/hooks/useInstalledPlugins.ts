@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getInstanceConfig } from "@/lib/instanceStore";
+import { getInstanceUrl, getMarketplaceToken } from "@/lib/instanceStore";
 
 export interface InstalledPluginRecord {
   id: string;
@@ -20,8 +20,8 @@ interface HookResult {
 }
 
 /**
- * Fetch installed plugins from the user's WWV instance via bridge API.
- * Returns { configured: false } if no instance config is saved.
+ * Fetch installed plugins from the user's WWV instance.
+ * Uses session cookies (credentials: include) — no token needed.
  */
 export function useInstalledPlugins(): HookResult {
   const [plugins, setPlugins] = useState<InstalledPluginRecord[]>([]);
@@ -33,8 +33,8 @@ export function useInstalledPlugins(): HookResult {
   const refetch = useCallback(() => setTrigger((t) => t + 1), []);
 
   useEffect(() => {
-    const config = getInstanceConfig();
-    if (!config) {
+    const instanceUrl = getInstanceUrl();
+    if (!instanceUrl) {
       setConfigured(false);
       setLoading(false);
       return;
@@ -45,8 +45,10 @@ export function useInstalledPlugins(): HookResult {
     setLoading(true);
     setError("");
 
-    fetch(`${config.url}/api/marketplace/status`, {
-      headers: { Authorization: `Bearer ${config.token}` },
+    fetch(`${instanceUrl}/api/marketplace/status`, {
+      headers: {
+        ...(getMarketplaceToken() ? { Authorization: `Bearer ${getMarketplaceToken()}` } : {}),
+      },
       signal: AbortSignal.timeout(8000),
     })
       .then(async (res) => {

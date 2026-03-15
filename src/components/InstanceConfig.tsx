@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { getInstanceConfig, setInstanceConfig } from "@/lib/instanceStore";
+import { useState, useEffect } from "react";
+import { getInstanceUrl, setInstanceUrl } from "@/lib/instanceStore";
 import styles from "./InstanceConfig.module.css";
 
 interface Props {
@@ -10,25 +10,27 @@ interface Props {
 }
 
 export default function InstanceConfig({ onConfigured, onCancel }: Props) {
-    const existing = getInstanceConfig();
-    const [url, setUrl] = useState(existing?.url ?? "http://localhost:3000");
-    const [token, setToken] = useState(existing?.token ?? "");
+    const [url, setUrl] = useState("");
     const [status, setStatus] = useState<"idle" | "testing" | "success" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
+
+    useEffect(() => {
+        setUrl(getInstanceUrl() ?? "http://localhost:3000");
+    }, []);
 
     async function handleTest() {
         setStatus("testing");
         setErrorMsg("");
+        const normalized = url.replace(/\/+$/, "");
         try {
-            const res = await fetch(`${url.replace(/\/+$/, "")}/api/marketplace/status`, {
-                headers: { Authorization: `Bearer ${token}` },
+            const res = await fetch(`${normalized}/api/auth/setup-status`, {
                 signal: AbortSignal.timeout(5000),
             });
             if (res.ok) {
                 setStatus("success");
             } else {
                 setStatus("error");
-                setErrorMsg(res.status === 401 ? "Invalid token" : `Server returned ${res.status}`);
+                setErrorMsg(`Server returned ${res.status}`);
             }
         } catch {
             setStatus("error");
@@ -37,16 +39,17 @@ export default function InstanceConfig({ onConfigured, onCancel }: Props) {
     }
 
     function handleSave() {
-        setInstanceConfig(url, token);
+        setInstanceUrl(url);
         onConfigured();
     }
 
     return (
         <div className={styles.overlay} onClick={onCancel}>
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                <h2 className={styles.title}>Configure Instance</h2>
+                <h2 className={styles.title}>Connect Your Instance</h2>
                 <p className={styles.subtitle}>
-                    Enter your WorldWideView instance URL and bridge token.
+                    Enter the URL of your WorldWideView instance. You{"'"}ll be asked to
+                    sign in when installing a plugin.
                 </p>
 
                 <label className={styles.label}>Instance URL</label>
@@ -58,24 +61,23 @@ export default function InstanceConfig({ onConfigured, onCancel }: Props) {
                     placeholder="http://localhost:3000"
                 />
 
-                <label className={styles.label}>Bridge Token</label>
-                <input
-                    className={styles.input}
-                    type="password"
-                    value={token}
-                    onChange={(e) => { setToken(e.target.value); setStatus("idle"); }}
-                    placeholder="Your WWV_BRIDGE_TOKEN value"
-                />
-
                 {status === "error" && <p className={styles.error}>{errorMsg}</p>}
-                {status === "success" && <p className={styles.success}>✓ Connected</p>}
+                {status === "success" && <p className={styles.success}>✓ Instance reachable</p>}
 
                 <div className={styles.actions}>
                     <button className={styles.btnSecondary} onClick={onCancel}>Cancel</button>
-                    <button className={styles.btnTest} onClick={handleTest} disabled={!url || !token || status === "testing"}>
+                    <button
+                        className={styles.btnTest}
+                        onClick={handleTest}
+                        disabled={!url || status === "testing"}
+                    >
                         {status === "testing" ? "Testing…" : "Test Connection"}
                     </button>
-                    <button className={styles.btnSave} onClick={handleSave} disabled={status !== "success"}>
+                    <button
+                        className={styles.btnSave}
+                        onClick={handleSave}
+                        disabled={status !== "success"}
+                    >
                         Save
                     </button>
                 </div>

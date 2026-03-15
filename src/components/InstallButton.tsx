@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getInstanceConfig } from "@/lib/instanceStore";
+import { getInstanceUrl, setMarketplaceToken } from "@/lib/instanceStore";
 import { PLUGIN_DETAILS } from "@/data/pluginDetails";
 import { getInstallManifest } from "@/data/pluginManifests";
 import InstanceConfig from "./InstanceConfig";
@@ -12,73 +12,65 @@ interface Props {
     version: string;
 }
 
-type Status = "idle" | "loading" | "installed" | "error" | "configure";
+type Status = "idle" | "installed" | "configure";
 
 export default function InstallButton({ pluginId, version }: Props) {
     const [status, setStatus] = useState<Status>("idle");
-    const [errorMsg, setErrorMsg] = useState("");
     const [showConfig, setShowConfig] = useState(false);
 
-    // Check if already installed on mount
+    // Detect return from WWV install redirect (?installed=pluginId&token=<jwt>)
     useEffect(() => {
-        checkInstalled();
+        const params = new URLSearchParams(window.location.search);
+        const clean = new URL(window.location.href);
+
+        if (params.get("installed") === pluginId) {
+            setStatus("installed");
+            clean.searchParams.delete("installed");
+        }
+        // Persist the marketplace JWT for Manage-page API calls
+        const token = params.get("token");
+        if (token) {
+            setMarketplaceToken(token);
+            clean.searchParams.delete("token");
+        }
+        if (params.get("install_error") === pluginId) {
+            clean.searchParams.delete("install_error");
+        }
+        // Clean all handled params from URL in one replace
+        if (
+            params.has("installed") ||
+            params.has("token") ||
+            params.has("install_error")
+        ) {
+            window.history.replaceState({}, "", clean.toString());
+        }
     }, [pluginId]);
 
-    async function checkInstalled(): Promise<void> {
-        const config = getInstanceConfig();
-        if (!config) return;
-        try {
-            const res = await fetch(`${config.url}/api/marketplace/status`, {
-                headers: { Authorization: `Bearer ${config.token}` },
-                signal: AbortSignal.timeout(3000),
-            });
-            if (!res.ok) return;
-            const data = await res.json();
-            const found = data.plugins?.some((p: { pluginId: string }) => p.pluginId === pluginId);
-            if (found) setStatus("installed");
-        } catch { /* ignore — just show install button */ }
+    function buildRedirectUrl(instanceUrl: string): string {
+        const detail = PLUGIN_DETAILS[pluginId] ?? {
+            id: pluginId, name: pluginId, version,
+            format: "bundle", trust: "unverified",
+            capabilities: ["data:own"], category: "Custom", icon: "📦",
+        };
+        const manifest = getInstallManifest(detail);
+        const manifestB64 = btoa(JSON.stringify(manifest));
+        const redirectTo = window.location.href.split("?")[0]; // current page, no params
+
+        const url = new URL(`${instanceUrl}/api/marketplace/install-redirect`);
+        url.searchParams.set("pluginId", pluginId);
+        url.searchParams.set("version", version);
+        url.searchParams.set("manifest", manifestB64);
+        url.searchParams.set("redirectTo", redirectTo);
+        return url.toString();
     }
 
-    async function handleInstall() {
-        const config = getInstanceConfig();
-        if (!config) {
+    function handleInstall() {
+        const instanceUrl = getInstanceUrl();
+        if (!instanceUrl) {
             setShowConfig(true);
             return;
         }
-
-        setStatus("loading");
-        setErrorMsg("");
-
-        try {
-            const res = await fetch(`${config.url}/api/marketplace/install`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${config.token}`,
-                },
-                body: JSON.stringify({
-                    pluginId,
-                    version,
-                    manifest: getInstallManifest(
-                        PLUGIN_DETAILS[pluginId] ?? { id: pluginId, version, format: "bundle", trust: "unverified", capabilities: [], category: "Custom", icon: "📦" }
-                    ),
-                }),
-                signal: AbortSignal.timeout(10000),
-            });
-
-            if (res.ok) {
-                setStatus("installed");
-            } else if (res.status === 409) {
-                setStatus("installed");
-            } else {
-                const data = await res.json().catch(() => ({}));
-                setStatus("error");
-                setErrorMsg(data.error || `Failed (${res.status})`);
-            }
-        } catch {
-            setStatus("error");
-            setErrorMsg("Could not connect to your instance");
-        }
+        window.location.href = buildRedirectUrl(instanceUrl);
     }
 
     function handleConfigured() {
@@ -99,17 +91,11 @@ export default function InstallButton({ pluginId, version }: Props) {
                 <button className={`${styles.btn} ${styles.installed}`} disabled>
                     ✓ Installed
                 </button>
-            ) : status === "loading" ? (
-                <button className={`${styles.btn} ${styles.loading}`} disabled>
-                    Installing…
-                </button>
             ) : (
                 <button className={styles.btn} onClick={handleInstall}>
                     Install Plugin
                 </button>
             )}
-
-            {status === "error" && <p className={styles.error}>{errorMsg}</p>}
         </>
     );
 }

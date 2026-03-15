@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getInstanceConfig } from "@/lib/instanceStore";
+import { getInstanceUrl, getMarketplaceToken } from "@/lib/instanceStore";
 import { PLUGIN_DETAILS } from "@/data/pluginDetails";
 import styles from "./InstalledPluginCard.module.css";
 
@@ -23,18 +23,18 @@ export default function InstalledPluginCard({
   const detail = PLUGIN_DETAILS[pluginId];
 
   async function handleUninstall() {
-    const config = getInstanceConfig();
-    if (!config) return;
+    const instanceUrl = getInstanceUrl();
+    if (!instanceUrl) return;
 
     setStatus("loading");
     setErrorMsg("");
 
     try {
-      const res = await fetch(`${config.url}/api/marketplace/uninstall`, {
+      const res = await fetch(`${instanceUrl}/api/marketplace/uninstall`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${config.token}`,
+          ...(getMarketplaceToken() ? { Authorization: `Bearer ${getMarketplaceToken()}` } : {}),
         },
         body: JSON.stringify({ pluginId }),
         signal: AbortSignal.timeout(10000),
