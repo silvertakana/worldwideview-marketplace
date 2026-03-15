@@ -7,6 +7,7 @@ import styles from "./Header.module.css";
 
 const NAV_LINKS = [
   { href: "/browse", label: "Browse" },
+  { href: "/manage", label: "My Plugins" },
   { href: "/publish", label: "Publish" },
   { href: "/docs", label: "Docs" },
 ];
