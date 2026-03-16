@@ -1,0 +1,43 @@
+/* ───────── WIP Banner ────────── */
+.banner {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-md);
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-warning),
+    var(--color-warning) 10px,
+    #c47f00 10px,
+    #c47f00 20px
+  );
+  color: #111;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.4;
+  user-select: none;
+}
+
+.icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.text {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .banner {
+    font-size: 0.7rem;
+    padding: var(--space-xs) var(--space-sm);
+  }
+}
