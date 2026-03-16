@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { trackEvent } from "@/lib/analytics";
 import { getInstanceUrl, setMarketplaceToken } from "@/lib/instanceStore";
 import { PLUGIN_DETAILS } from "@/data/pluginDetails";
 import { getInstallManifest } from "@/data/pluginManifests";
@@ -25,6 +26,7 @@ export default function InstallButton({ pluginId, version }: Props) {
 
         if (params.get("installed") === pluginId) {
             setStatus("installed");
+            trackEvent("plugin_install_success", { pluginId });
             clean.searchParams.delete("installed");
         }
         // Persist the marketplace JWT for Manage-page API calls
@@ -65,6 +67,7 @@ export default function InstallButton({ pluginId, version }: Props) {
     }
 
     function handleInstall() {
+        trackEvent("plugin_install_click", { pluginId });
         const instanceUrl = getInstanceUrl();
         if (!instanceUrl) {
             setShowConfig(true);

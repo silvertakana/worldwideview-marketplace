@@ -42,7 +42,7 @@ export default function RootLayout({
         <script
           defer
           src="https://analytics.worldwideview.dev/script.js"
-          data-website-id="b70ed34b-4361-490b-9a66-1e43bb74f4ec"
+          data-website-id="66565d0f-5206-4fa6-91b6-3159b67bf866"
         />
       </head>
       <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>

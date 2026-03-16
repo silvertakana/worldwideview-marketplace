@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CATEGORIES, type Category } from "@/data/plugins";
+import { trackEvent } from "@/lib/analytics";
 import { usePlugins } from "@/hooks/usePlugins";
 import { useDebounce } from "@/hooks/useDebounce";
 import PluginCard from "@/components/PluginCard";
@@ -12,6 +13,17 @@ export default function BrowsePage() {
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
   const { plugins, loading, error } = usePlugins(active, debouncedQuery);
+
+  useEffect(() => {
+    if (debouncedQuery) {
+      trackEvent("search_query", { query: debouncedQuery });
+    }
+  }, [debouncedQuery]);
+
+  function handleCategoryFilter(cat: Category) {
+    setActive(cat);
+    trackEvent("category_filter", { category: cat });
+  }
 
   return (
     <div className={styles.page}>
@@ -33,7 +45,7 @@ export default function BrowsePage() {
             className={`${styles.filterBtn} ${
               active === cat ? styles.filterBtnActive : ""
             }`}
-            onClick={() => setActive(cat)}
+            onClick={() => handleCategoryFilter(cat)}
           >
             {cat}
           </button>

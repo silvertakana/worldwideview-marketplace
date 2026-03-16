@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { trackEvent } from "@/lib/analytics";
 import { PLUGINS } from "@/data/plugins";
 import PluginCard from "@/components/PluginCard";
 import styles from "./page.module.css";
@@ -38,7 +41,11 @@ export default function Home() {
         </p>
 
         <div className={styles.ctas}>
-          <Link href="/browse" className={styles.primaryCta}>
+          <Link
+            href="/browse"
+            className={styles.primaryCta}
+            onClick={() => trackEvent("cta_click", { label: "Browse Plugins" })}
+          >
             Browse Plugins →
           </Link>
           <span className={styles.secondaryCta}>

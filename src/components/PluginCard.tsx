@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { trackEvent } from "@/lib/analytics";
 import type { PluginCard as PluginCardData } from "@/data/plugins";
 import styles from "./PluginCard.module.css";
 
@@ -7,8 +10,20 @@ interface PluginCardProps {
 }
 
 export default function PluginCard({ plugin }: PluginCardProps) {
+  function handleClick() {
+    trackEvent("plugin_card_click", {
+      pluginId: plugin.id,
+      pluginName: plugin.name,
+      category: plugin.category,
+    });
+  }
+
   return (
-    <Link href={`/browse/${plugin.id}`} className={styles.card}>
+    <Link
+      href={`/browse/${plugin.id}`}
+      className={styles.card}
+      onClick={handleClick}
+    >
       <div className={styles.cardHeader}>
         <span className={styles.cardIcon}>{plugin.icon}</span>
         <span className={styles.cardName}>{plugin.name}</span>
@@ -23,3 +38,4 @@ export default function PluginCard({ plugin }: PluginCardProps) {
     </Link>
   );
 }
+
