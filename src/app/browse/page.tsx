@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CATEGORIES, type Category } from "@/data/plugins";
+import { CATEGORIES, type Category } from "@/data/knownPlugins";
 import { trackEvent } from "@/lib/analytics";
 import { usePlugins } from "@/hooks/usePlugins";
 import { useDebounce } from "@/hooks/useDebounce";

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { trackEvent } from "@/lib/analytics";
-import { PLUGINS } from "@/data/plugins";
+import { KNOWN_PLUGINS } from "@/data/knownPlugins";
 import PluginCard from "@/components/PluginCard";
 import styles from "./page.module.css";
 
@@ -24,9 +24,23 @@ const FEATURES = [
   },
 ];
 
-const popularPlugins = [...PLUGINS]
-  .sort((a, b) => b.installs - a.installs)
-  .slice(0, 3);
+const featuredPlugins = KNOWN_PLUGINS.filter((p) => p.id !== "sdk").slice(0, 3);
+
+// Build PluginCard-shaped objects from known plugins for the homepage
+const popularPlugins = featuredPlugins.map((p) => ({
+  id: p.id,
+  name: p.npmPackage.replace("@worldwideview/wwv-plugin-", "").split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
+  description: p.longDescription.slice(0, 80),
+  category: p.category,
+  icon: p.icon,
+  installs: 0,
+  author: "WorldWideView",
+  version: "",
+  format: p.format,
+  trust: p.trust,
+  tags: [],
+  updatedAt: "",
+}));
 
 export default function Home() {
   return (

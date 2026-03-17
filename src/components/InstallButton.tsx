@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { getInstanceUrl, setMarketplaceToken } from "@/lib/instanceStore";
-import { PLUGIN_DETAILS } from "@/data/pluginDetails";
+import { KNOWN_PLUGINS } from "@/data/knownPlugins";
 import { getInstallManifest } from "@/data/pluginManifests";
 import InstanceConfig from "./InstanceConfig";
 import styles from "./InstallButton.module.css";
@@ -50,10 +50,24 @@ export default function InstallButton({ pluginId, version }: Props) {
     }, [pluginId]);
 
     function buildRedirectUrl(instanceUrl: string): string {
-        const detail = PLUGIN_DETAILS[pluginId] ?? {
-            id: pluginId, name: pluginId, version,
-            format: "bundle", trust: "unverified",
-            capabilities: ["data:own"], category: "Custom", icon: "📦",
+        const known = KNOWN_PLUGINS.find((p) => p.id === pluginId);
+        const detail = {
+            id: pluginId,
+            name: known?.npmPackage ?? pluginId,
+            description: known?.longDescription ?? "",
+            version,
+            format: known?.format ?? "bundle" as const,
+            trust: known?.trust ?? "unverified" as const,
+            capabilities: known?.capabilities ?? ["data:own"],
+            category: known?.category ?? "Custom",
+            icon: known?.icon ?? "📦",
+            installs: 0,
+            author: "WorldWideView",
+            tags: [],
+            updatedAt: "",
+            longDescription: known?.longDescription ?? "",
+            compatibility: ">=0.1.0",
+            changelog: known?.changelog ?? "",
         };
         const manifest = getInstallManifest(detail);
         const manifestB64 = btoa(unescape(encodeURIComponent(JSON.stringify(manifest))));

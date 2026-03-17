@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { PLUGIN_DETAILS } from "@/data/pluginDetails";
+import { getPluginById } from "@/data/pluginService";
 import { CAPABILITY_LABELS } from "@/data/capabilityLabels";
 import InstallButton from "@/components/InstallButton";
 import styles from "./page.module.css";
@@ -11,7 +11,7 @@ interface Props {
 
 export default async function PluginDetailPage({ params }: Props) {
   const { id } = await params;
-  const plugin = PLUGIN_DETAILS[id];
+  const plugin = await getPluginById(id);
   if (!plugin) notFound();
 
   return (
@@ -37,16 +37,16 @@ export default async function PluginDetailPage({ params }: Props) {
       {/* ── Stats ── */}
       <section className={styles.stats}>
         <div className={styles.stat}>
-          <span className={styles.statValue}>{plugin.installs.toLocaleString()}</span>
-          <span className={styles.statLabel}>Installs</span>
-        </div>
-        <div className={styles.stat}>
           <span className={styles.statValue}>{plugin.category}</span>
           <span className={styles.statLabel}>Category</span>
         </div>
         <div className={styles.stat}>
           <span className={styles.statValue}>{plugin.compatibility}</span>
           <span className={styles.statLabel}>Compatibility</span>
+        </div>
+        <div className={styles.stat}>
+          <span className={styles.statValue}>{plugin.updatedAt}</span>
+          <span className={styles.statLabel}>Updated</span>
         </div>
       </section>
 

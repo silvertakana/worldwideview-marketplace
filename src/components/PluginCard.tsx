@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { trackEvent } from "@/lib/analytics";
-import type { PluginCard as PluginCardData } from "@/data/plugins";
+import type { PluginCard as PluginCardData } from "@/data/types";
 import styles from "./PluginCard.module.css";
 
 interface PluginCardProps {

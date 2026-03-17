@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { getInstanceUrl, getMarketplaceToken } from "@/lib/instanceStore";
-import { PLUGIN_DETAILS } from "@/data/pluginDetails";
+import { KNOWN_PLUGINS } from "@/data/knownPlugins";
 import styles from "./InstalledPluginCard.module.css";
 
 interface Props {
@@ -20,7 +20,7 @@ export default function InstalledPluginCard({
 }: Props) {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
-  const detail = PLUGIN_DETAILS[pluginId];
+  const detail = KNOWN_PLUGINS.find((p) => p.id === pluginId);
 
   async function handleUninstall() {
     const instanceUrl = getInstanceUrl();
@@ -53,9 +53,9 @@ export default function InstalledPluginCard({
     }
   }
 
-  const displayName = detail?.name ?? pluginId;
+  const displayName = detail?.npmPackage?.replace("@worldwideview/wwv-plugin-", "") ?? pluginId;
   const displayIcon = detail?.icon ?? "📦";
-  const displayDesc = detail?.description ?? "Marketplace plugin";
+  const displayDesc = detail?.longDescription?.slice(0, 80) ?? "Marketplace plugin";
   const date = new Date(installedAt).toLocaleDateString();
 
   return (

@@ -1,4 +1,4 @@
-import type { PluginDetail } from "./pluginDetails";
+import type { PluginDetail } from "./types";
 
 /**
  * Manifest templates for marketplace-only plugins (not built-in).

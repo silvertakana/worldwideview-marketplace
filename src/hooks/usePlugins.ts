@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { PluginCard } from "@/data/plugins";
+import type { PluginCard } from "@/data/types";
 
 interface UsePluginsResult {
   plugins: PluginCard[];
