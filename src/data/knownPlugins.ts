@@ -46,8 +46,8 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
       "v1.0.0 — Initial release with AIS-based vessel tracking and ship-type filtering.",
   },
   {
-    id: "military",
-    npmPackage: "@worldwideview/wwv-plugin-military",
+    id: "military-aviation",
+    npmPackage: "@worldwideview/wwv-plugin-military-aviation",
     icon: "🛡️",
     category: "Aviation",
     format: "bundle",
@@ -56,7 +56,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     longDescription:
       "Track military and government aircraft worldwide using the adsb.fi open feed. Identifies military transponder codes and displays aircraft with dedicated styling and filtering options.",
     changelog:
-      "v1.0.0 — Initial release with adsb.fi military feed integration.",
+      "v1.0.0 — Renamed from wwv-plugin-military for clarity.",
   },
   {
     id: "wildfire",
