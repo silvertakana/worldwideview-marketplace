@@ -32,6 +32,27 @@ export const PLUGIN_MANIFESTS: Record<string, ManifestTemplate> = {
       maxEntities: 5000,
     },
   },
+  "nuclear-facilities": {
+    id: "nuclear-facilities",
+    name: "Nuclear Facilities — Global",
+    version: "1.0.0",
+    description: "Worldwide nuclear power plants, reactors, and decommissioned facilities from OSM",
+    type: "data-layer",
+    format: "static",
+    trust: "verified",
+    capabilities: ["data:own"],
+    category: "Custom",
+    icon: "☢️",
+    dataFile: "/data/nuclear_facilities.geojson",
+    rendering: {
+      entityType: "point",
+      color: "#22d3ee",
+      labelField: "name",
+      clusterEnabled: true,
+      clusterDistance: 50,
+      maxEntities: 1000,
+    },
+  },
 };
 
 /** Get the install manifest for a plugin, or a minimal fallback. */
