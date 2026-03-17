@@ -19,7 +19,7 @@ export default function InstallButton({ pluginId, version }: Props) {
     const [status, setStatus] = useState<Status>("idle");
     const [showConfig, setShowConfig] = useState(false);
 
-    // Detect return from WWV install redirect (?installed=pluginId&token=<jwt>)
+    // Detect return from WWV install redirect (?installed=pluginId + #token=&lt;jwt&gt;)
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const clean = new URL(window.location.href);
@@ -29,20 +29,21 @@ export default function InstallButton({ pluginId, version }: Props) {
             trackEvent("plugin_install_success", { pluginId });
             clean.searchParams.delete("installed");
         }
-        // Persist the marketplace JWT for Manage-page API calls
-        const token = params.get("token");
-        if (token) {
-            setMarketplaceToken(token);
-            clean.searchParams.delete("token");
+        // Read token from URL fragment (never sent to server)
+        const hash = window.location.hash;
+        const tokenMatch = hash.match(/[#&]token=([^&]*)/);
+        if (tokenMatch?.[1]) {
+            setMarketplaceToken(tokenMatch[1]);
         }
         if (params.get("install_error") === pluginId) {
             clean.searchParams.delete("install_error");
         }
-        // Clean all handled params from URL in one replace
+        // Clean URL: remove handled query params and fragment
+        clean.hash = "";
         if (
             params.has("installed") ||
-            params.has("token") ||
-            params.has("install_error")
+            params.has("install_error") ||
+            tokenMatch
         ) {
             window.history.replaceState({}, "", clean.toString());
         }

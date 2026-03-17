@@ -12,15 +12,14 @@ export default function ManagePage() {
   const { plugins, loading, error, configured, refetch } = useInstalledPlugins();
   const [showConfig, setShowConfig] = useState(false);
 
-  // Detect ?token= returned from WWV grant-token redirect
+  // Detect #token= returned from WWV grant-token redirect
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    if (token) {
-      setMarketplaceToken(token);
-      const clean = new URL(window.location.href);
-      clean.searchParams.delete("token");
-      window.history.replaceState({}, "", clean.toString());
+    const hash = window.location.hash;
+    const tokenMatch = hash.match(/[#&]token=([^&]*)/);
+    if (tokenMatch?.[1]) {
+      setMarketplaceToken(tokenMatch[1]);
+      // Clean the fragment from URL
+      window.history.replaceState({}, "", window.location.pathname + window.location.search);
       refetch();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
