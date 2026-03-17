@@ -53,6 +53,27 @@ export const PLUGIN_MANIFESTS: Record<string, ManifestTemplate> = {
       maxEntities: 1000,
     },
   },
+  "embassies": {
+    id: "embassies",
+    name: "Embassies & Consulates",
+    version: "1.0.0",
+    description: "Global embassies, consulates, and diplomatic missions from OpenStreetMap",
+    type: "data-layer",
+    format: "static",
+    trust: "verified",
+    capabilities: ["data:own"],
+    category: "Custom",
+    icon: "🏛️",
+    dataFile: "/data/embassies.geojson",
+    rendering: {
+      entityType: "point",
+      color: "#a855f7",
+      labelField: "name",
+      clusterEnabled: true,
+      clusterDistance: 50,
+      maxEntities: 5000,
+    },
+  },
 };
 
 /** Get the install manifest for a plugin, or a minimal fallback. */

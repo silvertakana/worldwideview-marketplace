@@ -134,4 +134,17 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     changelog:
       "v1.0.0 — Initial release with global nuclear facility data from OSM.",
   },
+  {
+    id: "embassies",
+    npmPackage: "@worldwideview/wwv-plugin-embassies",
+    icon: "🏛️",
+    category: "Custom",
+    format: "static",
+    trust: "verified",
+    capabilities: ["data:own"],
+    longDescription:
+      "Displays 17,266 embassies, consulates, and diplomatic missions worldwide using OpenStreetMap data. Includes country, diplomatic type, and target nation metadata.",
+    changelog:
+      "v1.0.0 — Initial release with global diplomatic mission data from OSM.",
+  },
 ];
