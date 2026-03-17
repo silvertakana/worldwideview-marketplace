@@ -25,10 +25,18 @@
     transform: translateY(0);
 }
 
-.installed {
-    background: var(--color-success);
-    cursor: default;
+.uninstall {
+    background: transparent;
+    color: var(--color-danger, #ef4444);
+    border: 2px solid var(--color-danger, #ef4444);
 }
+
+.uninstall:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.1);
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+    transform: translateY(-1px);
+}
+
 
 .loading {
     background: var(--color-accent);

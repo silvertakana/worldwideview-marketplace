@@ -2,7 +2,7 @@
 
 import { useState, type MouseEvent } from "react";
 import { trackEvent } from "@/lib/analytics";
-import { getInstanceUrl, getMarketplaceToken } from "@/lib/instanceStore";
+import { getInstanceUrl } from "@/lib/instanceStore";
 import { KNOWN_PLUGINS } from "@/data/knownPlugins";
 import { getInstallManifest } from "@/data/pluginManifests";
 import { useInstalledIds } from "./InstalledPluginsProvider";
@@ -15,9 +15,8 @@ interface Props {
 }
 
 export default function PluginCardActions({ pluginId, version }: Props) {
-  const { installedIds, refetch } = useInstalledIds();
+  const { installedIds } = useInstalledIds();
   const isInstalled = installedIds.has(pluginId);
-  const [uninstalling, setUninstalling] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
 
   function buildRedirectUrl(instanceUrl: string): string {
@@ -74,36 +73,6 @@ export default function PluginCardActions({ pluginId, version }: Props) {
     }
   }
 
-  async function handleUninstall(e: MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    const instanceUrl = getInstanceUrl();
-    if (!instanceUrl) return;
-
-    setUninstalling(true);
-    try {
-      const res = await fetch(`${instanceUrl}/api/marketplace/uninstall`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(getMarketplaceToken()
-            ? { Authorization: `Bearer ${getMarketplaceToken()}` }
-            : {}),
-        },
-        body: JSON.stringify({ pluginId }),
-        signal: AbortSignal.timeout(10000),
-      });
-      if (res.ok) {
-        trackEvent("plugin_uninstall_success", { pluginId });
-        refetch();
-      }
-    } catch {
-      /* silently fail on card — user can retry from detail page */
-    } finally {
-      setUninstalling(false);
-    }
-  }
-
   return (
     <>
       {showConfig && (
@@ -113,24 +82,16 @@ export default function PluginCardActions({ pluginId, version }: Props) {
         />
       )}
 
-      <div className={styles.actions}>
-        {isInstalled ? (
-          <button
-            className={`${styles.btn} ${styles.uninstall} ${uninstalling ? styles.loading : ""}`}
-            onClick={handleUninstall}
-            disabled={uninstalling}
-          >
-            {uninstalling ? "Removing…" : "Uninstall"}
-          </button>
-        ) : (
-          <button
-            className={`${styles.btn} ${styles.install}`}
-            onClick={handleInstall}
-          >
-            Install
-          </button>
-        )}
-      </div>
+      {isInstalled ? (
+        <span className={styles.installedBadge}>✓ Installed</span>
+      ) : (
+        <button
+          className={`${styles.btn} ${styles.install}`}
+          onClick={handleInstall}
+        >
+          Install
+        </button>
+      )}
     </>
   );
 }

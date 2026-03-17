@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { trackEvent } from "@/lib/analytics";
-import { getInstanceUrl, setMarketplaceToken } from "@/lib/instanceStore";
+import {
+    getInstanceUrl,
+    setMarketplaceToken,
+    getMarketplaceToken,
+} from "@/lib/instanceStore";
 import { KNOWN_PLUGINS } from "@/data/knownPlugins";
 import { getInstallManifest } from "@/data/pluginManifests";
 import { useInstalledIds } from "./InstalledPluginsProvider";
@@ -14,17 +18,20 @@ interface Props {
     version: string;
 }
 
-type Status = "idle" | "installed" | "configure";
+type Status = "idle" | "installed" | "configure" | "uninstalling";
 
 export default function InstallButton({ pluginId, version }: Props) {
     const { installedIds, refetch } = useInstalledIds();
     const [status, setStatus] = useState<Status>("idle");
     const [showConfig, setShowConfig] = useState(false);
+    const [errorMsg, setErrorMsg] = useState("");
 
     // Sync status from context (already-installed plugins)
     useEffect(() => {
         if (installedIds.has(pluginId)) {
             setStatus("installed");
+        } else {
+            setStatus("idle");
         }
     }, [installedIds, pluginId]);
 
@@ -67,8 +74,8 @@ export default function InstallButton({ pluginId, version }: Props) {
             name: known?.npmPackage ?? pluginId,
             description: known?.longDescription ?? "",
             version,
-            format: known?.format ?? "bundle" as const,
-            trust: known?.trust ?? "unverified" as const,
+            format: known?.format ?? "bundle",
+            trust: known?.trust ?? "unverified",
             capabilities: known?.capabilities ?? ["data:own"],
             category: known?.category ?? "Custom",
             icon: known?.icon ?? "Package",
@@ -102,6 +109,41 @@ export default function InstallButton({ pluginId, version }: Props) {
         window.location.href = buildRedirectUrl(instanceUrl);
     }
 
+    async function handleUninstall() {
+        const instanceUrl = getInstanceUrl();
+        if (!instanceUrl) return;
+
+        setStatus("uninstalling");
+        setErrorMsg("");
+
+        try {
+            const res = await fetch(`${instanceUrl}/api/marketplace/uninstall`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(getMarketplaceToken()
+                        ? { Authorization: `Bearer ${getMarketplaceToken()}` }
+                        : {}),
+                },
+                body: JSON.stringify({ pluginId }),
+                signal: AbortSignal.timeout(10000),
+            });
+
+            if (res.ok) {
+                trackEvent("plugin_uninstall_success", { pluginId });
+                setStatus("idle");
+                refetch();
+            } else {
+                const data = await res.json().catch(() => ({}));
+                setErrorMsg(data.error || `Failed (${res.status})`);
+                setStatus("installed");
+            }
+        } catch {
+            setErrorMsg("Could not connect to your instance");
+            setStatus("installed");
+        }
+    }
+
     function handleConfigured() {
         setShowConfig(false);
         handleInstall();
@@ -117,14 +159,21 @@ export default function InstallButton({ pluginId, version }: Props) {
             )}
 
             {status === "installed" ? (
-                <button className={`${styles.btn} ${styles.installed}`} disabled>
-                    ✓ Installed
+                <button className={`${styles.btn} ${styles.uninstall}`} onClick={handleUninstall}>
+                    Uninstall Plugin
+                </button>
+            ) : status === "uninstalling" ? (
+                <button className={`${styles.btn} ${styles.loading}`} disabled>
+                    Removing…
                 </button>
             ) : (
                 <button className={styles.btn} onClick={handleInstall}>
                     Install Plugin
                 </button>
             )}
+
+            {errorMsg && <p className={styles.error}>{errorMsg}</p>}
         </>
     );
 }
+
