@@ -1,7 +1,6 @@
 /* ───────── WIP Banner ────────── */
 .banner {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 1100;
   display: flex;
   align-items: center;
@@ -15,15 +14,33 @@
     #c47f00 10px,
     #c47f00 20px
   );
-  color: #111;
+  color: #fff;
   font-family: var(--font-sans);
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   text-align: center;
   line-height: 1.4;
   user-select: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* dark overlay for better text contrast */
+.banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+/* ensure content sits above the overlay */
+.icon,
+.text,
+.close {
+  position: relative;
+  z-index: 1;
 }
 
 .icon {
@@ -33,6 +50,25 @@
 
 .text {
   white-space: nowrap;
+}
+
+.close {
+  all: unset;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  margin-left: var(--space-sm);
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  opacity: 0.9;
+  transition: opacity 0.15s ease;
+}
+
+.close:hover {
+  opacity: 1;
 }
 
 @media (max-width: 480px) {

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ThemeProvider from "@/components/ThemeProvider";
+import ClientProviders from "@/components/ClientProviders";
 import WipBanner from "@/components/WipBanner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -46,12 +46,12 @@ export default function RootLayout({
         />
       </head>
       <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <ThemeProvider>
+        <ClientProviders>
           <WipBanner />
           <Header />
           <main style={{ flex: 1 }}>{children}</main>
           <Footer />
-        </ThemeProvider>
+        </ClientProviders>
       </body>
     </html>
   );

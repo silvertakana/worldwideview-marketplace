@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { getInstanceUrl, getMarketplaceToken } from "@/lib/instanceStore";
 import { KNOWN_PLUGINS } from "@/data/knownPlugins";
+import PluginIcon from "./PluginIcon";
 import styles from "./InstalledPluginCard.module.css";
 
 interface Props {
@@ -54,14 +55,14 @@ export default function InstalledPluginCard({
   }
 
   const displayName = detail?.npmPackage?.replace("@worldwideview/wwv-plugin-", "") ?? pluginId;
-  const displayIcon = detail?.icon ?? "📦";
+  const displayIcon = detail?.icon ?? "Package";
   const displayDesc = detail?.longDescription?.slice(0, 80) ?? "Marketplace plugin";
   const date = new Date(installedAt).toLocaleDateString();
 
   return (
     <div className={styles.card}>
       <div className={styles.iconWrap}>
-        <span className={styles.icon}>{displayIcon}</span>
+        <PluginIcon name={displayIcon} size={24} />
       </div>
 
       <div className={styles.info}>

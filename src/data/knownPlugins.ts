@@ -22,7 +22,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
   {
     id: "aviation",
     npmPackage: "@worldwideview/wwv-plugin-aviation",
-    icon: "✈️",
+    icon: "Plane",
     category: "Aviation",
     format: "bundle",
     trust: "built-in",
@@ -35,7 +35,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
   {
     id: "maritime",
     npmPackage: "@worldwideview/wwv-plugin-maritime",
-    icon: "🚢",
+    icon: "Ship",
     category: "Maritime",
     format: "bundle",
     trust: "built-in",
@@ -48,7 +48,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
   {
     id: "military-aviation",
     npmPackage: "@worldwideview/wwv-plugin-military-aviation",
-    icon: "🛡️",
+    icon: "Shield",
     category: "Aviation",
     format: "bundle",
     trust: "built-in",
@@ -61,7 +61,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
   {
     id: "wildfire",
     npmPackage: "@worldwideview/wwv-plugin-wildfire",
-    icon: "🔥",
+    icon: "Flame",
     category: "Natural Disaster",
     format: "bundle",
     trust: "built-in",
@@ -74,7 +74,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
   {
     id: "camera",
     npmPackage: "@worldwideview/wwv-plugin-camera",
-    icon: "📷",
+    icon: "Camera",
     category: "Infrastructure",
     format: "bundle",
     trust: "built-in",
@@ -86,7 +86,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
   {
     id: "borders",
     npmPackage: "@worldwideview/wwv-plugin-borders",
-    icon: "🗺️",
+    icon: "Map",
     category: "Custom",
     format: "bundle",
     trust: "built-in",
@@ -99,7 +99,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
   {
     id: "military-bases",
     npmPackage: "@worldwideview/wwv-plugin-military-bases",
-    icon: "🏛️",
+    icon: "Swords",
     category: "Military",
     format: "static",
     trust: "verified",
@@ -112,7 +112,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
   {
     id: "sdk",
     npmPackage: "@worldwideview/wwv-plugin-sdk",
-    icon: "🧰",
+    icon: "Wrench",
     category: "Custom",
     format: "bundle",
     trust: "built-in",
@@ -124,7 +124,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
   {
     id: "nuclear-facilities",
     npmPackage: "@worldwideview/wwv-plugin-nuclear",
-    icon: "☢️",
+    icon: "Atom",
     category: "Infrastructure",
     format: "static",
     trust: "verified",
@@ -137,7 +137,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
   {
     id: "embassies",
     npmPackage: "@worldwideview/wwv-plugin-embassies",
-    icon: "🏛️",
+    icon: "Landmark",
     category: "Custom",
     format: "static",
     trust: "verified",

@@ -4,21 +4,22 @@ import Link from "next/link";
 import { trackEvent } from "@/lib/analytics";
 import { KNOWN_PLUGINS } from "@/data/knownPlugins";
 import PluginCard from "@/components/PluginCard";
+import PluginIcon from "@/components/PluginIcon";
 import styles from "./page.module.css";
 
 const FEATURES = [
   {
-    icon: "🔌",
+    icon: "Plug",
     title: "Three Plugin Formats",
     desc: "JSON-only declarative configs, static data bundles, or full code plugins — pick the level of control you need.",
   },
   {
-    icon: "🛡️",
+    icon: "ShieldCheck",
     title: "Verified & Sandboxed",
     desc: "Trusted built-in plugins get full control. Community plugins run sandboxed for safety.",
   },
   {
-    icon: "⚡",
+    icon: "Zap",
     title: "One-Click Install",
     desc: "Install any plugin straight from the marketplace into your WorldWideView instance. Coming soon.",
   },
@@ -89,7 +90,7 @@ export default function Home() {
         <div className={styles.featuresGrid}>
           {FEATURES.map((f) => (
             <div key={f.title} className={styles.featureCard}>
-              <span className={styles.featureIcon}>{f.icon}</span>
+              <span className={styles.featureIcon}><PluginIcon name={f.icon} size={28} /></span>
               <h3>{f.title}</h3>
               <p>{f.desc}</p>
             </div>

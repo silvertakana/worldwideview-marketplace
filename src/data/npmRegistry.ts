@@ -28,6 +28,7 @@ export async function fetchPackageMeta(
       ? json.versions?.[latestTag]
       : undefined;
 
+    const readme = json.readme ?? undefined;
     return {
       name: json.name ?? npmPackage,
       description: json.description ?? "",
@@ -36,7 +37,8 @@ export async function fetchPackageMeta(
       keywords: json.keywords ?? [],
       updatedAt: extractUpdatedAt(json, latestTag),
       repository: extractRepoUrl(json),
-      readme: json.readme ?? undefined,
+      readme,
+      changelog: extractChangelog(readme),
     };
   } catch {
     return null;
@@ -85,4 +87,15 @@ function extractRepoUrl(json: any): string | undefined {
   const url = json.repository?.url;
   if (!url) return undefined;
   return url.replace(/^git\+/, "").replace(/\.git$/, "");
+}
+
+/**
+ * Extract the ## Changelog section from the package README.
+ * Returns undefined if no changelog section is found.
+ */
+function extractChangelog(readme?: string): string | undefined {
+  if (!readme) return undefined;
+  const match = readme.match(/## Changelog\s*\n([\s\S]*?)(?=\n## |$)/);
+  if (!match?.[1]) return undefined;
+  return match[1].trim();
 }

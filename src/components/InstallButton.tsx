@@ -5,6 +5,7 @@ import { trackEvent } from "@/lib/analytics";
 import { getInstanceUrl, setMarketplaceToken } from "@/lib/instanceStore";
 import { KNOWN_PLUGINS } from "@/data/knownPlugins";
 import { getInstallManifest } from "@/data/pluginManifests";
+import { useInstalledIds } from "./InstalledPluginsProvider";
 import InstanceConfig from "./InstanceConfig";
 import styles from "./InstallButton.module.css";
 
@@ -16,10 +17,18 @@ interface Props {
 type Status = "idle" | "installed" | "configure";
 
 export default function InstallButton({ pluginId, version }: Props) {
+    const { installedIds, refetch } = useInstalledIds();
     const [status, setStatus] = useState<Status>("idle");
     const [showConfig, setShowConfig] = useState(false);
 
-    // Detect return from WWV install redirect (?installed=pluginId + #token=&lt;jwt&gt;)
+    // Sync status from context (already-installed plugins)
+    useEffect(() => {
+        if (installedIds.has(pluginId)) {
+            setStatus("installed");
+        }
+    }, [installedIds, pluginId]);
+
+    // Detect return from WWV install redirect (?installed=pluginId + #token=<jwt>)
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const clean = new URL(window.location.href);
@@ -28,6 +37,7 @@ export default function InstallButton({ pluginId, version }: Props) {
             setStatus("installed");
             trackEvent("plugin_install_success", { pluginId });
             clean.searchParams.delete("installed");
+            refetch(); // refresh the shared context
         }
         // Read token from URL fragment (never sent to server)
         const hash = window.location.hash;
@@ -47,6 +57,7 @@ export default function InstallButton({ pluginId, version }: Props) {
         ) {
             window.history.replaceState({}, "", clean.toString());
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pluginId]);
 
     function buildRedirectUrl(instanceUrl: string): string {
@@ -60,7 +71,7 @@ export default function InstallButton({ pluginId, version }: Props) {
             trust: known?.trust ?? "unverified" as const,
             capabilities: known?.capabilities ?? ["data:own"],
             category: known?.category ?? "Custom",
-            icon: known?.icon ?? "📦",
+            icon: known?.icon ?? "Package",
             installs: 0,
             author: "WorldWideView",
             tags: [],
@@ -71,7 +82,7 @@ export default function InstallButton({ pluginId, version }: Props) {
         };
         const manifest = getInstallManifest(detail);
         const manifestB64 = btoa(unescape(encodeURIComponent(JSON.stringify(manifest))));
-        const redirectTo = window.location.href.split("?")[0]; // current page, no params
+        const redirectTo = window.location.href.split("?")[0];
 
         const url = new URL(`${instanceUrl}/api/marketplace/install-redirect`);
         url.searchParams.set("pluginId", pluginId);

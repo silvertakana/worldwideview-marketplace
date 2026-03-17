@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPluginById } from "@/data/pluginService";
 import { CAPABILITY_LABELS } from "@/data/capabilityLabels";
+import PluginIcon from "@/components/PluginIcon";
 import InstallButton from "@/components/InstallButton";
 import styles from "./page.module.css";
 
@@ -22,7 +23,9 @@ export default async function PluginDetailPage({ params }: Props) {
 
       {/* ── Hero ── */}
       <section className={styles.hero}>
-        <span className={styles.heroIcon}>{plugin.icon}</span>
+        <span className={styles.heroIcon}>
+          <PluginIcon name={plugin.icon} size={40} />
+        </span>
         <div className={styles.heroInfo}>
           <h1 className={styles.heroName}>{plugin.name}</h1>
           <p className={styles.heroAuthor}>by {plugin.author}</p>
@@ -61,10 +64,10 @@ export default async function PluginDetailPage({ params }: Props) {
         <h2 className={styles.sectionTitle}>Capabilities</h2>
         <div className={styles.capList}>
           {plugin.capabilities.map((cap) => {
-            const info = CAPABILITY_LABELS[cap] ?? { emoji: "📦", label: cap };
+            const info = CAPABILITY_LABELS[cap] ?? { icon: "Package", label: cap };
             return (
               <span key={cap} className={styles.capBadge}>
-                {info.emoji} {info.label}
+                <PluginIcon name={info.icon} size={14} /> {info.label}
               </span>
             );
           })}
@@ -82,3 +85,4 @@ export default async function PluginDetailPage({ params }: Props) {
     </div>
   );
 }
+

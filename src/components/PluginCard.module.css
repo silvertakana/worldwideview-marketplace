@@ -74,3 +74,13 @@
   font-size: 0.78rem;
   color: var(--color-text-muted);
 }
+
+.installedBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-full);
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}

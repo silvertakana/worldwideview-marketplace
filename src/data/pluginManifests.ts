@@ -21,7 +21,7 @@ export const PLUGIN_MANIFESTS: Record<string, ManifestTemplate> = {
     trust: "verified",
     capabilities: ["data:own"],
     category: "Custom",
-    icon: "🏛️",
+    icon: "Swords",
     dataFile: "/data/military_bases.geojson",
     rendering: {
       entityType: "point",
@@ -42,7 +42,7 @@ export const PLUGIN_MANIFESTS: Record<string, ManifestTemplate> = {
     trust: "verified",
     capabilities: ["data:own"],
     category: "Custom",
-    icon: "☢️",
+    icon: "Atom",
     dataFile: "/data/nuclear_facilities.geojson",
     rendering: {
       entityType: "point",
@@ -63,7 +63,7 @@ export const PLUGIN_MANIFESTS: Record<string, ManifestTemplate> = {
     trust: "verified",
     capabilities: ["data:own"],
     category: "Custom",
-    icon: "🏛️",
+    icon: "Landmark",
     dataFile: "/data/embassies.geojson",
     rendering: {
       entityType: "point",

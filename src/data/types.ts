@@ -47,4 +47,5 @@ export interface NpmPackageMeta {
   updatedAt: string;
   repository?: string;
   readme?: string;
+  changelog?: string;
 }

@@ -87,7 +87,7 @@ function mergeToDetail(
     capabilities: known.capabilities,
     compatibility: ">=0.1.0",
     repository: npm?.repository,
-    changelog: known.changelog,
+    changelog: npm?.changelog ?? known.changelog,
     readme: npm?.readme,
   };
 }

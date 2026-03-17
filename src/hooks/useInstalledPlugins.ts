@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { getInstanceUrl, getMarketplaceToken } from "@/lib/instanceStore";
+import { useState, useEffect } from "react";
+import { useInstalledIds } from "@/components/InstalledPluginsProvider";
+import { getInstanceUrl } from "@/lib/instanceStore";
 
 export interface InstalledPluginRecord {
   id: string;
@@ -20,35 +21,30 @@ interface HookResult {
 }
 
 /**
- * Fetch installed plugins from the user's WWV instance.
- * Uses session cookies (credentials: include) — no token needed.
+ * Thin wrapper around the shared InstalledPluginsProvider context.
+ * Kept for backward compatibility with the Manage page which
+ * expects the full plugin records from the status endpoint.
+ * TODO: migrate Manage page to use the context directly.
  */
 export function useInstalledPlugins(): HookResult {
-  const [plugins, setPlugins] = useState<InstalledPluginRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [configured, setConfigured] = useState(true);
-  const [trigger, setTrigger] = useState(0);
+  const { installedIds, loading, configured, refetch } = useInstalledIds();
 
-  const refetch = useCallback(() => setTrigger((t) => t + 1), []);
+  // The context only exposes IDs. For the Manage page we still need
+  // full records, so we re-fetch when the context says plugins exist.
+  // This is a pragmatic tradeoff to avoid breaking the Manage page.
+  const [plugins, setPlugins] = useState<InstalledPluginRecord[]>([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const instanceUrl = getInstanceUrl();
-    if (!instanceUrl) {
-      setConfigured(false);
-      setLoading(false);
+    if (!instanceUrl || !configured) {
+      setPlugins([]);
       return;
     }
-    setConfigured(true);
 
     let cancelled = false;
-    setLoading(true);
-    setError("");
 
     fetch(`${instanceUrl}/api/marketplace/status`, {
-      headers: {
-        ...(getMarketplaceToken() ? { Authorization: `Bearer ${getMarketplaceToken()}` } : {}),
-      },
       signal: AbortSignal.timeout(8000),
     })
       .then(async (res) => {
@@ -60,13 +56,10 @@ export function useInstalledPlugins(): HookResult {
       .catch((err) => {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : "Failed to fetch");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
       });
 
     return () => { cancelled = true; };
-  }, [trigger]);
+  }, [configured, installedIds]);
 
   return { plugins, loading, error, configured, refetch };
 }
