@@ -4,6 +4,7 @@ export const CATEGORIES = [
   "All",
   "Aviation",
   "Maritime",
+  "Military",
   "Natural Disaster",
   "Infrastructure",
   "Custom",
@@ -96,6 +97,19 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
       "v1.0.0 — Initial release with GeoJSON-based political boundaries.",
   },
   {
+    id: "military-bases",
+    npmPackage: "@worldwideview/wwv-plugin-military-bases",
+    icon: "🏛️",
+    category: "Military",
+    format: "static",
+    trust: "verified",
+    capabilities: ["data:own"],
+    longDescription:
+      "Displays worldwide military bases, airfields, and barracks sourced from OpenStreetMap. Static GeoJSON data layer with clustered point markers — no external API calls at runtime.",
+    changelog:
+      "v1.0.0 — Initial release with OSM military installation data.",
+  },
+  {
     id: "sdk",
     npmPackage: "@worldwideview/wwv-plugin-sdk",
     icon: "🧰",
@@ -106,5 +120,18 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     longDescription:
       "Plugin SDK — types, interfaces, and utilities for building WorldWideView globe plugins. Required as a peer dependency by all other plugins.",
     changelog: "v1.0.0 — Initial release with core types and interfaces.",
+  },
+  {
+    id: "nuclear-facilities",
+    npmPackage: "@worldwideview/wwv-plugin-nuclear",
+    icon: "☢️",
+    category: "Infrastructure",
+    format: "static",
+    trust: "verified",
+    capabilities: ["data:own"],
+    longDescription:
+      "Displays 758 nuclear power plants, research reactors, and decommissioned facilities worldwide using OpenStreetMap data. Includes operator, output capacity, reactor type, and operational status metadata. Data sourced from Overpass Turbo.",
+    changelog:
+      "v1.0.0 — Initial release with global nuclear facility data from OSM.",
   },
 ];
