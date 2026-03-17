@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useInstalledIds } from "@/components/InstalledPluginsProvider";
-import { getInstanceUrl } from "@/lib/instanceStore";
+import { getInstanceUrl, getMarketplaceToken } from "@/lib/instanceStore";
 
 export interface InstalledPluginRecord {
   id: string;
@@ -45,6 +45,11 @@ export function useInstalledPlugins(): HookResult {
     let cancelled = false;
 
     fetch(`${instanceUrl}/api/marketplace/status`, {
+      headers: {
+        ...(getMarketplaceToken()
+          ? { Authorization: `Bearer ${getMarketplaceToken()}` }
+          : {}),
+      },
       signal: AbortSignal.timeout(8000),
     })
       .then(async (res) => {

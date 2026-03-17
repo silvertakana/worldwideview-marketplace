@@ -77,7 +77,19 @@ export default async function PluginDetailPage({ params }: Props) {
       {/* ── Changelog ── */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Changelog</h2>
-        <p className={styles.changelog}>{plugin.changelog}</p>
+        <ul className={styles.changelog}>
+          {(plugin.changelog ?? "").split(/\n/).filter(l => l.trim()).map((line, i) => {
+            const text = line.replace(/^-\s*/, "");
+            const parts = text.split(/\*\*(.+?)\*\*/g);
+            return (
+              <li key={i}>
+                {parts.map((part, j) =>
+                  j % 2 === 1 ? <strong key={j}>{part}</strong> : part
+                )}
+              </li>
+            );
+          })}
+        </ul>
       </section>
 
       {/* ── Install Button ── */}

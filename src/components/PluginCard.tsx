@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { trackEvent } from "@/lib/analytics";
-import { useInstalledIds } from "./InstalledPluginsProvider";
 import PluginIcon from "./PluginIcon";
+import PluginCardActions from "./PluginCardActions";
 import type { PluginCard as PluginCardData } from "@/data/types";
 import styles from "./PluginCard.module.css";
 
@@ -12,9 +12,6 @@ interface PluginCardProps {
 }
 
 export default function PluginCard({ plugin }: PluginCardProps) {
-  const { installedIds } = useInstalledIds();
-  const isInstalled = installedIds.has(plugin.id);
-
   function handleClick() {
     trackEvent("plugin_card_click", {
       pluginId: plugin.id,
@@ -36,13 +33,7 @@ export default function PluginCard({ plugin }: PluginCardProps) {
       <p className={styles.cardDesc}>{plugin.description}</p>
       <div className={styles.cardFooter}>
         <span className={styles.categoryBadge}>{plugin.category}</span>
-        {isInstalled ? (
-          <span className={styles.installedBadge}>✓ Installed</span>
-        ) : (
-          <span className={styles.installs}>
-            {plugin.installs.toLocaleString()} installs
-          </span>
-        )}
+        <PluginCardActions pluginId={plugin.id} version={plugin.version} />
       </div>
     </Link>
   );
