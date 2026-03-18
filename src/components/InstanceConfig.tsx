@@ -39,7 +39,7 @@ export default function InstanceConfig({ onConfigured, onCancel, returnPath }: P
                 return;
             }
             const data = await res.json();
-            if (data.edition === "demo") {
+            if (data.pluginManagementEnabled === false) {
                 setStatus("demo-blocked");
                 return;
             }
@@ -98,8 +98,8 @@ export default function InstanceConfig({ onConfigured, onCancel, returnPath }: P
                 {status === "success" && <p className={styles.success}>✓ Instance reachable</p>}
                 {status === "demo-blocked" && (
                     <p className={styles.warning}>
-                        ⚠ This is a demo instance. The demo cannot install or manage
-                        plugins. Please connect a local or cloud instance instead.
+                        ⚠ Plugin management is not enabled on this instance.
+                        Please connect a local or cloud instance instead.
                     </p>
                 )}
 
