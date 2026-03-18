@@ -25,7 +25,12 @@ const FEATURES = [
   },
 ];
 
-const featuredPlugins = KNOWN_PLUGINS.filter((p) => p.id !== "sdk").slice(0, 3);
+const userPlugins = KNOWN_PLUGINS.filter((p) => p.id !== "sdk");
+const pluginCount = userPlugins.length;
+const categoryCount = new Set(userPlugins.map((p) => p.category)).size;
+const formatCount = new Set(userPlugins.map((p) => p.format)).size;
+
+const featuredPlugins = userPlugins.slice(0, 3);
 
 // Build PluginCard-shaped objects from known plugins for the homepage
 const popularPlugins = featuredPlugins.map((p) => ({
@@ -71,15 +76,15 @@ export default function Home() {
 
         <div className={styles.stats}>
           <div className={styles.stat}>
-            <span className={styles.statValue}>7</span>
+            <span className={styles.statValue}>{pluginCount}</span>
             <span className={styles.statLabel}>Plugins</span>
           </div>
           <div className={styles.stat}>
-            <span className={styles.statValue}>5</span>
+            <span className={styles.statValue}>{categoryCount}</span>
             <span className={styles.statLabel}>Categories</span>
           </div>
           <div className={styles.stat}>
-            <span className={styles.statValue}>3</span>
+            <span className={styles.statValue}>{formatCount}</span>
             <span className={styles.statLabel}>Formats</span>
           </div>
         </div>

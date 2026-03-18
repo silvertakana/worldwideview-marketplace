@@ -1,16 +1,21 @@
 import { NextResponse } from "next/server";
-import { VERIFIED_PLUGIN_IDS } from "@/data/verifiedPlugins";
+import { prisma } from "@/lib/prisma";
 import { signRegistry } from "@/lib/registryKeys";
 
 /**
  * GET /api/registry
  * Returns a signed JSON payload listing all verified plugin IDs.
- * Public endpoint — no auth required.
+ * Reads from the SQLite database. Public endpoint — no auth required.
  */
 export async function GET() {
   try {
+    const plugins = await prisma.verifiedPlugin.findMany({
+      select: { id: true },
+      orderBy: { addedAt: "asc" },
+    });
+
     const payload = {
-      plugins: VERIFIED_PLUGIN_IDS,
+      plugins: plugins.map((p) => p.id),
       issuedAt: new Date().toISOString(),
     };
 
@@ -19,9 +24,9 @@ export async function GET() {
 
     return NextResponse.json({ ...payload, signature });
   } catch (err) {
-    console.error("[Registry] Signing error:", err);
+    console.error("[Registry] Error:", err);
     return NextResponse.json(
-      { error: "Registry signing failed" },
+      { error: "Registry query failed" },
       { status: 500 },
     );
   }

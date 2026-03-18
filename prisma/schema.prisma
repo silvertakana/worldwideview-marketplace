@@ -1,0 +1,13 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model VerifiedPlugin {
+  id      String   @id       // plugin ID (e.g. "aviation")
+  name    String?            // optional display name
+  addedAt DateTime @default(now())
+}

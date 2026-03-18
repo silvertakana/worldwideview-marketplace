@@ -109,18 +109,9 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     changelog:
       "v1.0.0 — Initial release with OSM military installation data.",
   },
-  {
-    id: "sdk",
-    npmPackage: "@worldwideview/wwv-plugin-sdk",
-    icon: "Wrench",
-    category: "Custom",
-    format: "bundle",
-    trust: "built-in",
-    capabilities: [],
-    longDescription:
-      "Plugin SDK — types, interfaces, and utilities for building WorldWideView globe plugins. Required as a peer dependency by all other plugins.",
-    changelog: "v1.0.0 — Initial release with core types and interfaces.",
-  },
+  // NOTE: @worldwideview/wwv-plugin-sdk is intentionally excluded from this list.
+  // It is a developer peer-dependency (types + interfaces), not a user-installable plugin.
+  // See docs/creating-a-plugin.md for how developers use the SDK.
   {
     id: "nuclear-facilities",
     npmPackage: "@worldwideview/wwv-plugin-nuclear",
