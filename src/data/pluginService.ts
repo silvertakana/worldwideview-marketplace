@@ -1,6 +1,27 @@
 import type { PluginCard, PluginDetail } from "./types";
 import { KNOWN_PLUGINS } from "./knownPlugins";
 import { fetchAllPackageMeta, fetchPackageMeta } from "./npmRegistry";
+import { prisma } from "@/lib/prisma";
+
+/** Hardcoded built-in IDs that are always trusted regardless of registry. */
+const BUILT_IN_IDS = new Set(
+  KNOWN_PLUGINS.filter((p) => p.trust === "built-in").map((p) => p.id),
+);
+
+/** Get the set of verified plugin IDs from the live registry DB. */
+async function getVerifiedIds(): Promise<Set<string>> {
+  const rows = await prisma.verifiedPlugin.findMany({ select: { id: true } });
+  return new Set(rows.map((r) => r.id));
+}
+
+/** Resolve trust from the live registry instead of static data. */
+function resolveTrust(
+  pluginId: string,
+  verifiedIds: Set<string>,
+): "built-in" | "verified" | "unverified" {
+  if (BUILT_IN_IDS.has(pluginId)) return "built-in";
+  return verifiedIds.has(pluginId) ? "verified" : "unverified";
+}
 
 /**
  * Build PluginCard objects by merging curated metadata with live npm data.
@@ -10,11 +31,14 @@ export async function getAllPlugins(
   category?: string,
 ): Promise<PluginCard[]> {
   const npmPackages = KNOWN_PLUGINS.map((p) => p.npmPackage);
-  const metaMap = await fetchAllPackageMeta(npmPackages);
+  const [metaMap, verifiedIds] = await Promise.all([
+    fetchAllPackageMeta(npmPackages),
+    getVerifiedIds(),
+  ]);
 
   let cards = KNOWN_PLUGINS.map((known) => {
     const npm = metaMap.get(known.npmPackage);
-    return mergeToCard(known, npm ?? null);
+    return mergeToCard(known, npm ?? null, verifiedIds);
   });
 
   if (category && category !== "All") {
@@ -30,8 +54,11 @@ export async function getPluginById(
   const known = KNOWN_PLUGINS.find((p) => p.id === id);
   if (!known) return null;
 
-  const npm = await fetchPackageMeta(known.npmPackage);
-  return mergeToDetail(known, npm);
+  const [npm, verifiedIds] = await Promise.all([
+    fetchPackageMeta(known.npmPackage),
+    getVerifiedIds(),
+  ]);
+  return mergeToDetail(known, npm, verifiedIds);
 }
 
 /**
@@ -58,6 +85,7 @@ export async function searchPlugins(
 function mergeToCard(
   known: (typeof KNOWN_PLUGINS)[number],
   npm: Awaited<ReturnType<typeof fetchPackageMeta>>,
+  verifiedIds: Set<string>,
 ): PluginCard {
   return {
     id: known.id,
@@ -71,7 +99,7 @@ function mergeToCard(
     author: npm?.author ?? "WorldWideView",
     version: npm?.version ?? "0.0.0",
     format: known.format,
-    trust: known.trust,
+    trust: resolveTrust(known.id, verifiedIds),
     tags: npm?.keywords ?? [],
     updatedAt: npm?.updatedAt ?? "—",
   };
@@ -80,9 +108,10 @@ function mergeToCard(
 function mergeToDetail(
   known: (typeof KNOWN_PLUGINS)[number],
   npm: Awaited<ReturnType<typeof fetchPackageMeta>>,
+  verifiedIds: Set<string>,
 ): PluginDetail {
   return {
-    ...mergeToCard(known, npm),
+    ...mergeToCard(known, npm, verifiedIds),
     longDescription: known.longDescription,
     capabilities: known.capabilities,
     compatibility: ">=0.1.0",
