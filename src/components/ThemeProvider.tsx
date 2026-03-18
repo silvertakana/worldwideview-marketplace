@@ -37,16 +37,17 @@ function resolveTheme(theme: Theme): "light" | "dark" {
 const STORAGE_KEY = "wwv-marketplace-theme";
 
 export default function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system");
-  const [resolved, setResolved] = useState<"light" | "dark">("dark");
-
-  /* Hydrate saved preference */
-  useEffect(() => {
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "system";
     const saved = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    if (saved && ["light", "dark", "system"].includes(saved)) {
-      setThemeState(saved);
-    }
-  }, []);
+    if (saved && ["light", "dark", "system"].includes(saved)) return saved;
+    return "system";
+  });
+
+  const [resolved, setResolved] = useState<"light" | "dark">(() => {
+    if (typeof window === "undefined") return "dark";
+    return (document.documentElement.getAttribute("data-theme") as "light" | "dark") || resolveTheme("system");
+  });
 
   /* Apply theme to <html> whenever it changes */
   useEffect(() => {

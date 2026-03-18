@@ -15,8 +15,9 @@ interface Props {
 }
 
 export default function PluginCardActions({ pluginId, version }: Props) {
-  const { installedIds } = useInstalledIds();
+  const { installedIds, pendingIds } = useInstalledIds();
   const isInstalled = installedIds.has(pluginId);
+  const isPending = pendingIds.has(pluginId);
   const [showConfig, setShowConfig] = useState(false);
 
   function buildRedirectUrl(instanceUrl: string): string {
@@ -84,6 +85,8 @@ export default function PluginCardActions({ pluginId, version }: Props) {
 
       {isInstalled ? (
         <span className={styles.installedBadge}>✓ Installed</span>
+      ) : isPending ? (
+        <span className={styles.pendingBadge}>⏳ Pending</span>
       ) : (
         <button
           className={`${styles.btn} ${styles.install}`}

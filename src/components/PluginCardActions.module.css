@@ -35,3 +35,15 @@
   color: #22c55e;
   border: 1px solid rgba(34, 197, 94, 0.4);
 }
+
+.pendingBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px var(--space-md);
+  border-radius: var(--radius-full);
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
