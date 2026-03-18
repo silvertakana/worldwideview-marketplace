@@ -8,7 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import { getInstanceUrl, getMarketplaceToken } from "@/lib/instanceStore";
+import { getInstanceUrl, getMarketplaceToken, setMarketplaceToken } from "@/lib/instanceStore";
 
 interface InstalledPluginsContextValue {
   /** Set of installed plugin IDs (empty if not connected). */
@@ -39,6 +39,33 @@ export default function InstalledPluginsProvider({ children }: { children: React
   const [trigger, setTrigger] = useState(0);
 
   const refetch = useCallback(() => setTrigger((t) => t + 1), []);
+
+  // Global: extract token + installed param from URL after redirect
+  useEffect(() => {
+    const hash = window.location.hash;
+    const tokenMatch = hash.match(/[#&]token=([^&]*)/);
+    if (tokenMatch?.[1]) {
+      setMarketplaceToken(tokenMatch[1]);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const installed = params.has("installed");
+    const installError = params.has("install_error");
+
+    // Clean handled params from the URL
+    if (tokenMatch || installed || installError) {
+      const clean = new URL(window.location.href);
+      clean.hash = "";
+      clean.searchParams.delete("installed");
+      clean.searchParams.delete("install_error");
+      window.history.replaceState({}, "", clean.toString());
+    }
+
+    // Trigger a refetch so the new token is used immediately
+    if (tokenMatch || installed) {
+      setTrigger((t) => t + 1);
+    }
+  }, []);
 
   useEffect(() => {
     const instanceUrl = getInstanceUrl();
