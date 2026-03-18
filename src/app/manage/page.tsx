@@ -93,7 +93,7 @@ export default function ManagePage() {
         <div className={styles.list}>
           {plugins.map((p) => (
             <InstalledPluginCard
-              key={p.id}
+              key={p.pluginId}
               pluginId={p.pluginId}
               version={p.version}
               installedAt={p.installedAt}
