@@ -70,6 +70,14 @@
     font-weight: 600;
 }
 
+.warning {
+    color: #e9a230;
+    font-size: 0.8rem;
+    margin-top: var(--space-sm);
+    font-weight: 600;
+    line-height: 1.5;
+}
+
 .actions {
     display: flex;
     gap: var(--space-sm);

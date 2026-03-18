@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { getInstanceUrl, setInstanceUrl } from "@/lib/instanceStore";
 import styles from "./InstanceConfig.module.css";
 
@@ -11,16 +12,20 @@ interface Props {
     returnPath?: string;
 }
 
+type ConnectionStatus = "idle" | "testing" | "success" | "error" | "demo-blocked";
+
 export default function InstanceConfig({ onConfigured, onCancel, returnPath }: Props) {
     const [url, setUrl] = useState("");
-    const [status, setStatus] = useState<"idle" | "testing" | "success" | "error">("idle");
+    const [status, setStatus] = useState<ConnectionStatus>("idle");
     const [errorMsg, setErrorMsg] = useState("");
 
     useEffect(() => {
         setUrl(getInstanceUrl() ?? "http://localhost:3000");
     }, []);
 
-    async function handleTest() {
+    async function handleTest(e: React.MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
         setStatus("testing");
         setErrorMsg("");
         const normalized = url.replace(/\/+$/, "");
@@ -28,19 +33,26 @@ export default function InstanceConfig({ onConfigured, onCancel, returnPath }: P
             const res = await fetch(`${normalized}/api/auth/setup-status`, {
                 signal: AbortSignal.timeout(5000),
             });
-            if (res.ok) {
-                setStatus("success");
-            } else {
+            if (!res.ok) {
                 setStatus("error");
                 setErrorMsg(`Server returned ${res.status}`);
+                return;
             }
+            const data = await res.json();
+            if (data.edition === "demo") {
+                setStatus("demo-blocked");
+                return;
+            }
+            setStatus("success");
         } catch {
             setStatus("error");
             setErrorMsg("Could not connect — check the URL and ensure WWV is running");
         }
     }
 
-    function handleSave() {
+    function handleSave(e: React.MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
         setInstanceUrl(url);
         // Redirect to WWV to obtain a marketplace token via session auth.
         // WWV will redirect back to returnPath with ?token=<jwt>.
@@ -50,8 +62,22 @@ export default function InstanceConfig({ onConfigured, onCancel, returnPath }: P
         window.location.href = grantUrl.toString();
     }
 
-    return (
-        <div className={styles.overlay} onClick={onCancel}>
+    function handleOverlayClick(e: React.MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+        onCancel();
+    }
+
+    function handleCancelClick(e: React.MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+        onCancel();
+    }
+
+    const canSave = status === "success";
+
+    return createPortal(
+        <div className={styles.overlay} onClick={handleOverlayClick}>
             <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <h2 className={styles.title}>Connect Your Instance</h2>
                 <p className={styles.subtitle}>
@@ -70,9 +96,15 @@ export default function InstanceConfig({ onConfigured, onCancel, returnPath }: P
 
                 {status === "error" && <p className={styles.error}>{errorMsg}</p>}
                 {status === "success" && <p className={styles.success}>✓ Instance reachable</p>}
+                {status === "demo-blocked" && (
+                    <p className={styles.warning}>
+                        ⚠ This is a demo instance. The demo cannot install or manage
+                        plugins. Please connect a local or cloud instance instead.
+                    </p>
+                )}
 
                 <div className={styles.actions}>
-                    <button className={styles.btnSecondary} onClick={onCancel}>Cancel</button>
+                    <button className={styles.btnSecondary} onClick={handleCancelClick}>Cancel</button>
                     <button
                         className={styles.btnTest}
                         onClick={handleTest}
@@ -83,12 +115,14 @@ export default function InstanceConfig({ onConfigured, onCancel, returnPath }: P
                     <button
                         className={styles.btnSave}
                         onClick={handleSave}
-                        disabled={status !== "success"}
+                        disabled={!canSave}
                     >
                         Save
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
+
