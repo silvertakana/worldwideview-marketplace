@@ -57,7 +57,8 @@ export default function InstalledPluginCard({
   const displayName = detail?.npmPackage?.replace("@worldwideview/wwv-plugin-", "") ?? pluginId;
   const displayIcon = detail?.icon ?? "Package";
   const displayDesc = detail?.longDescription?.slice(0, 80) ?? "Marketplace plugin";
-  const date = new Date(installedAt).toLocaleDateString();
+  const isBuiltIn = version === "built-in";
+  const date = installedAt ? new Date(installedAt).toLocaleDateString() : "";
 
   return (
     <div className={styles.card}>
@@ -69,8 +70,8 @@ export default function InstalledPluginCard({
         <h3 className={styles.name}>{displayName}</h3>
         <p className={styles.desc}>{displayDesc}</p>
         <div className={styles.meta}>
-          <span className={styles.badge}>v{version}</span>
-          <span className={styles.date}>Installed {date}</span>
+          <span className={styles.badge}>{isBuiltIn ? "Built-in" : `v${version}`}</span>
+          {date && <span className={styles.date}>Installed {date}</span>}
         </div>
       </div>
 
