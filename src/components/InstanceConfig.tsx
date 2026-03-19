@@ -35,7 +35,11 @@ export default function InstanceConfig({ onConfigured, onCancel, returnPath }: P
             });
             if (!res.ok) {
                 setStatus("error");
-                setErrorMsg(`Server returned ${res.status}`);
+                setErrorMsg(
+                    res.status === 503
+                        ? "Instance is starting up — database is not ready yet. Try again shortly."
+                        : `Server returned ${res.status} — the instance may need to be restarted.`
+                );
                 return;
             }
             const data = await res.json();
@@ -46,7 +50,10 @@ export default function InstanceConfig({ onConfigured, onCancel, returnPath }: P
             setStatus("success");
         } catch {
             setStatus("error");
-            setErrorMsg("Could not connect — check the URL and ensure WWV is running");
+            setErrorMsg(
+                "Could not connect — check the URL and ensure WWV is running. " +
+                "If using a remote instance, it may have a CORS or SSL issue."
+            );
         }
     }
 
