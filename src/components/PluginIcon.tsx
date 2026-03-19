@@ -1,20 +1,8 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
-import {
-  Plane, Ship, Shield, Flame, Camera, Map, Swords, Wrench,
-  Atom, Landmark, Package, Database, Globe, HardDrive,
-  BookOpen, PanelRight, PanelLeft, Settings, Video,
-  Plug, ShieldCheck, Zap,
-} from "lucide-react";
+import { icons, type LucideIcon } from "lucide-react";
 
-/** Map of lucide icon name strings → React components. */
-const ICON_MAP: Record<string, LucideIcon> = {
-  Plane, Ship, Shield, Flame, Camera, Map, Swords, Wrench,
-  Atom, Landmark, Package, Database, Globe, HardDrive,
-  BookOpen, PanelRight, PanelLeft, Settings, Video,
-  Plug, ShieldCheck, Zap,
-};
+const FallbackIcon = icons.Package;
 
 interface PluginIconProps {
   name: string;
@@ -24,6 +12,8 @@ interface PluginIconProps {
 
 /**
  * Renders a lucide-react icon by name string.
+ * Resolves any valid lucide icon name dynamically (1700+ icons),
+ * so new plugins can use any icon without updating this component.
  * Falls back to the Package icon for unrecognised names.
  */
 export default function PluginIcon({
@@ -31,6 +21,6 @@ export default function PluginIcon({
   size = 20,
   className,
 }: PluginIconProps) {
-  const Icon = ICON_MAP[name] ?? Package;
+  const Icon = (icons[name as keyof typeof icons] as LucideIcon | undefined) ?? FallbackIcon;
   return <Icon size={size} className={className} />;
 }

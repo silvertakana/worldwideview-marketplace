@@ -90,7 +90,7 @@ function mergeToCard(
   return {
     id: known.id,
     name: npm?.name?.replace("@worldwideview/wwv-plugin-", "")
-      ? formatName(npm.name, npm.description)
+      ? formatName(npm.name)
       : known.id,
     description: npm?.description ?? known.longDescription.slice(0, 80),
     category: known.category,
@@ -121,13 +121,8 @@ function mergeToDetail(
   };
 }
 
-/** Derive a human-readable name from the npm package metadata. */
-function formatName(npmName: string, description?: string): string {
-  // Use the description as display name if it's short enough,
-  // otherwise clean the package name.
-  if (description && description.length < 80) {
-    return description;
-  }
+/** Derive a human-readable name from the npm package name. */
+function formatName(npmName: string): string {
   return npmName
     .replace("@worldwideview/wwv-plugin-", "")
     .split("-")
