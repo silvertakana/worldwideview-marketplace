@@ -138,4 +138,68 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     changelog:
       "v1.0.0 — Initial release with global diplomatic mission data from OSM.",
   },
+  {
+    id: "volcanoes",
+    npmPackage: "@worldwideview/wwv-plugin-volcanoes",
+    icon: "Mountain",
+    category: "Natural Disaster",
+    format: "static",
+    trust: "verified",
+    capabilities: ["data:own"],
+    longDescription:
+      "Displays active and dormant volcanoes worldwide using OpenStreetMap data. Static GeoJSON data layer with clustered point markers.",
+    changelog: "v1.0.0 — Initial release with global volcano data from OSM.",
+  },
+  {
+    id: "airports",
+    npmPackage: "@worldwideview/wwv-plugin-airports",
+    icon: "PlaneTakeoff",
+    category: "Aviation",
+    format: "static",
+    trust: "verified",
+    capabilities: ["data:own"],
+    longDescription:
+      "Displays airports and aerodromes worldwide using OpenStreetMap data. Complements the live aviation tracking plugin by showing where aircraft land.",
+    changelog:
+      "v1.0.0 — Initial release with global aerodrome data from OSM.",
+  },
+  {
+    id: "seaports",
+    npmPackage: "@worldwideview/wwv-plugin-seaports",
+    icon: "Anchor",
+    category: "Maritime",
+    format: "static",
+    trust: "verified",
+    capabilities: ["data:own"],
+    longDescription:
+      "Displays harbours and seaports worldwide using OpenStreetMap data. Complements the live maritime tracking plugin by showing where vessels dock.",
+    changelog:
+      "v1.0.0 — Initial release with global harbour data from OSM.",
+  },
+  {
+    id: "lighthouses",
+    npmPackage: "@worldwideview/wwv-plugin-lighthouses",
+    icon: "Lamp",
+    category: "Maritime",
+    format: "static",
+    trust: "verified",
+    capabilities: ["data:own"],
+    longDescription:
+      "Displays lighthouses worldwide using OpenStreetMap data. Iconic coastal landmarks visualized along coastlines on the 3D globe.",
+    changelog:
+      "v1.0.0 — Initial release with global lighthouse data from OSM.",
+  },
+  {
+    id: "spaceports",
+    npmPackage: "@worldwideview/wwv-plugin-spaceports",
+    icon: "Rocket",
+    category: "Custom",
+    format: "static",
+    trust: "verified",
+    capabilities: ["data:own"],
+    longDescription:
+      "Displays space launch sites worldwide using OpenStreetMap data. Includes major spaceports like Cape Canaveral, Baikonur, and Guiana Space Centre.",
+    changelog:
+      "v1.0.0 — Initial release with global spaceport data from OSM.",
+  },
 ];
