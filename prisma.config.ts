@@ -1,8 +1,7 @@
-import path from "path";
-import { defineConfig } from "prisma/config";
+import { defineConfig, env } from "prisma/config";
 
 export default defineConfig({
     datasource: {
-        url: `file:${path.join(__dirname, "prisma", "registry.db")}`,
+        url: env("DATABASE_URL"),
     },
 });
