@@ -5,7 +5,14 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# ── Stage 2: Build the application ──
+# ── Stage 2: Install PRODUCTION-ONLY dependencies ──
+FROM node:22-alpine AS proddeps
+RUN apk add --no-cache python3 make g++
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
+# ── Stage 3: Build the application ──
 FROM node:22-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -15,7 +22,7 @@ ENV DATABASE_URL="file:./dummy.db"
 RUN npx prisma generate
 RUN npm run build
 
-# ── Stage 3: Production runner ──
+# ── Stage 4: Production runner ──
 FROM node:22-alpine AS runner
 WORKDIR /app
 
@@ -31,6 +38,9 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 # Copy Prisma Config
 COPY --from=builder /app/prisma.config.ts ./
+
+# Copy production-only node_modules so CLI tools like Prisma config can load
+COPY --from=proddeps /app/node_modules ./node_modules
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
