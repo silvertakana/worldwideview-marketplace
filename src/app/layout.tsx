@@ -12,7 +12,6 @@ export const metadata: Metadata = {
   },
   description:
     "Browse, publish, and install data source plugins for WorldWideView — the real-time 3D globe intelligence platform.",
-  icons: { icon: "/favicon.svg" },
   openGraph: {
     title: "WorldWideView Marketplace",
     description:
