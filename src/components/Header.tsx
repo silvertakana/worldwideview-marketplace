@@ -19,7 +19,7 @@ export default function Header() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link href="/" className={styles.logo}>
-          <span className={styles.logoIcon}>W</span>
+          <img src="/logo/logo-icon.svg" alt="Logo" className={styles.logoImg} />
           WWV Marketplace
         </Link>
 

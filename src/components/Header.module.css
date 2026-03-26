@@ -34,17 +34,10 @@
   color: var(--color-accent-hover);
 }
 
-.logoIcon {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  font-weight: 800;
-  color: #fff;
+.logoImg {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .nav {
