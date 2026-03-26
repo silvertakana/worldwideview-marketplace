@@ -46,6 +46,20 @@
   color: var(--color-text-muted);
   margin-bottom: var(--space-xs);
 }
+.heroId {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+  opacity: 0.8;
+}
+.heroId code {
+  font-family: var(--font-mono);
+  background: var(--color-bg-elevated);
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  user-select: all;
+}
 .badges {
   display: flex;
   gap: var(--space-xs);

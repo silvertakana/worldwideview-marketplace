@@ -29,6 +29,7 @@ export default async function PluginDetailPage({ params }: Props) {
         <div className={styles.heroInfo}>
           <h1 className={styles.heroName}>{plugin.name}</h1>
           <p className={styles.heroAuthor}>by {plugin.author}</p>
+          <p className={styles.heroId}>ID: <code>{plugin.id}</code></p>
           <div className={styles.badges}>
             <span className={styles.badgeVersion}>v{plugin.version}</span>
             <span className={styles.badgeFormat}>{plugin.format}</span>
