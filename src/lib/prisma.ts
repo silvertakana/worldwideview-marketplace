@@ -5,8 +5,10 @@ import path from "path";
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createPrismaClient(): PrismaClient {
-  const dbPath = path.join(process.cwd(), "prisma", "registry.db");
-  const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
+  // Use Docker's environment variable (e.g., file:/app/data/registry.db) if present
+  const dbUrl = process.env.DATABASE_URL || `file:${path.join(process.cwd(), "prisma", "registry.db")}`;
+  // The PrismaBetterSqlite3 adapter appears to be using a config object with url
+  const adapter = new PrismaBetterSqlite3({ url: dbUrl } as any);
   return new PrismaClient({ adapter });
 }
 
