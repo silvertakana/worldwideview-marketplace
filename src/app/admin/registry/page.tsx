@@ -1,6 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { LoginForm } from "./components/LoginForm";
+import { Toolbar } from "./components/Toolbar";
+import { BulkAddForm } from "./components/BulkAddForm";
+import { PluginTable } from "./components/PluginTable";
 import styles from "./page.module.css";
 
 interface VerifiedPlugin {
@@ -13,13 +17,9 @@ export default function AdminRegistryPage() {
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [plugins, setPlugins] = useState<VerifiedPlugin[]>([]);
-  const [newId, setNewId] = useState("");
-  const [newName, setNewName] = useState("");
   const [error, setError] = useState("");
-
-  const token = typeof window !== "undefined"
-    ? sessionStorage.getItem("admin_token") ?? ""
-    : "";
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const headers = useCallback(() => ({
     "Content-Type": "application/json",
@@ -31,6 +31,7 @@ export default function AdminRegistryPage() {
     if (!res.ok) { setAuthed(false); return; }
     const data = await res.json();
     setPlugins(data.plugins);
+    setSelected(new Set());
   }, [headers]);
 
   useEffect(() => {
@@ -39,6 +40,14 @@ export default function AdminRegistryPage() {
       fetchPlugins();
     }
   }, [fetchPlugins]);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return plugins;
+    const q = search.toLowerCase();
+    return plugins.filter(
+      (p) => p.id.toLowerCase().includes(q) || p.name?.toLowerCase().includes(q)
+    );
+  }, [plugins, search]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -57,16 +66,12 @@ export default function AdminRegistryPage() {
     }
   }
 
-  async function handleAdd(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newId.trim()) return;
+  async function handleAdd(items: { id: string; name?: string }[]) {
     await fetch("/api/admin/registry", {
       method: "POST",
       headers: headers(),
-      body: JSON.stringify({ id: newId.trim(), name: newName.trim() || null }),
+      body: JSON.stringify({ plugins: items }),
     });
-    setNewId("");
-    setNewName("");
     fetchPlugins();
   }
 
@@ -74,85 +79,67 @@ export default function AdminRegistryPage() {
     await fetch("/api/admin/registry", {
       method: "DELETE",
       headers: headers(),
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ ids: [id] }),
     });
     fetchPlugins();
   }
 
+  async function handleRemoveSelected() {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    await fetch("/api/admin/registry", {
+      method: "DELETE",
+      headers: headers(),
+      body: JSON.stringify({ ids }),
+    });
+    fetchPlugins();
+  }
+
+  function toggleSelect(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    if (filtered.every((p) => selected.has(p.id))) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(filtered.map((p) => p.id)));
+    }
+  }
+
   if (!authed) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loginCard}>
-          <h1>🔒 Registry Admin</h1>
-          <form onSubmit={handleLogin}>
-            <input
-              type="password"
-              placeholder="Admin password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={styles.input}
-            />
-            <button type="submit" className={styles.btnPrimary}>Login</button>
-          </form>
-          {error && <p className={styles.error}>{error}</p>}
-        </div>
-      </div>
+      <LoginForm
+        password={password}
+        setPassword={setPassword}
+        onLogin={handleLogin}
+        error={error}
+      />
     );
   }
 
   return (
     <div className={styles.container}>
       <div className={styles.panel}>
-        <div className={styles.header}>
-          <h1>Registry Admin</h1>
-          <span className={styles.count}>{plugins.length} plugins</span>
-        </div>
-
-        <form onSubmit={handleAdd} className={styles.addForm}>
-          <input
-            placeholder="Plugin ID (e.g. aviation)"
-            value={newId}
-            onChange={(e) => setNewId(e.target.value)}
-            className={styles.input}
-          />
-          <input
-            placeholder="Display name (optional)"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            className={styles.input}
-          />
-          <button type="submit" className={styles.btnPrimary}>
-            Add Plugin
-          </button>
-        </form>
-
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Plugin ID</th>
-              <th>Name</th>
-              <th>Added</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {plugins.map((p) => (
-              <tr key={p.id}>
-                <td className={styles.mono}>{p.id}</td>
-                <td>{p.name ?? "—"}</td>
-                <td>{new Date(p.addedAt).toLocaleDateString()}</td>
-                <td>
-                  <button
-                    onClick={() => handleRemove(p.id)}
-                    className={styles.btnDanger}
-                  >
-                    Remove
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Toolbar
+          totalCount={plugins.length}
+          selectedCount={selected.size}
+          search={search}
+          setSearch={setSearch}
+          onRemoveSelected={handleRemoveSelected}
+        />
+        <BulkAddForm onAdd={handleAdd} />
+        <PluginTable
+          plugins={filtered}
+          selected={selected}
+          onToggle={toggleSelect}
+          onToggleAll={toggleSelectAll}
+          onRemove={handleRemove}
+        />
       </div>
     </div>
   );

@@ -22,41 +22,62 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ plugins });
 }
 
-/** POST /api/admin/registry — add a plugin { id, name? }. */
+/** POST /api/admin/registry — add plugin(s).
+ *  Single: { id, name? }
+ *  Bulk:   { plugins: [{ id, name? }] }
+ */
 export async function POST(request: NextRequest) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id, name } = await request.json();
-  if (!id || typeof id !== "string") {
-    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  const body = await request.json();
+
+  // Normalize to array
+  const items: { id: string; name?: string | null }[] = body.plugins
+    ? body.plugins
+    : body.id ? [{ id: body.id, name: body.name }] : [];
+
+  if (items.length === 0 || items.some((p) => !p.id || typeof p.id !== "string")) {
+    return NextResponse.json({ error: "Missing or invalid plugin id(s)" }, { status: 400 });
   }
 
-  const plugin = await prisma.verifiedPlugin.upsert({
-    where: { id },
-    update: { name: name ?? null },
-    create: { id, name: name ?? null },
-  });
+  const results = await prisma.$transaction(
+    items.map((p) =>
+      prisma.verifiedPlugin.upsert({
+        where: { id: p.id },
+        update: { name: p.name ?? null },
+        create: { id: p.id, name: p.name ?? null },
+      })
+    )
+  );
 
-  return NextResponse.json({ plugin }, { status: 201 });
+  return NextResponse.json({ plugins: results }, { status: 201 });
 }
 
-/** DELETE /api/admin/registry — remove a plugin { id }. */
+/** DELETE /api/admin/registry — remove plugin(s).
+ *  Single: { id }
+ *  Bulk:   { ids: string[] }
+ */
 export async function DELETE(request: NextRequest) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await request.json();
-  if (!id || typeof id !== "string") {
-    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  const body = await request.json();
+
+  // Normalize to array
+  const ids: string[] = body.ids
+    ? body.ids
+    : body.id ? [body.id] : [];
+
+  if (ids.length === 0 || ids.some((id: string) => typeof id !== "string")) {
+    return NextResponse.json({ error: "Missing or invalid id(s)" }, { status: 400 });
   }
 
-  try {
-    await prisma.verifiedPlugin.delete({ where: { id } });
-    return NextResponse.json({ removed: id });
-  } catch {
-    return NextResponse.json({ error: "Plugin not found" }, { status: 404 });
-  }
+  const result = await prisma.verifiedPlugin.deleteMany({
+    where: { id: { in: ids } },
+  });
+
+  return NextResponse.json({ removed: ids, count: result.count });
 }
