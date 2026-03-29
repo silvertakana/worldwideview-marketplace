@@ -8,7 +8,9 @@ interface ToolbarProps {
   selectedCount: number;
   search: string;
   setSearch: (v: string) => void;
-  onRemoveSelected: () => void;
+  onUpdateSelected: (trust: string) => void;
+  onExport: () => void;
+  onImportClick: () => void;
 }
 
 export function Toolbar({
@@ -16,17 +18,19 @@ export function Toolbar({
   selectedCount,
   search,
   setSearch,
-  onRemoveSelected,
+  onUpdateSelected,
+  onExport,
+  onImportClick,
 }: ToolbarProps) {
-  const [confirming, setConfirming] = useState(false);
+  const [confirmingReject, setConfirmingReject] = useState(false);
 
-  function handleRemoveClick() {
-    if (!confirming) {
-      setConfirming(true);
+  function handleAction(trust: string) {
+    if (trust === "rejected" && !confirmingReject) {
+      setConfirmingReject(true);
       return;
     }
-    onRemoveSelected();
-    setConfirming(false);
+    onUpdateSelected(trust);
+    setConfirmingReject(false);
   }
 
   return (
@@ -43,16 +47,38 @@ export function Toolbar({
           onChange={(e) => setSearch(e.target.value)}
           className={`${styles.input} ${styles.searchInput}`}
         />
+        <button
+          onClick={onExport}
+          className={styles.btnSecondary}
+          style={{ padding: "8px 16px", fontSize: "0.8rem", whiteSpace: "nowrap" }}
+        >
+          Export
+        </button>
+        <button
+          onClick={onImportClick}
+          className={styles.btnSecondary}
+          style={{ padding: "8px 16px", fontSize: "0.8rem", whiteSpace: "nowrap" }}
+        >
+          Import
+        </button>
         {selectedCount > 0 && (
-          <button
-            onClick={handleRemoveClick}
-            className={styles.btnDanger}
-            onBlur={() => setConfirming(false)}
-          >
-            {confirming
-              ? `Confirm remove ${selectedCount}?`
-              : `Remove ${selectedCount} selected`}
-          </button>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              onClick={() => handleAction("verified")}
+              className={styles.btnPrimary}
+            >
+              Verify {selectedCount}
+            </button>
+            <button
+              onClick={() => handleAction("rejected")}
+              className={styles.btnDanger}
+              onBlur={() => setConfirmingReject(false)}
+            >
+              {confirmingReject
+                ? `Confirm reject ${selectedCount}?`
+                : `Reject ${selectedCount}`}
+            </button>
+          </div>
         )}
       </div>
     </div>

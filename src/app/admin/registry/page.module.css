@@ -249,3 +249,27 @@
   font-size: 0.85rem;
   margin-top: 12px;
 }
+
+/*  Modal  */
+.modalOverlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(10, 10, 20, 0.8);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.modalContent {
+  background: #14142a; border: 1px solid #2a2a4a; border-radius: 12px;
+  padding: 32px; width: 100%; max-width: 600px;
+}
+.importForm { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
+.modalActions { display: flex; justify-content: flex-end; gap: 12px; }
+.btnSecondary {
+  padding: 10px 20px; border-radius: 8px; border: 1px solid #2a2a4a; background: transparent;
+  color: #ccc; font-weight: 500; font-size: 0.85rem; cursor: pointer; transition: background 0.15s ease;
+}
+.btnSecondary:hover { background: #1a1a3a; }
+.radioGroup { display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem; color: #ccc; }
+.radioLabel { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; }
+.radioLabel input { margin-top: 4px; }
+.radioLabelDanger { color: #ef4444; }

@@ -5,21 +5,24 @@ import { LoginForm } from "./components/LoginForm";
 import { Toolbar } from "./components/Toolbar";
 import { BulkAddForm } from "./components/BulkAddForm";
 import { PluginTable } from "./components/PluginTable";
+import { ImportModal } from "./components/ImportModal";
 import styles from "./page.module.css";
 
-interface VerifiedPlugin {
+interface AdminPlugin {
   id: string;
-  name: string | null;
+  npmPackage: string;
+  trust: string;
   addedAt: string;
 }
 
 export default function AdminRegistryPage() {
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
-  const [plugins, setPlugins] = useState<VerifiedPlugin[]>([]);
+  const [plugins, setPlugins] = useState<AdminPlugin[]>([]);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const headers = useCallback(() => ({
     "Content-Type": "application/json",
@@ -45,7 +48,7 @@ export default function AdminRegistryPage() {
     if (!search.trim()) return plugins;
     const q = search.toLowerCase();
     return plugins.filter(
-      (p) => p.id.toLowerCase().includes(q) || p.name?.toLowerCase().includes(q)
+      (p) => p.id.toLowerCase().includes(q) || p.npmPackage.toLowerCase().includes(q)
     );
   }, [plugins, search]);
 
@@ -66,11 +69,31 @@ export default function AdminRegistryPage() {
     }
   }
 
-  async function handleAdd(items: { id: string; name?: string }[]) {
+  async function handleAdd(items: { id: string }[]) {
     await fetch("/api/admin/registry", {
       method: "POST",
       headers: headers(),
       body: JSON.stringify({ plugins: items }),
+    });
+    fetchPlugins();
+  }
+
+  async function handleUpdateTrust(id: string, trust: string) {
+    await fetch("/api/admin/registry", {
+      method: "PATCH",
+      headers: headers(),
+      body: JSON.stringify({ ids: [id], trust }),
+    });
+    fetchPlugins();
+  }
+
+  async function handleBulkUpdateTrust(trust: string) {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    await fetch("/api/admin/registry", {
+      method: "PATCH",
+      headers: headers(),
+      body: JSON.stringify({ ids, trust }),
     });
     fetchPlugins();
   }
@@ -84,15 +107,28 @@ export default function AdminRegistryPage() {
     fetchPlugins();
   }
 
-  async function handleRemoveSelected() {
-    const ids = Array.from(selected);
-    if (ids.length === 0) return;
-    await fetch("/api/admin/registry", {
-      method: "DELETE",
+  function handleExport() {
+    const jsonStr = JSON.stringify(plugins, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `market-registry-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleImport(importPlugins: any[], mode: "merge" | "overwrite") {
+    const res = await fetch("/api/admin/registry/import", {
+      method: "POST",
       headers: headers(),
-      body: JSON.stringify({ ids }),
+      body: JSON.stringify({ plugins: importPlugins, mode }),
     });
-    fetchPlugins();
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.details || err.error || "Import failed");
+    }
+    await fetchPlugins();
   }
 
   function toggleSelect(id: string) {
@@ -130,7 +166,9 @@ export default function AdminRegistryPage() {
           selectedCount={selected.size}
           search={search}
           setSearch={setSearch}
-          onRemoveSelected={handleRemoveSelected}
+          onUpdateSelected={handleBulkUpdateTrust}
+          onExport={handleExport}
+          onImportClick={() => setShowImportModal(true)}
         />
         <BulkAddForm onAdd={handleAdd} />
         <PluginTable
@@ -138,9 +176,16 @@ export default function AdminRegistryPage() {
           selected={selected}
           onToggle={toggleSelect}
           onToggleAll={toggleSelectAll}
+          onUpdateTrust={handleUpdateTrust}
           onRemove={handleRemove}
         />
       </div>
+      {showImportModal && (
+        <ImportModal
+          onClose={() => setShowImportModal(false)}
+          onImport={handleImport}
+        />
+      )}
     </div>
   );
 }
