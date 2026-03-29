@@ -6,8 +6,16 @@ datasource db {
   provider = "sqlite"
 }
 
-model VerifiedPlugin {
-  id      String   @id       // plugin ID (e.g. "aviation")
-  name    String?            // optional display name
-  addedAt DateTime @default(now())
+model Plugin {
+  id              String   @id // (e.g., "aviation" or "my-custom-plugin")
+  npmPackage      String   @unique
+  name            String?  // optional display name
+  icon            String   // lucide-react icon name e.g. "Plane"
+  category        String
+  format          String   // "bundle" | "static" | "dynamic"
+  trust           String   @default("pending") // "built-in", "verified", "unverified", "pending"
+  capabilities    String   // JSON string array of capabilities
+  longDescription String
+  changelog       String?
+  addedAt         DateTime @default(now())
 }

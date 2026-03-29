@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const plugins = await prisma.verifiedPlugin.findMany({
+  const plugins = await prisma.plugin.findMany({
+    where: { trust: "verified" },
     orderBy: { addedAt: "asc" },
   });
   return NextResponse.json({ plugins });
@@ -44,10 +45,9 @@ export async function POST(request: NextRequest) {
 
   const results = await prisma.$transaction(
     items.map((p) =>
-      prisma.verifiedPlugin.upsert({
+      prisma.plugin.update({
         where: { id: p.id },
-        update: { name: p.name ?? null },
-        create: { id: p.id, name: p.name ?? null },
+        data: { trust: "verified", name: p.name ?? undefined },
       })
     )
   );
@@ -75,7 +75,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Missing or invalid id(s)" }, { status: 400 });
   }
 
-  const result = await prisma.verifiedPlugin.deleteMany({
+  const result = await prisma.plugin.deleteMany({
     where: { id: { in: ids } },
   });
 

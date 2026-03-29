@@ -9,7 +9,8 @@ import { signRegistry } from "@/lib/registryKeys";
  */
 export async function GET() {
   try {
-    const plugins = await prisma.verifiedPlugin.findMany({
+    const plugins = await prisma.plugin.findMany({
+      where: { trust: { in: ["built-in", "verified"] } },
       select: { id: true },
       orderBy: { addedAt: "asc" },
     });

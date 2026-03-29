@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: "/browse", label: "Browse" },
   { href: "/manage", label: "My Plugins" },
   { href: "/publish", label: "Publish" },
+  { href: "/submit", label: "Submit Plugin" },
   { href: "/docs", label: "Docs" },
 ];
 

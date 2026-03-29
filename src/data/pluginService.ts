@@ -1,44 +1,27 @@
 import type { PluginCard, PluginDetail } from "./types";
-import { KNOWN_PLUGINS } from "./knownPlugins";
 import { fetchAllPackageMeta, fetchPackageMeta } from "./npmRegistry";
 import { prisma } from "@/lib/prisma";
-
-/** Hardcoded built-in IDs that are always trusted regardless of registry. */
-const BUILT_IN_IDS = new Set(
-  KNOWN_PLUGINS.filter((p) => p.trust === "built-in").map((p) => p.id),
-);
-
-/** Get the set of verified plugin IDs from the live registry DB. */
-async function getVerifiedIds(): Promise<Set<string>> {
-  const rows = await prisma.verifiedPlugin.findMany({ select: { id: true } });
-  return new Set(rows.map((r) => r.id));
-}
-
-/** Resolve trust from the live registry instead of static data. */
-function resolveTrust(
-  pluginId: string,
-  verifiedIds: Set<string>,
-): "built-in" | "verified" | "unverified" {
-  if (BUILT_IN_IDS.has(pluginId)) return "built-in";
-  return verifiedIds.has(pluginId) ? "verified" : "unverified";
-}
+import type { Plugin } from "@prisma/client";
 
 /**
- * Build PluginCard objects by merging curated metadata with live npm data.
+ * Build PluginCard objects by merging database metadata with live npm data.
  * Falls back to sensible defaults when npm is unreachable.
  */
 export async function getAllPlugins(
   category?: string,
 ): Promise<PluginCard[]> {
-  const npmPackages = KNOWN_PLUGINS.map((p) => p.npmPackage);
-  const [metaMap, verifiedIds] = await Promise.all([
-    fetchAllPackageMeta(npmPackages),
-    getVerifiedIds(),
-  ]);
+  const dbPlugins = await prisma.plugin.findMany({
+    where: { 
+      trust: { in: ["built-in", "verified"] },
+    }
+  });
 
-  let cards = KNOWN_PLUGINS.map((known) => {
-    const npm = metaMap.get(known.npmPackage);
-    return mergeToCard(known, npm ?? null, verifiedIds);
+  const npmPackages = dbPlugins.map((p) => p.npmPackage);
+  const metaMap = await fetchAllPackageMeta(npmPackages);
+
+  let cards = dbPlugins.map((dbPlugin) => {
+    const npm = metaMap.get(dbPlugin.npmPackage);
+    return mergeToCard(dbPlugin, npm ?? null);
   });
 
   if (category && category !== "All") {
@@ -51,14 +34,11 @@ export async function getAllPlugins(
 export async function getPluginById(
   id: string,
 ): Promise<PluginDetail | null> {
-  const known = KNOWN_PLUGINS.find((p) => p.id === id);
-  if (!known) return null;
+  const dbPlugin = await prisma.plugin.findUnique({ where: { id } });
+  if (!dbPlugin || dbPlugin.trust === "pending") return null;
 
-  const [npm, verifiedIds] = await Promise.all([
-    fetchPackageMeta(known.npmPackage),
-    getVerifiedIds(),
-  ]);
-  return mergeToDetail(known, npm, verifiedIds);
+  const npm = await fetchPackageMeta(dbPlugin.npmPackage);
+  return mergeToDetail(dbPlugin, npm);
 }
 
 /**
@@ -83,40 +63,43 @@ export async function searchPlugins(
 /* ---------- merge helpers ---------- */
 
 function mergeToCard(
-  known: (typeof KNOWN_PLUGINS)[number],
+  dbPlugin: Plugin,
   npm: Awaited<ReturnType<typeof fetchPackageMeta>>,
-  verifiedIds: Set<string>,
 ): PluginCard {
   return {
-    id: known.id,
-    name: npm?.name?.replace("@worldwideview/wwv-plugin-", "")
+    id: dbPlugin.id,
+    name: dbPlugin.name || (npm?.name?.replace("@worldwideview/wwv-plugin-", "")
       ? formatName(npm.name)
-      : known.id,
-    description: npm?.description ?? known.longDescription.slice(0, 80),
-    category: known.category,
-    icon: known.icon,
+      : dbPlugin.id),
+    description: npm?.description ?? dbPlugin.longDescription.slice(0, 80),
+    category: dbPlugin.category,
+    icon: dbPlugin.icon,
     installs: 0, // No real install count from npm
     author: npm?.author ?? "WorldWideView",
     version: npm?.version ?? "0.0.0",
-    format: known.format,
-    trust: resolveTrust(known.id, verifiedIds),
+    format: dbPlugin.format as "bundle" | "static" | "declarative",
+    trust: dbPlugin.trust as "built-in" | "verified" | "unverified",
     tags: npm?.keywords ?? [],
     updatedAt: npm?.updatedAt ?? "—",
   };
 }
 
 function mergeToDetail(
-  known: (typeof KNOWN_PLUGINS)[number],
+  dbPlugin: Plugin,
   npm: Awaited<ReturnType<typeof fetchPackageMeta>>,
-  verifiedIds: Set<string>,
 ): PluginDetail {
+  let capabilities: string[] = [];
+  try {
+    capabilities = JSON.parse(dbPlugin.capabilities);
+  } catch (e) {}
+
   return {
-    ...mergeToCard(known, npm, verifiedIds),
-    longDescription: known.longDescription,
-    capabilities: known.capabilities,
+    ...mergeToCard(dbPlugin, npm),
+    longDescription: dbPlugin.longDescription,
+    capabilities,
     compatibility: ">=0.1.0",
     repository: npm?.repository,
-    changelog: npm?.changelog ?? known.changelog,
+    changelog: npm?.changelog ?? dbPlugin.changelog ?? "",
     readme: npm?.readme,
   };
 }
