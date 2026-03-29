@@ -11,5 +11,9 @@ export DB_PATH="/app/data/registry.db"
 echo "Running prisma migrate deploy..."
 npx prisma migrate deploy
 
+# Seed built-in plugins (idempotent)
+echo "Seeding plugins..."
+npx --yes tsx prisma/seed.ts
+
 # Execute the main command (from Dockerfile CMD)
 exec "$@"

@@ -4,8 +4,8 @@ import path from "path";
 import { KNOWN_PLUGINS } from "../src/data/knownPlugins";
 
 async function main() {
-  const dbPath = path.join(process.cwd(), "prisma", "registry.db");
-  const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
+  const dbPath = process.env.DB_PATH || path.join(process.cwd(), "prisma", "registry.db");
+  const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` } as any);
   const prisma = new PrismaClient({ adapter });
 
   for (const plugin of KNOWN_PLUGINS) {
