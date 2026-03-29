@@ -1,26 +1,29 @@
 # ── Stage 1: Install dependencies ──
 FROM node:22-alpine AS deps
+RUN corepack enable pnpm
 RUN apk add --no-cache python3 make g++
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm i --frozen-lockfile
 
 # ── Stage 2: Install PRODUCTION-ONLY dependencies ──
 FROM node:22-alpine AS proddeps
+RUN corepack enable pnpm
 RUN apk add --no-cache python3 make g++
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm i --prod --frozen-lockfile
 
 # ── Stage 3: Build the application ──
 FROM node:22-alpine AS builder
+RUN corepack enable pnpm
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # Set a dummy DATABASE_URL so prisma generate passes during the build step
 ENV DATABASE_URL="file:./dummy.db"
 RUN npx prisma generate
-RUN npm run build
+RUN pnpm run build
 
 # ── Stage 4: Production runner ──
 FROM node:22-alpine AS runner
