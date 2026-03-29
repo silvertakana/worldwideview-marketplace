@@ -14,6 +14,26 @@ export function ImportModal({ onClose, onImport }: ImportModalProps) {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      if (text) {
+        setJsonText(text);
+        setError(""); // Clear any previous errors on success
+      }
+    };
+    reader.onerror = () => {
+      setError("Failed to read the selected file.");
+    };
+    reader.readAsText(file);
+    // Reset the input value so the same file can be selected again
+    e.target.value = "";
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -56,6 +76,19 @@ export function ImportModal({ onClose, onImport }: ImportModalProps) {
       <div className={styles.modalContent}>
         <h2>Import Registry JSON</h2>
         <form onSubmit={handleSubmit} className={styles.importForm}>
+          <div style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "8px" }}>
+            <label className={styles.btnSecondary} style={{ cursor: "pointer", fontSize: "0.85rem", padding: "8px 16px" }}>
+              Choose JSON File
+              <input
+                type="file"
+                accept=".json,application/json"
+                onChange={handleFileUpload}
+                style={{ display: "none" }}
+                disabled={isSubmitting}
+              />
+            </label>
+            <span style={{ color: "#aaa", fontSize: "0.85rem" }}>or paste below:</span>
+          </div>
           <textarea
             placeholder="[ { &quot;id&quot;: &quot;...&quot;, &quot;npmPackage&quot;: &quot;...&quot; }, ... ]"
             value={jsonText}
