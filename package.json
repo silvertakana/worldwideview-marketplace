@@ -7,7 +7,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "docker:test": "docker build -t marketplace-test . && docker run --rm marketplace-test"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.5.0",

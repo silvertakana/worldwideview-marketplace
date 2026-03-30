@@ -1,0 +1,52 @@
+name: Docker Smoke Test
+
+on:
+  push:
+    paths:
+      - "Dockerfile"
+      - "docker-entrypoint.sh"
+      - "prisma/**"
+      - "src/data/**"
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - "docker-entrypoint.sh"
+      - "prisma/**"
+      - "src/data/**"
+
+jobs:
+  docker-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t marketplace-smoke .
+
+      - name: Smoke test — entrypoint completes
+        run: |
+          # Run the container with a short-lived command that exercises
+          # the entrypoint (migrations + seed) then prints a health line.
+          # The container runs the entrypoint, seeds the DB, then starts
+          # the node server. We wait for the server to become ready,
+          # curl it, and exit.
+          docker run -d --name smoke-test -p 3000:3000 marketplace-smoke
+
+          echo "Waiting for server to start..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000 > /dev/null 2>&1; then
+              echo "Server is healthy!"
+              docker logs smoke-test
+              docker stop smoke-test
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "Server did not become healthy in 30s"
+          docker logs smoke-test
+          docker stop smoke-test
+          exit 1
