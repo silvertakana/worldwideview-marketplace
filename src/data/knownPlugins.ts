@@ -203,17 +203,5 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     changelog:
       "v1.0.0 — Initial release with global spaceport data from OSM.",
   },
-  {
-    id: "satellite",
-    npmPackage: "@worldwideview/wwv-plugin-satellite",
-    icon: "Satellite",
-    category: "Space",
-    format: "bundle",
-    trust: "built-in",
-    capabilities: ["data:own", "network:fetch"],
-    longDescription:
-      "Track satellites in real time on the 3D globe using CelesTrak orbital data and SGP4 propagation. Covers the ISS, GPS constellation, weather satellites, Earth observation, and more. Satellites render at true orbital altitude with group-based coloring and orbital trail visualization on selection.",
-    changelog:
-      "v1.0.0 — Initial release with CelesTrak TLE data and SGP4 propagation.",
-  },
+
 ];

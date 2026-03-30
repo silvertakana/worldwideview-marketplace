@@ -9,7 +9,6 @@ datasource db {
 model Plugin {
   id              String   @id // (e.g., "aviation" or "my-custom-plugin")
   npmPackage      String   @unique
-  name            String?  // optional display name
   icon            String   // lucide-react icon name e.g. "Plane"
   category        String
   format          String   // "bundle" | "static" | "dynamic"
@@ -18,4 +17,18 @@ model Plugin {
   longDescription String
   changelog       String?
   addedAt         DateTime @default(now())
+}
+
+model NpmCache {
+  npmPackage  String   @id // The npm package name, acting as PK
+  name        String
+  description String
+  version     String
+  author      String
+  keywords    String   // JSON string array of keywords
+  repository  String?
+  readme      String?
+  changelog   String?
+  updatedAt   String   // e.g. "YYYY-MM-DD"
+  crawledAt   DateTime @default(now())
 }

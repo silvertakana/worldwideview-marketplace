@@ -70,11 +70,22 @@ export default function AdminRegistryPage() {
   }
 
   async function handleAdd(items: { id: string }[]) {
-    await fetch("/api/admin/registry", {
+    const res = await fetch("/api/admin/registry", {
       method: "POST",
       headers: headers(),
       body: JSON.stringify({ plugins: items }),
     });
+    if (res.ok) {
+      const body = await res.json();
+      if (body.errors && body.errors.length > 0) {
+        alert("Some plugins failed to add:\n" + body.errors.map((e: any) => `- ${e.package}: ${e.error}`).join("\n"));
+      } else {
+        alert(`Successfully added ${body.plugins?.length || 0} plugin(s)!`);
+      }
+    } else {
+      const body = await res.json();
+      alert("Server error: " + (body.error || "Unknown"));
+    }
     fetchPlugins();
   }
 

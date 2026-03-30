@@ -2,8 +2,6 @@ import type { NpmPackageMeta } from "./types";
 
 const NPM_REGISTRY = "https://registry.npmjs.org";
 
-/** How long Next.js should cache npm responses (seconds). */
-const REVALIDATE_SECONDS = 300; // 5 minutes
 
 /**
  * Fetch metadata for a single @worldwideview package from the npm registry.
@@ -17,7 +15,7 @@ export async function fetchPackageMeta(
 
   try {
     const res = await fetch(url, {
-      next: { revalidate: REVALIDATE_SECONDS },
+      cache: "no-store",
     });
     if (!res.ok) return null;
 

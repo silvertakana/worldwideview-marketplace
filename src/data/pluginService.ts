@@ -1,11 +1,10 @@
-import type { PluginCard, PluginDetail } from "./types";
-import { fetchAllPackageMeta, fetchPackageMeta } from "./npmRegistry";
+import type { PluginCard, PluginDetail, NpmPackageMeta } from "./types";
 import { prisma } from "@/lib/prisma";
-import type { Plugin } from "@prisma/client";
+import type { Plugin, NpmCache } from "@prisma/client";
 
 /**
- * Build PluginCard objects by merging database metadata with live npm data.
- * Falls back to sensible defaults when npm is unreachable.
+ * Build PluginCard objects by merging database metadata with local crawler cache (NpmCache).
+ * Falls back to sensible defaults when cache is missing.
  */
 export async function getAllPlugins(
   category?: string,
@@ -17,7 +16,14 @@ export async function getAllPlugins(
   });
 
   const npmPackages = dbPlugins.map((p) => p.npmPackage);
-  const metaMap = await fetchAllPackageMeta(npmPackages);
+  const cacheRecords = await prisma.npmCache.findMany({
+    where: { npmPackage: { in: npmPackages } }
+  });
+
+  const metaMap = new Map<string, NpmPackageMeta>();
+  cacheRecords.forEach((c) => {
+    metaMap.set(c.npmPackage, mapCacheToMeta(c));
+  });
 
   let cards = dbPlugins.map((dbPlugin) => {
     const npm = metaMap.get(dbPlugin.npmPackage);
@@ -37,7 +43,11 @@ export async function getPluginById(
   const dbPlugin = await prisma.plugin.findUnique({ where: { id } });
   if (!dbPlugin || dbPlugin.trust === "pending") return null;
 
-  const npm = await fetchPackageMeta(dbPlugin.npmPackage);
+  const cacheRecord = await prisma.npmCache.findUnique({
+    where: { npmPackage: dbPlugin.npmPackage }
+  });
+
+  const npm = cacheRecord ? mapCacheToMeta(cacheRecord) : null;
   return mergeToDetail(dbPlugin, npm);
 }
 
@@ -60,17 +70,36 @@ export async function searchPlugins(
   );
 }
 
-/* ---------- merge helpers ---------- */
+/* ---------- helpers ---------- */
+
+function mapCacheToMeta(c: NpmCache): NpmPackageMeta {
+  let keywords: string[] = [];
+  try {
+    keywords = JSON.parse(c.keywords);
+  } catch (e) {}
+
+  return {
+    name: c.name,
+    description: c.description,
+    version: c.version,
+    author: c.author,
+    keywords,
+    repository: c.repository ?? undefined,
+    readme: c.readme ?? undefined,
+    changelog: c.changelog ?? undefined,
+    updatedAt: c.updatedAt,
+  };
+}
 
 function mergeToCard(
   dbPlugin: Plugin,
-  npm: Awaited<ReturnType<typeof fetchPackageMeta>>,
+  npm: NpmPackageMeta | null,
 ): PluginCard {
   return {
     id: dbPlugin.id,
-    name: dbPlugin.name || (npm?.name?.replace("@worldwideview/wwv-plugin-", "")
+    name: npm?.name?.replace("@worldwideview/wwv-plugin-", "")
       ? formatName(npm.name)
-      : dbPlugin.id),
+      : dbPlugin.id,
     description: npm?.description ?? dbPlugin.longDescription.slice(0, 80),
     category: dbPlugin.category,
     icon: dbPlugin.icon,
@@ -86,7 +115,7 @@ function mergeToCard(
 
 function mergeToDetail(
   dbPlugin: Plugin,
-  npm: Awaited<ReturnType<typeof fetchPackageMeta>>,
+  npm: NpmPackageMeta | null,
 ): PluginDetail {
   let capabilities: string[] = [];
   try {
