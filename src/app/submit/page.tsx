@@ -11,10 +11,11 @@ export default function SubmitPage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     setLoading(true);
     setError("");
 
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     const data = Object.fromEntries(fd.entries());
 
     try {
@@ -30,7 +31,7 @@ export default function SubmitPage() {
       }
 
       setSuccess(true);
-      e.currentTarget.reset();
+      form.reset();
     } catch (err: any) {
       setError(err.message);
     } finally {
