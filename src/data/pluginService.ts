@@ -11,7 +11,7 @@ export async function getAllPlugins(
 ): Promise<PluginCard[]> {
   const dbPlugins = await prisma.plugin.findMany({
     where: { 
-      trust: { in: ["built-in", "verified"] },
+      trust: { not: "pending" },
     }
   });
 
