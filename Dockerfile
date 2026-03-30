@@ -39,6 +39,8 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 # Copy Prisma schema, migrations, and SQLite DB
 COPY --from=builder /app/prisma ./prisma
+# Copy seed data dependencies (prisma/seed.ts imports ../src/data/knownPlugins)
+COPY --from=builder /app/src/data ./src/data
 # Copy Prisma Config
 COPY --from=builder /app/prisma.config.ts ./
 
