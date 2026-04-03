@@ -8,6 +8,10 @@ export const CATEGORIES = [
   "Natural Disaster",
   "Infrastructure",
   "Space",
+  "Conflict",
+  "Cyber",
+  "Economic",
+  "Intelligence",
   "Custom",
 ] as const;
 
@@ -204,4 +208,151 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
       "v1.0.0 — Initial release with global spaceport data from OSM.",
   },
 
+  {
+    id: "daynight",
+    npmPackage: "@worldwideview/wwv-plugin-daynight",
+    icon: "SunMoon",
+    category: "Custom",
+    format: "bundle",
+    trust: "built-in",
+    capabilities: ["data:own"],
+    longDescription:
+      "Simulates the Earth's day/night cycle by modifying the globe's scene lighting in real time based on the current time and sun position.",
+    changelog:
+      "v1.0.0 — Initial release with real-time lighting.",
+  },
+  {
+    id: "undersea-cables",
+    npmPackage: "@worldwideview/wwv-plugin-undersea-cables",
+    icon: "Cable",
+    category: "Infrastructure",
+    format: "bundle",
+    trust: "built-in",
+    capabilities: ["data:own", "network:fetch"],
+    longDescription:
+      "Displays the global network of submarine telecommunication cables using the TeleGeography Submarine Cable Map data.",
+    changelog:
+      "v1.0.0 — Initial release with GeoJSON data loading and visualization.",
+  },
+  {
+    id: "mineral-mines",
+    npmPackage: "@worldwideview/wwv-plugin-mineral-mines",
+    icon: "Pickaxe",
+    category: "Economic",
+    format: "bundle",
+    trust: "built-in",
+    capabilities: ["data:own", "network:fetch"],
+    longDescription:
+      "Displays global mining sites and quarries extracted from OpenStreetMap using the Overpass API.",
+    changelog:
+      "v1.0.0 — Initial release with GeoJSON data clustering and visualization.",
+  },
+  {
+    id: "air-defense",
+    npmPackage: "@worldwideview/wwv-plugin-air-defense",
+    icon: "ShieldAlert",
+    category: "Military",
+    format: "bundle",
+    trust: "built-in",
+    capabilities: ["data:own"],
+    longDescription:
+      "Displays known Air Defense Identification Zones (ADIZ) and restricted airspace boundaries globally.",
+    changelog:
+      "v1.0.0 — Initial release with statically curated ADIZ polygon data.",
+  },
+  {
+    id: "conflict-zones",
+    npmPackage: "@worldwideview/wwv-plugin-conflict-zones",
+    icon: "Crosshair",
+    category: "Conflict",
+    format: "bundle",
+    trust: "built-in",
+    capabilities: ["data:own"],
+    longDescription:
+      "Active conflict zones and geopolitical hotspots worldwide. Highlights major crisis regions with variable risk radii.",
+    changelog:
+      "v1.0.0 — Initial release with heavily monitored global flashpoints.",
+  },
+  /* --- TEMPORARILY DISABLED FOR DEMO (MOCK DATA) ---
+  {
+    id: "gps_jamming",
+    npmPackage: "@worldwideview/wwv-plugin-gps-jamming",
+    icon: "SatelliteDish",
+    category: "Intelligence",
+    format: "bundle",
+    trust: "built-in",
+    capabilities: ["network:fetch", "data:own"],
+    longDescription:
+      "Displays an approximation of global GPS/GNSS coverage disruption mapping based on navigation accuracy.",
+    changelog:
+      "v1.0.0 — Initial release with Seeder Engine integration.",
+  },
+  {
+    id: "conflict-events",
+    npmPackage: "@worldwideview/wwv-plugin-conflict-events",
+    icon: "Crosshair",
+    category: "Conflict",
+    format: "bundle",
+    trust: "built-in",
+    capabilities: ["network:fetch", "data:own"],
+    longDescription:
+      "Global database of armed conflict events, tracking battles, explosions, and fatalities worldwide.",
+    changelog:
+      "v1.0.0 — Initial release with Seeder Engine integration.",
+  },
+  {
+    id: "civil-unrest",
+    npmPackage: "@worldwideview/wwv-plugin-civil-unrest",
+    icon: "Hand",
+    category: "Conflict",
+    format: "bundle",
+    trust: "built-in",
+    capabilities: ["network:fetch", "data:own"],
+    longDescription:
+      "Global database of civil unrest events, tracking protests, riots, and demonstrations worldwide.",
+    changelog:
+      "v1.0.0 — Initial release with Mock ACLED Data Seeder implementation.",
+  },
+  */
+  {
+    id: "surveillance-satellites",
+    npmPackage: "@worldwideview/wwv-plugin-surveillance-satellites",
+    icon: "Radar",
+    category: "Military",
+    format: "bundle",
+    trust: "built-in",
+    capabilities: ["network:fetch", "data:own"],
+    longDescription:
+      "Active military and reconnaissance satellite tracking using CelesTrak data.",
+    changelog:
+      "v1.0.0 — Initial release with CelesTrak data for military/recon groups.",
+  },
+  /* --- TEMPORARILY DISABLED FOR DEMO (MOCK DATA) ---
+  {
+    id: "cyber-attacks",
+    npmPackage: "@worldwideview/wwv-plugin-cyber-attacks",
+    icon: "ShieldAlert",
+    category: "Infrastructure",
+    format: "bundle",
+    trust: "built-in",
+    capabilities: ["network:fetch", "data:own"],
+    longDescription:
+      "Global database of live cyber attacks, state-backed intrusions, and distributed denial-of-service occurrences.",
+    changelog:
+      "v1.0.0 — Initial release with Mock Threat Feed Data Seeder implementation.",
+  },
+  {
+    id: "international-sanctions",
+    npmPackage: "@worldwideview/wwv-plugin-international-sanctions",
+    icon: "Scale",
+    category: "Economic",
+    format: "bundle",
+    trust: "built-in",
+    capabilities: ["network:fetch", "data:own"],
+    longDescription:
+      "Global entities, vessels, and facilities under active sanctions.",
+    changelog:
+      "v1.0.0 — Initial release with Mock OpenSanctions Seeder implementation.",
+  },
+  */
 ];
