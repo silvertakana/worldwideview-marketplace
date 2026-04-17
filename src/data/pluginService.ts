@@ -97,6 +97,7 @@ function mergeToCard(
 ): PluginCard {
   return {
     id: dbPlugin.id,
+    npmPackage: dbPlugin.npmPackage,
     name: npm?.name?.replace("@worldwideview/wwv-plugin-", "")
       ? formatName(npm.name)
       : dbPlugin.id,
