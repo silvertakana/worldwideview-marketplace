@@ -197,11 +197,17 @@ export function getInstallManifest(detail: PluginDetail): ManifestTemplate {
     icon: detail.icon,
   };
 
-  // Bundle plugins require an entry field to pass validateManifest.
-  // For built-in bundles the plugin code is already in WWV, so we use
-  // the plugin ID as a stable placeholder.
+  // Bundle plugins require an entry field to point to their javascript bundle.
+  // Now that plugins are extracted to npm, we point to the CDN.
   if (detail.format === "bundle") {
-    base.entry = detail.id;
+    base.entry = `https://cdn.jsdelivr.net/npm/${detail.npmPackage}@latest/dist/index.js`;
+  }
+
+  // Static plugins require a dataFile pointing to their GeoJSON point data.
+  // We point this to the CDN as well.
+  if (detail.format === "static" && base.dataFile?.startsWith("/data/")) {
+    const geojsonName = base.dataFile.split("/data/")[1];
+    base.dataFile = `https://cdn.jsdelivr.net/npm/${detail.npmPackage}@latest/data/${geojsonName}`;
   }
 
   return base;
