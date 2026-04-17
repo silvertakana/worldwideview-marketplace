@@ -26,6 +26,8 @@ export default function InstallButton({ plugin }: Props) {
     const [showConfig, setShowConfig] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
 
+    if (!plugin) return null;
+
     // Sync status from context (already-installed plugins)
     useEffect(() => {
         if (installedIds.has(plugin.id)) {

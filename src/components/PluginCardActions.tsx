@@ -16,9 +16,12 @@ interface Props {
 
 export default function PluginCardActions({ plugin }: Props) {
   const { installedIds, pendingIds } = useInstalledIds();
+  const [showConfig, setShowConfig] = useState(false);
+
+  if (!plugin) return null;
+
   const isInstalled = installedIds.has(plugin.id);
   const isPending = pendingIds.has(plugin.id);
-  const [showConfig, setShowConfig] = useState(false);
 
   function buildRedirectUrl(instanceUrl: string): string {
     const detail = {
