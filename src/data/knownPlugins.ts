@@ -106,7 +106,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     npmPackage: "@worldwideview/wwv-plugin-military-bases",
     icon: "Swords",
     category: "Military",
-    format: "static",
+    format: "bundle",
     trust: "verified",
     capabilities: ["data:own"],
     longDescription:
@@ -122,7 +122,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     npmPackage: "@worldwideview/wwv-plugin-nuclear",
     icon: "Atom",
     category: "Infrastructure",
-    format: "static",
+    format: "bundle",
     trust: "verified",
     capabilities: ["data:own"],
     longDescription:
@@ -135,7 +135,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     npmPackage: "@worldwideview/wwv-plugin-embassies",
     icon: "Landmark",
     category: "Custom",
-    format: "static",
+    format: "bundle",
     trust: "verified",
     capabilities: ["data:own"],
     longDescription:
@@ -148,7 +148,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     npmPackage: "@worldwideview/wwv-plugin-volcanoes",
     icon: "Mountain",
     category: "Natural Disaster",
-    format: "static",
+    format: "bundle",
     trust: "verified",
     capabilities: ["data:own"],
     longDescription:
@@ -160,7 +160,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     npmPackage: "@worldwideview/wwv-plugin-airports",
     icon: "PlaneTakeoff",
     category: "Aviation",
-    format: "static",
+    format: "bundle",
     trust: "verified",
     capabilities: ["data:own"],
     longDescription:
@@ -173,7 +173,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     npmPackage: "@worldwideview/wwv-plugin-seaports",
     icon: "Anchor",
     category: "Maritime",
-    format: "static",
+    format: "bundle",
     trust: "verified",
     capabilities: ["data:own"],
     longDescription:
@@ -186,7 +186,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     npmPackage: "@worldwideview/wwv-plugin-lighthouses",
     icon: "Lamp",
     category: "Maritime",
-    format: "static",
+    format: "bundle",
     trust: "verified",
     capabilities: ["data:own"],
     longDescription:
@@ -199,7 +199,7 @@ export const KNOWN_PLUGINS: KnownPlugin[] = [
     npmPackage: "@worldwideview/wwv-plugin-spaceports",
     icon: "Rocket",
     category: "Space",
-    format: "static",
+    format: "bundle",
     trust: "verified",
     capabilities: ["data:own"],
     longDescription:
