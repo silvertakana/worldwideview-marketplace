@@ -94,7 +94,7 @@ export default async function PluginDetailPage({ params }: Props) {
       </section>
 
       {/* ── Install Button ── */}
-      <InstallButton pluginId={plugin.id} version={plugin.version} />
+      <InstallButton plugin={plugin} />
     </div>
   );
 }

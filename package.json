@@ -1,10 +1,10 @@
 {
   "name": "worldwideview-marketplace",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "private": true,
   "description": "Marketplace for WorldWideView plugins — browse, publish, and install data sources",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

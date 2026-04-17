@@ -35,7 +35,7 @@ export default function PluginCard({ plugin }: PluginCardProps) {
       <p className={styles.cardDesc}>{plugin.description}</p>
       <div className={styles.cardFooter}>
         <span className={styles.categoryBadge}>{plugin.category}</span>
-        <PluginCardActions pluginId={plugin.id} version={plugin.version} />
+        <PluginCardActions plugin={plugin} />
       </div>
     </Link>
   );
