@@ -200,14 +200,14 @@ export function getInstallManifest(detail: PluginDetail): ManifestTemplate {
   // Bundle plugins require an entry field to point to their javascript bundle.
   // Now that plugins are extracted to npm, we point to the CDN.
   if (detail.format === "bundle") {
-    base.entry = `https://cdn.jsdelivr.net/npm/${detail.npmPackage}@latest/dist/index.js`;
+    base.entry = `https://cdn.jsdelivr.net/npm/${detail.npmPackage}@${detail.version}/dist/index.js`;
   }
 
   // Static plugins require a dataFile pointing to their GeoJSON point data.
   // We point this to the CDN as well.
   if (detail.format === "static" && base.dataFile?.startsWith("/data/")) {
     const geojsonName = base.dataFile.split("/data/")[1];
-    base.dataFile = `https://cdn.jsdelivr.net/npm/${detail.npmPackage}@latest/data/${geojsonName}`;
+    base.dataFile = `https://cdn.jsdelivr.net/npm/${detail.npmPackage}@${detail.version}/data/${geojsonName}`;
   }
 
   return base;
