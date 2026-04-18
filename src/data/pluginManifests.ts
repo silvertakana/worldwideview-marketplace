@@ -28,16 +28,21 @@ export function getInstallManifest(detail: PluginDetail): ManifestTemplate {
     icon: detail.icon,
   };
 
+  // Fix faulty plugins that say "static" on NPM but are actually bundles missing dataFile config
+  if (base.format === "static" && !base.dataFile) {
+    base.format = "bundle";
+  }
+
   // Requesting the +esm endpoint from jsdelivr guarantees they parse the package.json "module" field
   // and return the correct module bundle, regardless of whether Vite chose /dist/frontend.mjs
   // or tsup chose /dist/index.mjs.
-  if (detail.format === "bundle") {
+  if (base.format === "bundle") {
     base.entry = `https://cdn.jsdelivr.net/npm/${detail.npmPackage}@${detail.version}/+esm`;
   }
 
   // Static plugins require a dataFile pointing to their GeoJSON point data.
   // We point this to the CDN as well.
-  if (detail.format === "static" && base.dataFile?.startsWith("/data/")) {
+  if (base.format === "static" && base.dataFile?.startsWith("/data/")) {
     const geojsonName = base.dataFile.split("/data/")[1];
     base.dataFile = `https://cdn.jsdelivr.net/npm/${detail.npmPackage}@${detail.version}/data/${geojsonName}`;
   }

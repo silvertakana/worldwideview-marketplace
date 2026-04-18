@@ -51,11 +51,9 @@ export function DiscoveryModal({ onClose, onImport }: DiscoveryModalProps) {
 
     // Convert the selected npmPackage names to the required payload for bulk-add
     const payloads = Array.from(selected).map((npmPackage) => {
-      // Generate a clean ID from the package name (e.g., wwv-plugin-test -> test)
-      // fallback to the full name if we can't extract the suffix easily
-      const match = npmPackage.match(/wwv-plugin-(.+)$/);
-      const id = match ? match[1] : npmPackage.replace(/[@/]/g, "-");
-      return { id, npmPackage };
+      // The API expects the `id` field to contain the full NPM package name
+      // so it can look it up on the registry. The server then parses out the short id.
+      return { id: npmPackage };
     });
 
     try {
