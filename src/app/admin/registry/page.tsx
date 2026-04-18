@@ -6,6 +6,7 @@ import { Toolbar } from "./components/Toolbar";
 import { BulkAddForm } from "./components/BulkAddForm";
 import { PluginTable } from "./components/PluginTable";
 import { ImportModal } from "./components/ImportModal";
+import { DiscoveryModal } from "./components/DiscoveryModal";
 import styles from "./page.module.css";
 
 interface AdminPlugin {
@@ -23,6 +24,7 @@ export default function AdminRegistryPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showDiscoveryModal, setShowDiscoveryModal] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
   const headers = useCallback(() => ({
@@ -194,6 +196,7 @@ export default function AdminRegistryPage() {
           onUpdateSelected={handleBulkUpdateTrust}
           onExport={handleExport}
           onImportClick={() => setShowImportModal(true)}
+          onDiscoverClick={() => setShowDiscoveryModal(true)}
           onSync={handleSync}
           syncing={syncing}
         />
@@ -211,6 +214,16 @@ export default function AdminRegistryPage() {
         <ImportModal
           onClose={() => setShowImportModal(false)}
           onImport={handleImport}
+        />
+      )}
+      {showDiscoveryModal && (
+        <DiscoveryModal
+          onClose={() => setShowDiscoveryModal(false)}
+          onImport={async (items) => {
+            // Re-use handleAdd with discovery items, then auto-sync cache
+            await handleAdd(items);
+            await handleSync();
+          }}
         />
       )}
     </div>
