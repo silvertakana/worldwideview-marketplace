@@ -15,25 +15,34 @@ export async function GET(request: Request) {
   }
 
   try {
-    // 1. Fetch raw search results from NPM
-    const searchUrl = "https://registry.npmjs.org/-/v1/search?text=wwv-plugin-&size=100";
-    const searchRes = await fetch(searchUrl, { cache: "no-store" });
-    if (!searchRes.ok) {
-      throw new Error(`NPM Search failed with status: ${searchRes.status}`);
+    // 1. Fetch raw search results from NPM with two complementary strategies to ensure coverage
+    const [searchResGeneric, searchResScoped] = await Promise.all([
+      fetch("https://registry.npmjs.org/-/v1/search?text=wwv-plugin-&size=250", { cache: "no-store" }),
+      fetch("https://registry.npmjs.org/-/v1/search?text=@worldwideview&size=250", { cache: "no-store" })
+    ]);
+
+    if (!searchResGeneric.ok || !searchResScoped.ok) {
+      throw new Error(`NPM Search failed. Generic: ${searchResGeneric.status}, Scoped: ${searchResScoped.status}`);
     }
 
-    const json = await searchRes.json();
-    const objects = json.objects || [];
+    const [jsonGeneric, jsonScoped] = await Promise.all([
+      searchResGeneric.json(),
+      searchResScoped.json()
+    ]);
+
+    const objects = [...(jsonGeneric.objects || []), ...(jsonScoped.objects || [])];
 
     // 2. Filter raw NPM packages with exact regex prefix matching
-    const matchingNames: string[] = [];
     const prefixRegex = /^(@[\w-]+\/)?wwv-plugin-/;
+    const matchingMap = new Map<string, any>();
     
     for (const obj of objects) {
       if (obj.package && obj.package.name && prefixRegex.test(obj.package.name)) {
-        matchingNames.push(obj.package.name);
+        // Deduplicate using Map
+        matchingMap.set(obj.package.name, obj.package);
       }
     }
+    const matchingNames = Array.from(matchingMap.keys());
 
     // 3. Get currently tracked packages
     const dbPlugins = await prisma.plugin.findMany();
@@ -52,7 +61,7 @@ export async function GET(request: Request) {
         discovered.push(meta);
       } else {
         // Fallback for packages that strictly exist in NPM search but fail direct meta pull
-        const rawObj = objects.find((o: any) => o.package.name === name)?.package;
+        const rawObj = matchingMap.get(name);
         if (rawObj) {
            discovered.push({
              name: rawObj.name,
