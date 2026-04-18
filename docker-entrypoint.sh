@@ -15,5 +15,9 @@ npx prisma migrate deploy
 echo "Seeding plugins..."
 npx --yes tsx prisma/seed.ts
 
+# Start the internal NPM cron sync daemon in the background
+echo "Starting NPM sync daemon..."
+node scripts/cron.mjs &
+
 # Execute the main command (from Dockerfile CMD)
 exec "$@"
