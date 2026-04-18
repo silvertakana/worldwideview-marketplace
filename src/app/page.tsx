@@ -35,6 +35,7 @@ const featuredPlugins = userPlugins.slice(0, 3);
 // Build PluginCard-shaped objects from known plugins for the homepage
 const popularPlugins = featuredPlugins.map((p) => ({
   id: p.id,
+  npmPackage: p.npmPackage,
   name: p.npmPackage.replace("@worldwideview/wwv-plugin-", "").split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
   description: p.longDescription.slice(0, 80),
   category: p.category,

@@ -6,6 +6,7 @@ import styles from "../page.module.css";
 interface AdminPlugin {
   id: string;
   npmPackage: string;
+  version?: string;
   trust: string;
   addedAt: string;
 }
@@ -71,6 +72,7 @@ function PluginTableRow({
         </td>
         <td className={styles.mono}>{p.id}</td>
         <td className={styles.mono}>{p.npmPackage}</td>
+        <td>{p.version ?? "Unknown"}</td>
         <td>
           <select
             value={p.trust}
@@ -151,6 +153,7 @@ export function PluginTable({
           </th>
           <th>Plugin ID</th>
           <th>NPM Package</th>
+          <th>Version</th>
           <th>Trust Level</th>
           <th>Added</th>
           <th>Actions</th>
