@@ -11,6 +11,7 @@ interface ToolbarProps {
   onUpdateSelected: (trust: string) => void;
   onExport: () => void;
   onImportClick: () => void;
+  onDiscoverClick: () => void;
   onSync: () => void;
   syncing: boolean;
 }
@@ -23,6 +24,7 @@ export function Toolbar({
   onUpdateSelected,
   onExport,
   onImportClick,
+  onDiscoverClick,
   onSync,
   syncing,
 }: ToolbarProps) {
@@ -51,6 +53,13 @@ export function Toolbar({
           onChange={(e) => setSearch(e.target.value)}
           className={`${styles.input} ${styles.searchInput}`}
         />
+        <button
+          onClick={onDiscoverClick}
+          className={styles.btnSecondary}
+          style={{ padding: "8px 16px", fontSize: "0.8rem", whiteSpace: "nowrap" }}
+        >
+          Discover Plugins
+        </button>
         <button
           onClick={onSync}
           disabled={syncing}
