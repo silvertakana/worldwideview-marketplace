@@ -19,7 +19,23 @@ export async function GET(request: NextRequest) {
   const plugins = await prisma.plugin.findMany({
     orderBy: { addedAt: "asc" },
   });
-  return NextResponse.json({ plugins });
+
+  const npmPackages = plugins.map((p) => p.npmPackage);
+  const cacheRecords = await prisma.npmCache.findMany({
+    where: { npmPackage: { in: npmPackages } }
+  });
+
+  const versionMap = new Map<string, string>();
+  cacheRecords.forEach((c) => {
+    versionMap.set(c.npmPackage, c.version);
+  });
+
+  const pluginsWithVersion = plugins.map((p) => ({
+    ...p,
+    version: versionMap.get(p.npmPackage) || "Unknown",
+  }));
+
+  return NextResponse.json({ plugins: pluginsWithVersion });
 }
 
 /** POST /api/admin/registry — add/verify plugin(s).

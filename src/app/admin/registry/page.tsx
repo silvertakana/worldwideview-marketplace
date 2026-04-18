@@ -23,6 +23,7 @@ export default function AdminRegistryPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showImportModal, setShowImportModal] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   const headers = useCallback(() => ({
     "Content-Type": "application/json",
@@ -66,6 +67,19 @@ export default function AdminRegistryPage() {
     } else {
       setError("Invalid password");
       sessionStorage.removeItem("admin_token");
+    }
+  }
+
+  async function handleSync() {
+    setSyncing(true);
+    try {
+      await fetch("/api/cron/sync-npm");
+      await fetchPlugins();
+      alert("NPM sync completed!");
+    } catch {
+      alert("Failed to sync NPM cache.");
+    } finally {
+      setSyncing(false);
     }
   }
 
@@ -180,6 +194,8 @@ export default function AdminRegistryPage() {
           onUpdateSelected={handleBulkUpdateTrust}
           onExport={handleExport}
           onImportClick={() => setShowImportModal(true)}
+          onSync={handleSync}
+          syncing={syncing}
         />
         <BulkAddForm onAdd={handleAdd} />
         <PluginTable

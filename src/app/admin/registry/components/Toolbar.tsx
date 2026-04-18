@@ -11,6 +11,8 @@ interface ToolbarProps {
   onUpdateSelected: (trust: string) => void;
   onExport: () => void;
   onImportClick: () => void;
+  onSync: () => void;
+  syncing: boolean;
 }
 
 export function Toolbar({
@@ -21,6 +23,8 @@ export function Toolbar({
   onUpdateSelected,
   onExport,
   onImportClick,
+  onSync,
+  syncing,
 }: ToolbarProps) {
   const [confirmingReject, setConfirmingReject] = useState(false);
 
@@ -47,6 +51,14 @@ export function Toolbar({
           onChange={(e) => setSearch(e.target.value)}
           className={`${styles.input} ${styles.searchInput}`}
         />
+        <button
+          onClick={onSync}
+          disabled={syncing}
+          className={styles.btnSecondary}
+          style={{ padding: "8px 16px", fontSize: "0.8rem", whiteSpace: "nowrap", opacity: syncing ? 0.6 : 1, cursor: syncing ? "not-allowed" : "pointer" }}
+        >
+          {syncing ? "Syncing..." : "Sync NPM"}
+        </button>
         <button
           onClick={onExport}
           className={styles.btnSecondary}

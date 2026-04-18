@@ -14,6 +14,7 @@ export interface KnownPlugin {
 /** Data used to render a plugin card on the browse page. */
 export interface PluginCard {
   id: string;
+  npmPackage: string;
   name: string;
   description: string;
   category: string;
