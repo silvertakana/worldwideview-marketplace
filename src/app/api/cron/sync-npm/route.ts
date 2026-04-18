@@ -18,42 +18,54 @@ export async function GET(request: Request) {
     const updated = [];
     const failed = [];
 
-    // Process sequentially to be gentle on the npm API
-    for (const pkg of npmPackages) {
-      const meta = await fetchPackageMeta(pkg);
-      if (!meta) {
-        failed.push(pkg);
-        continue;
-      }
+    // Process in chunks of 5 to balance HTTP fetch speed without hitting NPM rate limits
+    // or overwhelming the local SQLite database with massive concurrent write lock contention.
+    const chunkSize = 5;
+    for (let i = 0; i < npmPackages.length; i += chunkSize) {
+      const chunk = npmPackages.slice(i, i + chunkSize);
 
-      await prisma.npmCache.upsert({
-        where: { npmPackage: pkg },
-        create: {
-          npmPackage: pkg,
-          name: meta.name,
-          description: meta.description,
-          version: meta.version,
-          author: meta.author,
-          keywords: JSON.stringify(meta.keywords),
-          repository: meta.repository,
-          readme: meta.readme,
-          changelog: meta.changelog,
-          updatedAt: meta.updatedAt,
-        },
-        update: {
-          name: meta.name,
-          description: meta.description,
-          version: meta.version,
-          author: meta.author,
-          keywords: JSON.stringify(meta.keywords),
-          repository: meta.repository,
-          readme: meta.readme,
-          changelog: meta.changelog,
-          updatedAt: meta.updatedAt,
-          crawledAt: new Date(),
-        },
-      });
-      updated.push(pkg);
+      await Promise.all(
+        chunk.map(async (pkg) => {
+          try {
+            const meta = await fetchPackageMeta(pkg);
+            if (!meta) {
+              failed.push(pkg);
+              return;
+            }
+
+            await prisma.npmCache.upsert({
+              where: { npmPackage: pkg },
+              create: {
+                npmPackage: pkg,
+                name: meta.name,
+                description: meta.description,
+                version: meta.version,
+                author: meta.author,
+                keywords: JSON.stringify(meta.keywords),
+                repository: meta.repository,
+                readme: meta.readme,
+                changelog: meta.changelog,
+                updatedAt: meta.updatedAt,
+              },
+              update: {
+                name: meta.name,
+                description: meta.description,
+                version: meta.version,
+                author: meta.author,
+                keywords: JSON.stringify(meta.keywords),
+                repository: meta.repository,
+                readme: meta.readme,
+                changelog: meta.changelog,
+                updatedAt: meta.updatedAt,
+                crawledAt: new Date(),
+              },
+            });
+            updated.push(pkg);
+          } catch (e) {
+            failed.push(pkg);
+          }
+        })
+      );
     }
 
     return NextResponse.json({
