@@ -15,8 +15,8 @@ export async function GET(request: Request) {
     const dbPlugins = await prisma.plugin.findMany();
     const npmPackages = dbPlugins.map((p) => p.npmPackage);
 
-    const updated = [];
-    const failed = [];
+    const updated: string[] = [];
+    const failed: string[] = [];
 
     // Process in chunks of 5 to balance HTTP fetch speed without hitting NPM rate limits
     // or overwhelming the local SQLite database with massive concurrent write lock contention.
