@@ -6,7 +6,7 @@ import type { NpmPackageMeta } from "@/data/types";
 
 interface DiscoveryModalProps {
   onClose: () => void;
-  onImport: (items: { id: string; npmPackage: string }[]) => Promise<void>;
+  onImport: (items: { id: string; npmPackage?: string }[]) => Promise<void>;
 }
 
 export function DiscoveryModal({ onClose, onImport }: DiscoveryModalProps) {
