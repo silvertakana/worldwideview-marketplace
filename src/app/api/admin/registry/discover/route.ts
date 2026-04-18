@@ -35,9 +35,15 @@ export async function GET(request: Request) {
     // 2. Filter raw NPM packages with exact regex prefix matching
     const prefixRegex = /^(@[\w-]+\/)?wwv-plugin-/;
     const matchingMap = new Map<string, any>();
+    const BLACKLIST = new Set(["@worldwideview/wwv-plugin-sdk"]);
     
     for (const obj of objects) {
-      if (obj.package && obj.package.name && prefixRegex.test(obj.package.name)) {
+      if (
+        obj.package && 
+        obj.package.name && 
+        prefixRegex.test(obj.package.name) &&
+        !BLACKLIST.has(obj.package.name)
+      ) {
         // Deduplicate using Map
         matchingMap.set(obj.package.name, obj.package);
       }
