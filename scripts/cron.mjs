@@ -3,8 +3,8 @@
  * Runs independently of the Next.js server threads to ensure single execution.
  */
 
-// Define interval in milliseconds (default: 6 hours)
-const INTERVAL_MS = parseInt(process.env.NPM_SYNC_INTERVAL_MS || '21600000', 10);
+// Define interval in milliseconds (default: 1 minute = 60000ms)
+const INTERVAL_MS = parseInt(process.env.NPM_SYNC_INTERVAL_MS || '60000', 10);
 const TARGET_URL = `http://127.0.0.1:${process.env.PORT || '3000'}/api/cron/sync-npm`;
 
 console.log(`[Cron Daemon] Started. Will ping ${TARGET_URL} every ${INTERVAL_MS / 1000 / 60} minutes.`);
