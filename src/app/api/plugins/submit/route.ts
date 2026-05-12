@@ -30,12 +30,12 @@ export async function POST(req: Request) {
     const id = wwvBlock.id;
     const icon = wwvBlock.icon;
     const category = wwvBlock.category;
-    const format = wwvBlock.format;
+    const format = wwvBlock.format || "bundle";
     const longDescription = pkgData.description || "No description provided.";
 
-    if (!id || !icon || !category || !format) {
+    if (!id || !icon || !category) {
       return NextResponse.json({
-        error: "Invalid 'worldwideview' block. Must contain id, icon, category, and format."
+        error: "Invalid 'worldwideview' block. Must contain id, icon, and category."
       }, { status: 400 });
     }
 
