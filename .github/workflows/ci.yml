@@ -85,4 +85,5 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: npx prisma generate
+      - run: npx prisma db push
       - run: pnpm build
