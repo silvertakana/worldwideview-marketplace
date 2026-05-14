@@ -26,19 +26,21 @@ export default function InstallButton({ plugin }: Props) {
     const [showConfig, setShowConfig] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
 
-    if (!plugin) return null;
+
 
     // Sync status from context (already-installed plugins)
     useEffect(() => {
+        if (!plugin) return;
         if (installedIds.has(plugin.id)) {
             setStatus("installed");
         } else {
             setStatus("idle");
         }
-    }, [installedIds, plugin.id]);
+    }, [installedIds, plugin?.id]);
 
     // Detect return from WWV install redirect (?installed=pluginId + #token=<jwt>)
     useEffect(() => {
+        if (!plugin) return;
         const params = new URLSearchParams(window.location.search);
         const clean = new URL(window.location.href);
 
@@ -67,7 +69,9 @@ export default function InstallButton({ plugin }: Props) {
             window.history.replaceState({}, "", clean.toString());
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [plugin.id]);
+    }, [plugin?.id]);
+
+    if (!plugin) return null;
 
     function buildRedirectUrl(instanceUrl: string): string {
         const detail = {

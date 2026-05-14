@@ -32,6 +32,7 @@ export function usePlugins(
     const qs = params.toString();
     const url = `/api/plugins${qs ? `?${qs}` : ""}`;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     fetch(url)
       .then((res) => {
@@ -56,7 +57,8 @@ export function usePlugin(id: string): UsePluginResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true); // Ignore warning because we want to indicate loading when dependencies change
     fetch(`/api/plugins/${encodeURIComponent(id)}`)
       .then((res) => {
         if (!res.ok) throw new Error(`API error: ${res.status}`);
