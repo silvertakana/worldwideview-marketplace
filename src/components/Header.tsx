@@ -9,7 +9,7 @@ const NAV_LINKS = [
   { href: "/browse", label: "Browse" },
   { href: "/manage", label: "My Plugins" },
   { href: "/submit", label: "Submit Plugin" },
-  { href: "https://docs.worldwideview.dev", label: "Docs" },
+  { href: "https://worldwideview.dev/docs", label: "Docs" },
 ];
 
 export default function Header() {

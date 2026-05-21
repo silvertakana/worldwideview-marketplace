@@ -6,12 +6,12 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/docs",
-        destination: "https://docs.worldwideview.dev",
+        destination: "https://worldwideview.dev/docs",
         permanent: false,
       },
       {
         source: "/docs/:path*",
-        destination: "https://docs.worldwideview.dev/:path*",
+        destination: "https://worldwideview.dev/docs/:path*",
         permanent: false,
       },
     ];

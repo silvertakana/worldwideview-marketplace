@@ -1,15 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as jose from "jose";
+import { prisma } from "@/lib/prisma";
+import { hashApiKey } from "@/lib/auth/apiKeyHash";
+import { scopeFor } from "@/lib/auth/tierScope";
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { apiKey } = body;
+        const { apiKey, audience, plugin_id: _plugin_id } = body;
 
-        // Stub verification: in real app, query DB
-        if (apiKey !== "valid-key-for-testing") {
+        if (!apiKey) {
+            return NextResponse.json({ error: "apiKey is required" }, { status: 400 });
+        }
+
+        const keyHash = hashApiKey(apiKey);
+        const apiKeyRecord = await prisma.marketplaceApiKey.findUnique({
+            where: { keyHash },
+            include: { user: true },
+        });
+
+        if (!apiKeyRecord || apiKeyRecord.revokedAt !== null) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+
+        // Fire-and-forget analytics update — never block the response
+        prisma.marketplaceApiKey.update({
+            where: { id: apiKeyRecord.id },
+            data: { lastUsedAt: new Date() },
+        }).catch((err: Error) => console.warn("lastUsedAt update failed:", err.message));
 
         const jwkString = process.env.MARKETPLACE_JWK_PRIVATE;
         if (!jwkString) {
@@ -21,16 +39,16 @@ export async function POST(req: NextRequest) {
         const privateKey = await jose.importJWK(privateJwk, "EdDSA");
 
         const now = Math.floor(Date.now() / 1000);
-        
+
         const jwt = await new jose.SignJWT({
-            tier: "pro", // Stub
-            scope: "plugins:read" // Stub
+            tier: apiKeyRecord.user.tier,
+            scope: scopeFor(apiKeyRecord.user.tier),
         })
             .setProtectedHeader({ alg: "EdDSA", typ: "JWT", kid: privateJwk.kid })
             .setIssuer("https://marketplace.worldwideview.dev")
-            .setSubject("user-id-stub")
-            .setAudience("wwv-data-engines")
-            .setExpirationTime(now + 300) // 5 minutes
+            .setSubject(apiKeyRecord.userId)
+            .setAudience(audience ?? "wwv-data-engine")
+            .setExpirationTime(now + 300)
             .setNotBefore(now)
             .setIssuedAt(now)
             .setJti(crypto.randomUUID())
