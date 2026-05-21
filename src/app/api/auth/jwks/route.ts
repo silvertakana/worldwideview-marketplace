@@ -16,6 +16,16 @@ export async function GET(req: NextRequest) {
             throw new Error("Only Ed25519 keys are supported.");
         }
 
+        if (!privateJwk.kid) {
+            console.error("MARKETPLACE_JWK_PRIVATE is missing 'kid' field — regenerate per README.");
+            return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        }
+
+        if (!privateJwk.alg) {
+            console.error("MARKETPLACE_JWK_PRIVATE is missing 'alg' field — regenerate per README.");
+            return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        }
+
         // Generate public JWK by stripping private parts ('d')
         const publicJwk = { ...privateJwk };
         delete publicJwk.d;
@@ -23,7 +33,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ keys: [publicJwk] }, {
             status: 200,
             headers: {
-                "Cache-Control": "public, max-age=86400, stale-while-revalidate=86400"
+                "Cache-Control": "public, max-age=300, stale-while-revalidate=60"
             }
         });
     } catch (error) {
