@@ -59,6 +59,8 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: file:./prisma/registry.db
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v6
