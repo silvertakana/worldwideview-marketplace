@@ -12,6 +12,10 @@ on:
 
 jobs:
   claude-review:
+    # Skip gracefully when neither Claude secret is configured in the repo.
+    # Evaluating secrets in `if` is safe: absent secrets resolve to empty string.
+    if: ${{ secrets.ANTHROPIC_API_KEY != '' || secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||
