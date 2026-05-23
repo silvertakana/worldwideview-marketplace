@@ -21,7 +21,7 @@
     "better-sqlite3": "^12.8.0",
     "jose": "^6.2.3",
     "lucide-react": "^0.577.0",
-    "next": "16.2.1",
+    "next": "16.2.6",
     "prisma": "^7.5.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -45,6 +45,10 @@
       "unrs-resolver",
       "@unrs/resolver-binding-linux-x64-gnu",
       "@unrs/resolver-binding-linux-x64-musl"
-    ]
+    ],
+    "overrides": {
+      "defu": ">=6.1.5",
+      "fast-uri": ">=3.1.2"
+    }
   }
 }

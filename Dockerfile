@@ -20,8 +20,10 @@ RUN corepack enable pnpm
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Set a dummy DATABASE_URL so prisma generate passes during the build step
+# Dummy env vars required for build — @supabase/ssr throws if URL/key are empty strings
 ENV DATABASE_URL="file:./dummy.db"
+ENV NEXT_PUBLIC_SUPABASE_URL="https://placeholder.supabase.co"
+ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="placeholder-key-for-build"
 RUN npx prisma generate
 RUN pnpm run build
 
