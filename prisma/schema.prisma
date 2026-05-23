@@ -20,11 +20,29 @@ model Plugin {
 }
 
 model User {
-  id        String              @id @default(cuid())
-  email     String              @unique
-  tier      String              @default("free")
-  createdAt DateTime            @default(now())
-  apiKeys   MarketplaceApiKey[]
+  id             String                   @id @default(cuid())
+  supabaseUserId String?                  @unique
+  email          String                   @unique
+  tier           String                   @default("free")
+  createdAt      DateTime                 @default(now())
+  apiKeys        MarketplaceApiKey[]
+  oauthCodes     OAuthAuthorizationCode[]
+}
+
+model OAuthAuthorizationCode {
+  code                String   @id
+  codeChallenge       String
+  codeChallengeMethod String
+  clientId            String
+  redirectUri         String
+  scope               String
+  userId              String
+  user                User     @relation(fields: [userId], references: [id])
+  expiresAt           DateTime
+  createdAt           DateTime @default(now())
+
+  @@index([expiresAt])
+  @@map("oauth_authorization_codes")
 }
 
 model MarketplaceApiKey {
