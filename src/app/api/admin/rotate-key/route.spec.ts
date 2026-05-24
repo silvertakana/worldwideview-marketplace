@@ -27,15 +27,29 @@ describe("Admin Rotate Key Endpoint", () => {
     });
 
     it("rotates the key and returns old/new kids", async () => {
+        process.env.CRON_SECRET = "test-secret";
         mockRotateKey.mockResolvedValueOnce({ oldKid: "kid-old", newKid: "kid-new" });
 
-        const req = new NextRequest("http://localhost/api/admin/rotate-key", { method: "POST" });
+        const req = new NextRequest("http://localhost/api/admin/rotate-key", {
+            method: "POST",
+            headers: { authorization: "Bearer test-secret" },
+        });
         const res: any = await POST(req);
 
         expect(res.init?.status).toBeUndefined(); // 200 default
         expect(res.body.success).toBe(true);
         expect(res.body.oldKid).toBe("kid-old");
         expect(res.body.newKid).toBe("kid-new");
+    });
+
+    it("returns 503 when CRON_SECRET is not configured", async () => {
+        delete process.env.CRON_SECRET;
+
+        const req = new NextRequest("http://localhost/api/admin/rotate-key", { method: "POST" });
+        const res: any = await POST(req);
+
+        expect(res.init?.status).toBe(503);
+        expect(mockRotateKey).not.toHaveBeenCalled();
     });
 
     it("returns 401 when CRON_SECRET is set but auth header is missing", async () => {
@@ -75,9 +89,13 @@ describe("Admin Rotate Key Endpoint", () => {
     });
 
     it("returns 500 on rotation failure", async () => {
+        process.env.CRON_SECRET = "test-secret";
         mockRotateKey.mockRejectedValueOnce(new Error("DB error"));
 
-        const req = new NextRequest("http://localhost/api/admin/rotate-key", { method: "POST" });
+        const req = new NextRequest("http://localhost/api/admin/rotate-key", {
+            method: "POST",
+            headers: { authorization: "Bearer test-secret" },
+        });
         const res: any = await POST(req);
 
         expect(res.init?.status).toBe(500);

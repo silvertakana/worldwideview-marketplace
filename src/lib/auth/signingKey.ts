@@ -68,17 +68,27 @@ export async function getJwksPublicKeys(): Promise<object[]> {
 /**
  * Rotate: mark current active key as `retiring`, generate a new active key.
  * During the KEY_OVERLAP_MS window, both keys appear in JWKS so in-flight JWTs remain valid.
+ * Wrapped in a transaction to prevent two concurrent calls producing two active keys.
  */
 export async function rotateKey(): Promise<{ oldKid: string | null; newKid: string }> {
-    const current = await prisma.signingKey.findFirst({ where: { status: "active" } });
-    if (current) {
-        await prisma.signingKey.update({
-            where: { id: current.id },
-            data: { status: "retiring", retiredAt: new Date() },
-        });
-    }
-    const newKey = await generateAndStoreKey();
-    return { oldKid: current?.kid ?? null, newKid: newKey.kid };
+    // Pre-generate key material outside the transaction -- crypto ops are not DB-atomic.
+    const { publicKey, privateKey } = await jose.generateKeyPair("EdDSA", { extractable: true });
+    const kid = crypto.randomUUID();
+    const meta = { kid, alg: "EdDSA", kty: "OKP", crv: "Ed25519" } as const;
+    const newPrivateJwk = JSON.stringify({ ...(await jose.exportJWK(privateKey)), ...meta });
+    const newPublicJwk = JSON.stringify({ ...(await jose.exportJWK(publicKey)), ...meta });
+
+    return prisma.$transaction(async (tx) => {
+        const current = await tx.signingKey.findFirst({ where: { status: "active" } });
+        if (current) {
+            await tx.signingKey.update({
+                where: { id: current.id },
+                data: { status: "retiring", retiredAt: new Date() },
+            });
+        }
+        const newKey = await tx.signingKey.create({ data: { kid, privateJwk: newPrivateJwk, publicJwk: newPublicJwk, status: "active" } });
+        return { oldKid: current?.kid ?? null, newKid: newKey.kid };
+    });
 }
 
 /**

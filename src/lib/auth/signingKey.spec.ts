@@ -11,7 +11,10 @@ const mockSigningKey = {
 };
 
 vi.mock("@/lib/prisma", () => ({
-    prisma: { signingKey: mockSigningKey },
+    prisma: {
+        signingKey: mockSigningKey,
+        $transaction: vi.fn(async (fn: (tx: any) => Promise<any>) => fn({ signingKey: mockSigningKey })),
+    },
 }));
 
 // Import after mocking
