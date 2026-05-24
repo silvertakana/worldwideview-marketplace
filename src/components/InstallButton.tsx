@@ -73,7 +73,7 @@ export default function InstallButton({ plugin }: Props) {
 
     if (!plugin) return null;
 
-    function buildRedirectUrl(instanceUrl: string): string {
+    function buildInstallStartUrl(instanceUrl: string): string {
         const detail = {
             id: plugin.id,
             npmPackage: plugin.npmPackage ?? plugin.id,
@@ -97,10 +97,11 @@ export default function InstallButton({ plugin }: Props) {
         const manifestB64 = btoa(unescape(encodeURIComponent(JSON.stringify(manifest))));
         const redirectTo = window.location.href.split("?")[0];
 
-        const url = new URL(`${instanceUrl}/api/marketplace/install-redirect`);
+        const url = new URL("/api/install/start", window.location.origin);
         url.searchParams.set("pluginId", plugin.id);
         url.searchParams.set("version", plugin.version);
         url.searchParams.set("manifest", manifestB64);
+        url.searchParams.set("instanceUrl", instanceUrl);
         url.searchParams.set("redirectTo", redirectTo);
         return url.toString();
     }
@@ -112,7 +113,7 @@ export default function InstallButton({ plugin }: Props) {
             setShowConfig(true);
             return;
         }
-        window.location.href = buildRedirectUrl(instanceUrl);
+        window.location.href = buildInstallStartUrl(instanceUrl);
     }
 
     async function handleUninstall() {

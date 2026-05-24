@@ -11,7 +11,7 @@ export async function requireSupabaseUser(returnTo: string) {
   const user = await getSupabaseUser()
   if (!user) {
     const authHost = process.env.NEXT_PUBLIC_AUTH_HOST_URL!
-    redirect(`${authHost}/login?next=${encodeURIComponent(returnTo)}`)
+    redirect(`${authHost}/login?callbackUrl=${encodeURIComponent(returnTo)}`)
   }
   return user
 }
