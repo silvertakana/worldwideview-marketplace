@@ -37,19 +37,19 @@ vi.mock("@/lib/prisma", () => ({
     },
 }));
 
+const { mockGetActiveKey } = vi.hoisted(() => ({
+    mockGetActiveKey: vi.fn(),
+}));
+
+vi.mock("@/lib/auth/signingKey", () => ({
+    getActiveKey: mockGetActiveKey,
+}));
+
 describe("Token Exchange Endpoint", () => {
-    const ORIGINAL_ENV = process.env;
-
     beforeEach(async () => {
-        vi.resetModules();
-        process.env = { ...ORIGINAL_ENV };
-
-        // Set up a real Ed25519 key for JWT signing tests
+        vi.clearAllMocks();
         const { privateKey } = await jose.generateKeyPair("EdDSA", { crv: "Ed25519", extractable: true });
-        const mockJwk = await jose.exportJWK(privateKey);
-        mockJwk.kid = "test-kid-exchange";
-        (mockJwk as any).alg = "EdDSA";
-        process.env.MARKETPLACE_JWK_PRIVATE = JSON.stringify(mockJwk);
+        mockGetActiveKey.mockResolvedValue({ kid: "test-kid-exchange", privateKey });
     });
 
     it("should return 400 if apiKey is missing", async () => {
@@ -101,6 +101,8 @@ describe("Token Exchange Endpoint", () => {
         expect(decoded.tier).toBe("pro");
         expect(decoded.scope).toBe("plugins:read plugins:write");
         expect(decoded.exp! - decoded.iat!).toBe(300);
+        expect(decoded.nbf).toBeDefined();
+        expect(decoded.jti).toBeDefined();
 
         const header = jose.decodeProtectedHeader(token);
         expect(header.kid).toBe("test-kid-exchange");
@@ -120,13 +122,15 @@ describe("Token Exchange Endpoint", () => {
         expect(decoded.aud).toBe("wwv-data-engine");
     });
 
-    it("should return 401 for the old stub key 'valid-key-for-testing'", async () => {
+    it("should return 500 when signing key is unavailable", async () => {
+        mockGetActiveKey.mockRejectedValueOnce(new Error("DB unavailable"));
+
         const req = new NextRequest("http://localhost/api/auth/exchange", {
             method: "POST",
-            body: JSON.stringify({ apiKey: "valid-key-for-testing" }),
+            body: JSON.stringify({ apiKey: FIXTURE_KEY_RAW }),
             headers: { "Content-Type": "application/json" },
         });
         const res: any = await POST(req);
-        expect(res.init?.status).toBe(401);
+        expect(res.init?.status).toBe(500);
     });
 });

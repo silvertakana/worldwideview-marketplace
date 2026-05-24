@@ -59,6 +59,19 @@ model MarketplaceApiKey {
   @@index([userId])
 }
 
+model SigningKey {
+  id         String    @id @default(cuid())
+  kid        String    @unique
+  privateJwk String
+  publicJwk  String
+  status     String    @default("active") // "active" | "retiring" | "revoked"
+  createdAt  DateTime  @default(now())
+  retiredAt  DateTime?
+  revokedAt  DateTime?
+
+  @@index([status])
+}
+
 model NpmCache {
   npmPackage  String   @id // The npm package name, acting as PK
   name        String
