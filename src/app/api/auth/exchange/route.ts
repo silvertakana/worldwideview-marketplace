@@ -3,6 +3,7 @@ import * as jose from "jose";
 import { prisma } from "@/lib/prisma";
 import { hashApiKey } from "@/lib/auth/apiKeyHash";
 import { scopeFor } from "@/lib/auth/tierScope";
+import { getActiveKey } from "@/lib/auth/signingKey";
 
 export async function POST(req: NextRequest) {
     try {
@@ -29,22 +30,14 @@ export async function POST(req: NextRequest) {
             data: { lastUsedAt: new Date() },
         }).catch((err: Error) => console.warn("lastUsedAt update failed:", err.message));
 
-        const jwkString = process.env.MARKETPLACE_JWK_PRIVATE;
-        if (!jwkString) {
-            console.error("MARKETPLACE_JWK_PRIVATE is not configured.");
-            return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-        }
-
-        const privateJwk = JSON.parse(jwkString);
-        const privateKey = await jose.importJWK(privateJwk, "EdDSA");
-
+        const { kid, privateKey } = await getActiveKey();
         const now = Math.floor(Date.now() / 1000);
 
         const jwt = await new jose.SignJWT({
             tier: apiKeyRecord.user.tier,
             scope: scopeFor(apiKeyRecord.user.tier),
         })
-            .setProtectedHeader({ alg: "EdDSA", typ: "JWT", kid: privateJwk.kid })
+            .setProtectedHeader({ alg: "EdDSA", typ: "JWT", kid })
             .setIssuer("https://marketplace.worldwideview.dev")
             .setSubject(apiKeyRecord.userId)
             .setAudience(audience ?? "wwv-data-engine")

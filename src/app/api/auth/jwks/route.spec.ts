@@ -13,16 +13,20 @@ vi.mock("next/server", async (importOriginal) => {
     };
 });
 
+const { mockGetJwksPublicKeys } = vi.hoisted(() => ({
+    mockGetJwksPublicKeys: vi.fn(),
+}));
+
+vi.mock("@/lib/auth/signingKey", () => ({
+    getJwksPublicKeys: mockGetJwksPublicKeys,
+}));
+
 describe("JWKS Endpoint", () => {
-    const ORIGINAL_ENV = process.env;
+    beforeEach(() => vi.clearAllMocks());
 
-    beforeEach(() => {
-        vi.resetModules();
-        process.env = { ...ORIGINAL_ENV };
-    });
+    it("should return 500 if key retrieval throws", async () => {
+        mockGetJwksPublicKeys.mockRejectedValueOnce(new Error("DB unavailable"));
 
-    it("should return 500 if MARKETPLACE_JWK_PRIVATE is not set", async () => {
-        delete process.env.MARKETPLACE_JWK_PRIVATE;
         const req = new NextRequest("http://localhost/api/auth/jwks");
         const res: any = await GET(req);
 
@@ -30,46 +34,43 @@ describe("JWKS Endpoint", () => {
         expect(res.body).toEqual({ error: "Internal Server Error" });
     });
 
-    it("should return 500 if MARKETPLACE_JWK_PRIVATE is missing kid", async () => {
-        const { privateKey } = await jose.generateKeyPair("EdDSA", { crv: "Ed25519", extractable: true });
-        const privateJwk = await jose.exportJWK(privateKey);
-        // Deliberately omit kid and alg
-        delete privateJwk.kid;
-        delete (privateJwk as any).alg;
-        process.env.MARKETPLACE_JWK_PRIVATE = JSON.stringify(privateJwk);
-
-        const req = new NextRequest("http://localhost/api/auth/jwks");
-        const res: any = await GET(req);
-
-        expect(res.init?.status).toBe(500);
-    });
-
-    it("should return the public JWKS when configured correctly", async () => {
-        // Generate a real Ed25519 key for testing
-        const { privateKey } = await jose.generateKeyPair("EdDSA", { crv: "Ed25519", extractable: true });
-        const privateJwk = await jose.exportJWK(privateKey);
-        privateJwk.kid = "test-kid-jwks";
-        (privateJwk as any).alg = "EdDSA";
-        process.env.MARKETPLACE_JWK_PRIVATE = JSON.stringify(privateJwk);
+    it("should return JWKS with active keys", async () => {
+        const { publicKey } = await jose.generateKeyPair("EdDSA", { extractable: true });
+        const publicJwk = { ...(await jose.exportJWK(publicKey)), kid: "test-kid-jwks", alg: "EdDSA", kty: "OKP", crv: "Ed25519" };
+        mockGetJwksPublicKeys.mockResolvedValueOnce([publicJwk]);
 
         const req = new NextRequest("http://localhost/api/auth/jwks");
         const res: any = await GET(req);
 
         expect(res.init?.status).toBe(200);
-
         const cacheControl: string = res.init?.headers?.["Cache-Control"] ?? "";
         expect(cacheControl).toContain("max-age=300");
         expect(cacheControl).toContain("stale-while-revalidate=60");
 
         const keys = res.body.keys;
         expect(Array.isArray(keys)).toBe(true);
-        expect(keys.length).toBe(1);
+        expect(keys).toHaveLength(1);
+        expect(keys[0].kid).toBe("test-kid-jwks");
+        expect(keys[0].crv).toBe("Ed25519");
+        expect(keys[0]).not.toHaveProperty("d");
+    });
 
-        const publicJwk = keys[0];
-        expect(publicJwk.crv).toBe("Ed25519");
-        expect(publicJwk.kty).toBe("OKP");
-        expect(publicJwk.kid).toBe("test-kid-jwks");
-        // Private parts should NOT be present
-        expect(publicJwk).not.toHaveProperty("d");
+    it("should return multiple keys during a rotation overlap window", async () => {
+        const makeKey = async (kid: string) => {
+            const { publicKey } = await jose.generateKeyPair("EdDSA", { extractable: true });
+            return { ...(await jose.exportJWK(publicKey)), kid, alg: "EdDSA", kty: "OKP", crv: "Ed25519" };
+        };
+        const activeJwk = await makeKey("kid-active");
+        const retiringJwk = await makeKey("kid-retiring");
+        mockGetJwksPublicKeys.mockResolvedValueOnce([activeJwk, retiringJwk]);
+
+        const req = new NextRequest("http://localhost/api/auth/jwks");
+        const res: any = await GET(req);
+
+        expect(res.init?.status).toBe(200);
+        expect(res.body.keys).toHaveLength(2);
+        const kids = res.body.keys.map((k: any) => k.kid);
+        expect(kids).toContain("kid-active");
+        expect(kids).toContain("kid-retiring");
     });
 });
