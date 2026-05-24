@@ -17,5 +17,6 @@ export function buildCookieOptions() {
     path: '/',
     sameSite: 'lax' as const,
     secure: true,
+    httpOnly: true,
   }
 }
