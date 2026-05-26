@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("Import error:", error);
     return NextResponse.json(
-      { error: "Failed to import plugins", details: error.message },
+      { error: "An internal error occurred." },
       { status: 500 }
     );
   }

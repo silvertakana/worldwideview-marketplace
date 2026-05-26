@@ -4,7 +4,10 @@ import { fetchPackageMeta } from "@/data/npmRegistry";
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!process.env.CRON_SECRET) {
+    return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+  }
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -73,6 +76,7 @@ export async function GET(request: NextRequest) {
       failed,
     });
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    console.error("[sync-npm] Unexpected error:", err);
+    return NextResponse.json({ success: false, error: "An internal error occurred." }, { status: 500 });
   }
 }

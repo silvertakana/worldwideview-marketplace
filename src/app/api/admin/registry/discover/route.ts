@@ -87,6 +87,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ discovered });
   } catch (err: any) {
     console.error("NPM Discovery Error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "An internal error occurred." }, { status: 500 });
   }
 }
