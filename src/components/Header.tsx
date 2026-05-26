@@ -1,19 +1,14 @@
-"use client";
+import Link from 'next/link'
+import ThemeToggle from './ThemeToggle'
+import NavLinks from './NavLinks'
+import UserMenu from './UserMenu'
+import { getSupabaseUser } from '@/lib/auth/requireSession'
+import styles from './Header.module.css'
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import ThemeToggle from "./ThemeToggle";
-import styles from "./Header.module.css";
-
-const NAV_LINKS = [
-  { href: "/browse", label: "Browse" },
-  { href: "/manage", label: "My Plugins" },
-  { href: "/submit", label: "Submit Plugin" },
-  { href: "https://worldwideview.dev/docs", label: "Docs" },
-];
-
-export default function Header() {
-  const pathname = usePathname();
+export default async function Header() {
+  const user = await getSupabaseUser()
+  const email = user?.email ?? null
+  const authHostUrl = process.env.NEXT_PUBLIC_AUTH_HOST_URL ?? ''
 
   return (
     <header className={styles.header}>
@@ -24,20 +19,11 @@ export default function Header() {
         </Link>
 
         <nav className={styles.nav}>
-          {NAV_LINKS.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`${styles.navLink} ${
-                pathname === href ? styles.navLinkActive : ""
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
+          <NavLinks />
           <ThemeToggle />
+          <UserMenu email={email} authHostUrl={authHostUrl} />
         </nav>
       </div>
     </header>
-  );
+  )
 }
