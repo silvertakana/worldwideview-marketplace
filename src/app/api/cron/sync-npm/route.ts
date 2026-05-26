@@ -1,15 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { fetchPackageMeta } from "@/data/npmRegistry";
 
-export async function GET(request: Request) {
-  // In a real production setup, we would verify an Authorization header
-  // matching a CRON_SECRET here, as per Next.js Vercel Cron docs.
-  // For now, this is kept open but could be easily secured:
-  // const authHeader = request.headers.get("authorization");
-  // if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  // }
+export async function GET(request: NextRequest) {
+  const authHeader = request.headers.get("authorization");
+  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   try {
     const dbPlugins = await prisma.plugin.findMany();
