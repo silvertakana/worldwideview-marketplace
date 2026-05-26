@@ -1,7 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSupabaseUser } from "@/lib/auth/requireSession";
+import { getOrCreateMarketplaceUser } from "@/lib/auth/getOrCreateMarketplaceUser";
 
 export async function POST(req: Request) {
+  const supabaseUser = await getSupabaseUser();
+  if (!supabaseUser) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  await getOrCreateMarketplaceUser(supabaseUser);
+
   try {
     const data = await req.json();
     const { npmPackage } = data;
