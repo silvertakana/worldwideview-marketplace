@@ -1,11 +1,11 @@
 {
   "name": "worldwideview-marketplace",
-  "version": "1.11.1",
+  "version": "1.11.2",
   "packageManager": "pnpm@10.33.0",
   "private": true,
   "description": "Marketplace for WorldWideView plugins — browse, publish, and install data sources",
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "cross-env NODE_OPTIONS=--use-system-ca next dev --webpack --port 3002 --hostname marketplace.wwv.local --experimental-https --experimental-https-key ./certs/marketplace.wwv.local-key.pem --experimental-https-cert ./certs/marketplace.wwv.local.pem",
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
@@ -31,6 +31,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "typescript": "^5",

@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import type { NpmPackageMeta } from "@/data/types";
 import { fetchAllPackageMeta } from "@/data/npmRegistry";
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json({ error: "Missing or invalid token" }, { status: 401 });
+  const adminPw = process.env.ADMIN_PASSWORD;
+  if (!authHeader || !authHeader.startsWith("Bearer ") || !adminPw) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const token = authHeader.split(" ")[1];
-  if (token !== process.env.ADMIN_PASSWORD) {
+  if (token.length !== adminPw.length || !timingSafeEqual(Buffer.from(token), Buffer.from(adminPw))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
