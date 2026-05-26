@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { fetchPackageMeta } from "@/data/npmRegistry";
 
@@ -7,7 +8,9 @@ function isAuthorized(request: NextRequest): boolean {
   const token = authHeader.replace("Bearer ", "");
   const adminPw = process.env.ADMIN_PASSWORD;
   if (!adminPw) return false;
-  return token === adminPw;
+  // Length difference is not a secret; early-exit is fine.
+  if (token.length !== adminPw.length) return false;
+  return timingSafeEqual(Buffer.from(token), Buffer.from(adminPw));
 }
 
 // Ensure the cache is updated if it hasn't been crawled in the last hour
