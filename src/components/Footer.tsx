@@ -19,6 +19,23 @@ export default function Footer() {
         <span className={styles.license}>
           © {year} WorldWideView · Business Source License 1.1
         </span>
+        <span className={styles.legal}>
+          <a
+            href="https://worldwideview.dev/legal/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Privacy Policy
+          </a>
+          {" · "}
+          <a
+            href="https://worldwideview.dev/legal/marketplace-terms"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Terms
+          </a>
+        </span>
       </div>
     </footer>
   );
