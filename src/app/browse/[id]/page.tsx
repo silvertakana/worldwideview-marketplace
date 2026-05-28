@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPluginById } from "@/data/pluginService";
+import { getSupabaseUser } from "@/lib/auth/requireSession";
 import { CAPABILITY_LABELS } from "@/data/capabilityLabels";
 import PluginIcon from "@/components/PluginIcon";
 import InstallButton from "@/components/InstallButton";
@@ -12,7 +13,10 @@ interface Props {
 
 export default async function PluginDetailPage({ params }: Props) {
   const { id } = await params;
-  const plugin = await getPluginById(id);
+  const [plugin, user] = await Promise.all([
+    getPluginById(id),
+    getSupabaseUser(),
+  ]);
   if (!plugin) notFound();
 
   return (
@@ -94,7 +98,7 @@ export default async function PluginDetailPage({ params }: Props) {
       </section>
 
       {/* ── Install Button ── */}
-      <InstallButton plugin={plugin} />
+      <InstallButton plugin={plugin} isAuthed={!!user} />
     </div>
   );
 }
