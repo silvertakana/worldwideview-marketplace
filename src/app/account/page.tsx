@@ -4,6 +4,7 @@ import { requireSupabaseUser } from '@/lib/auth/requireSession'
 import { getOrCreateMarketplaceUser } from '@/lib/auth/getOrCreateMarketplaceUser'
 import { prisma } from '@/lib/prisma'
 import { diceBearUrl } from '@/lib/diceBear'
+import InstallHistory from '@/components/InstallHistory'
 import styles from './account.module.css'
 
 export const metadata = { title: 'Your Account' }
@@ -36,6 +37,8 @@ export default async function AccountPage() {
 
   return (
     <main className={styles.pageContainer}>
+      <InstallHistory marketplaceUser={marketplaceUser} />
+
       {/* Profile section */}
       <section className={styles.card}>
         <div className={styles.profileHeader}>
