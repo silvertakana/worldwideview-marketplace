@@ -1,29 +1,36 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Package } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import {
     getInstanceUrl,
+    setInstanceUrl,
     setMarketplaceToken,
     getMarketplaceToken,
+    fetchUserInstances,
+    type SavedInstance,
 } from "@/lib/instanceStore";
 import { KNOWN_PLUGINS } from "@/data/knownPlugins";
 import { getInstallManifest } from "@/data/pluginManifests";
 import { useInstalledIds } from "./InstalledPluginsProvider";
 import InstanceConfig from "./InstanceConfig";
+import InstancePicker from "./InstancePicker";
 import styles from "./InstallButton.module.css";
 import type { PluginDetail } from "@/data/types";
 
 interface Props {
     plugin: PluginDetail;
+    isAuthed: boolean;
 }
 
 type Status = "idle" | "installed" | "configure" | "uninstalling";
 
-export default function InstallButton({ plugin }: Props) {
+export default function InstallButton({ plugin, isAuthed }: Props) {
     const { installedIds, refetch } = useInstalledIds();
     const [status, setStatus] = useState<Status>("idle");
     const [showConfig, setShowConfig] = useState(false);
+    const [pickerInstances, setPickerInstances] = useState<SavedInstance[] | null>(null);
     const [errorMsg, setErrorMsg] = useState("");
 
 
@@ -73,6 +80,19 @@ export default function InstallButton({ plugin }: Props) {
 
     if (!plugin) return null;
 
+    if (!isAuthed) {
+        const loginUrl = `${process.env.NEXT_PUBLIC_AUTH_HOST_URL}/login?next=${
+            typeof window !== "undefined" ? encodeURIComponent(window.location.href) : ""
+        }`;
+        return (
+            <div className={styles.authPrompt}>
+                <Package size={20} className={styles.authIcon} />
+                <p className={styles.authMessage}>Sign in to install and track your plugins</p>
+                <a href={loginUrl} className={styles.authSignIn}>Sign In</a>
+            </div>
+        );
+    }
+
     function buildInstallStartUrl(instanceUrl: string): string {
         const detail = {
             id: plugin.id,
@@ -106,14 +126,39 @@ export default function InstallButton({ plugin }: Props) {
         return url.toString();
     }
 
-    function handleInstall() {
+    async function handleInstall() {
         trackEvent("plugin_install_click", { pluginId: plugin.id });
-        const instanceUrl = getInstanceUrl();
-        if (!instanceUrl) {
-            setShowConfig(true);
+
+        const cached = getInstanceUrl();
+        if (cached) {
+            window.location.href = buildInstallStartUrl(cached);
             return;
         }
-        window.location.href = buildInstallStartUrl(instanceUrl);
+
+        // No cached URL — try the server (logged-in users with linked instances
+        // get the silent path; anonymous / new users fall through to the modal).
+        const instances = await fetchUserInstances();
+        if (instances.length === 1) {
+            setInstanceUrl(instances[0].url);
+            window.location.href = buildInstallStartUrl(instances[0].url);
+            return;
+        }
+        if (instances.length > 1) {
+            setPickerInstances(instances);
+            return;
+        }
+        setShowConfig(true);
+    }
+
+    function handlePickerSelect(instance: SavedInstance) {
+        setInstanceUrl(instance.url);
+        setPickerInstances(null);
+        window.location.href = buildInstallStartUrl(instance.url);
+    }
+
+    function handlePickerAddNew() {
+        setPickerInstances(null);
+        setShowConfig(true);
     }
 
     async function handleUninstall() {
@@ -162,6 +207,15 @@ export default function InstallButton({ plugin }: Props) {
                 <InstanceConfig
                     onConfigured={handleConfigured}
                     onCancel={() => setShowConfig(false)}
+                />
+            )}
+
+            {pickerInstances && (
+                <InstancePicker
+                    instances={pickerInstances}
+                    onSelect={handlePickerSelect}
+                    onAddNew={handlePickerAddNew}
+                    onCancel={() => setPickerInstances(null)}
                 />
             )}
 
