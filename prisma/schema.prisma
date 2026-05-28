@@ -7,26 +7,64 @@ datasource db {
 }
 
 model Plugin {
-  id              String   @id // (e.g., "aviation" or "my-custom-plugin")
-  npmPackage      String   @unique
-  icon            String   // lucide-react icon name e.g. "Plane"
+  id              String          @id // (e.g., "aviation" or "my-custom-plugin")
+  npmPackage      String          @unique
+  icon            String          // lucide-react icon name e.g. "Plane"
   category        String
-  format          String   // "bundle" | "static" | "dynamic"
-  trust           String   @default("pending") // "built-in", "verified", "unverified", "pending"
-  capabilities    String   // JSON string array of capabilities
+  format          String          // "bundle" | "static" | "dynamic"
+  trust           String          @default("pending") // "built-in", "verified", "unverified", "pending"
+  capabilities    String          // JSON string array of capabilities
   longDescription String
   changelog       String?
-  addedAt         DateTime @default(now())
+  addedAt         DateTime        @default(now())
+  installs        Int             @default(0)
+  pluginInstalls  PluginInstall[]
+}
+
+model PluginInstall {
+  id            String   @id @default(cuid())
+  userId        String
+  pluginId      String
+  pluginSlug    String
+  pluginVersion String
+  instanceUrl   String
+  installedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plugin        Plugin   @relation(fields: [pluginId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pluginId])
+  @@index([userId, installedAt])
+  @@map("plugin_installs")
 }
 
 model User {
-  id             String                   @id @default(cuid())
-  supabaseUserId String?                  @unique
-  email          String                   @unique
-  tier           String                   @default("free")
-  createdAt      DateTime                 @default(now())
-  apiKeys        MarketplaceApiKey[]
-  oauthCodes     OAuthAuthorizationCode[]
+  id              String                   @id @default(cuid())
+  supabaseUserId  String?                  @unique
+  email           String                   @unique
+  tier            String                   @default("free")
+  createdAt       DateTime                 @default(now())
+  apiKeys         MarketplaceApiKey[]
+  oauthCodes      OAuthAuthorizationCode[]
+  linkedInstances LinkedInstance[]
+  pluginInstalls  PluginInstall[]
+}
+
+/// A WWV instance URL this user has installed plugins to. Persisted server-side
+/// so the install flow auto-detects the right target on new devices / fresh
+/// sessions (rather than asking the user to retype it every time).
+model LinkedInstance {
+  id         String   @id @default(cuid())
+  userId     String
+  url        String // Normalised origin, e.g. "https://wwv.local:3000"
+  nickname   String?
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, url])
+  @@index([userId, lastUsedAt])
+  @@map("linked_instances")
 }
 
 model OAuthAuthorizationCode {
