@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/requireSession'
 import { getOrCreateMarketplaceUser } from '@/lib/auth/getOrCreateMarketplaceUser'
+import { prisma } from '@/lib/prisma'
 
 /**
  * GET /api/install/start
@@ -52,12 +53,38 @@ export async function GET(request: NextRequest) {
   const user = await getSupabaseUser()
   if (!user) {
     const authHost = process.env.NEXT_PUBLIC_AUTH_HOST_URL!
-    const callbackUrl = encodeURIComponent(request.nextUrl.toString())
-    return NextResponse.redirect(`${authHost}/login?callbackUrl=${callbackUrl}`)
+    const next = encodeURIComponent(request.nextUrl.toString())
+    return NextResponse.redirect(`${authHost}/login?next=${next}`)
   }
 
   // Ensure a MarketplaceUser row exists (idempotent, tier defaults to 'free')
-  await getOrCreateMarketplaceUser(user)
+  const marketplaceUser = await getOrCreateMarketplaceUser(user)
+
+  // Fire-and-forget install tracking: upsert PluginInstall row + increment Plugin.installs counter.
+  // DB failures are swallowed so they never block the install redirect (TRACK-04).
+  void Promise.resolve()
+    .then(() =>
+      prisma.pluginInstall.upsert({
+        where: { userId_pluginId: { userId: marketplaceUser.id, pluginId } },
+        update: { pluginVersion: version, instanceUrl },
+        create: {
+          userId: marketplaceUser.id,
+          pluginId,
+          pluginSlug: pluginId,
+          pluginVersion: version,
+          instanceUrl,
+        },
+      })
+    )
+    .then(() =>
+      prisma.plugin.update({
+        where: { id: pluginId },
+        data: { installs: { increment: 1 } },
+      })
+    )
+    .catch((err: unknown) => {
+      console.error('[install/start] tracking write failed:', err)
+    })
 
   // Build the WWV install-redirect URL and bounce the browser there
   const installRedirectUrl = new URL(`${instanceUrl}/api/marketplace/install-redirect`)
