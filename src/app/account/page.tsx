@@ -1,6 +1,5 @@
 import Link from 'next/link'
-import { ExternalLink, Link2, KeyRound, LogOut, Server, Package, CheckCircle2 } from 'lucide-react'
-import LinkedAccounts from './LinkedAccounts'
+import { ExternalLink, Link2, KeyRound, LogOut, Server, Package } from 'lucide-react'
 import { requireSupabaseUser } from '@/lib/auth/requireSession'
 import { getOrCreateMarketplaceUser } from '@/lib/auth/getOrCreateMarketplaceUser'
 import { prisma } from '@/lib/prisma'
@@ -9,13 +8,7 @@ import styles from './account.module.css'
 
 export const metadata = { title: 'Your Account' }
 
-export default async function AccountPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}) {
-  const params = await searchParams
-  const justLinked = params.linked === '1'
+export default async function AccountPage() {
   const supabaseUser = await requireSupabaseUser('/account')
   const marketplaceUser = await getOrCreateMarketplaceUser(supabaseUser)
 
@@ -43,13 +36,6 @@ export default async function AccountPage({
 
   return (
     <main className={styles.pageContainer}>
-      {justLinked && (
-        <div className={styles.linkedSuccessBanner} role="status">
-          <CheckCircle2 size={18} className={styles.linkedSuccessIcon} />
-          <span>Account linked successfully.</span>
-        </div>
-      )}
-
       {/* Profile section */}
       <section className={styles.card}>
         <div className={styles.profileHeader}>
@@ -103,15 +89,6 @@ export default async function AccountPage({
             <ExternalLink size={14} className={styles.btnIcon} />
           </a>
         </div>
-      </section>
-
-      {/* Linked accounts section */}
-      <section className={styles.card}>
-        <div className={styles.sectionHeading}>
-          <Link2 size={18} className={styles.sectionIcon} />
-          <h2 className={styles.sectionTitle}>Linked Accounts</h2>
-        </div>
-        <LinkedAccounts />
       </section>
 
       {/* Linked instances section */}
