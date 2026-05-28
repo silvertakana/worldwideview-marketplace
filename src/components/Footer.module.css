@@ -1,7 +1,10 @@
+/* ───────── Footer ────────── */
 .footer {
+  background: var(--color-bg-elevated);
   border-top: 1px solid var(--color-border);
   padding: var(--space-xl) var(--space-lg);
   margin-top: auto;
+  transition: background var(--transition-base), border-color var(--transition-base);
 }
 
 .inner {
@@ -21,6 +24,13 @@
 
 .brand a {
   font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.brand a:hover {
+  color: var(--color-text-primary);
 }
 
 .license {
@@ -31,7 +41,24 @@
 @media (max-width: 640px) {
   .inner {
     flex-direction: column;
+    align-items: center;
     text-align: center;
     gap: var(--space-sm);
   }
+}
+
+.legal {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.legal a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.legal a:hover {
+  color: var(--color-text-secondary);
+  text-decoration: underline;
 }
