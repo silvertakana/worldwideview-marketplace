@@ -82,6 +82,13 @@ export async function GET(request: NextRequest) {
         data: { installs: { increment: 1 } },
       })
     )
+    .then(() =>
+      prisma.linkedInstance.upsert({
+        where: { userId_url: { userId: marketplaceUser.id, url: parsedInstance.origin } },
+        update: { lastUsedAt: new Date() },
+        create: { userId: marketplaceUser.id, url: parsedInstance.origin },
+      })
+    )
     .catch((err: unknown) => {
       console.error('[install/start] tracking write failed:', err)
     })

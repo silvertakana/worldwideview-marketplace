@@ -151,12 +151,14 @@ describe('GET /api/install/start', () => {
     const req = makeValidRequest()
     const res = await GET(req)
 
-    // Flush the three-step fire-and-forget chain (need extra ticks for three .then() calls)
+    // Flush the three-step fire-and-forget chain (one tick per .then() step plus one extra)
+    await Promise.resolve()
     await Promise.resolve()
     await Promise.resolve()
     await Promise.resolve()
 
     expect(res.status).toBe(307)
+    await new Promise(resolve => setTimeout(resolve, 0))
     expect(mockLinkedInstanceUpsert).toHaveBeenCalledOnce()
     expect(mockLinkedInstanceUpsert).toHaveBeenCalledWith(
       expect.objectContaining({
