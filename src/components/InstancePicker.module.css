@@ -1,0 +1,118 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+}
+
+.modal {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    width: 100%;
+    max-width: 460px;
+    box-shadow: var(--shadow-lg);
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: var(--space-xs);
+}
+
+.subtitle {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: var(--space-lg);
+}
+
+.list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+.instanceUrl {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    flex: 1;
+    color: var(--color-text-primary);
+}
+
+.instanceNickname {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+.btnSelect {
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-accent);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    margin-left: var(--space-sm);
+}
+
+.btnSelect:hover {
+    background: var(--color-accent-hover);
+}
+
+.btnAddNew {
+    width: 100%;
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.btnAddNew:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.btnCancel {
+    width: 100%;
+    margin-top: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: color var(--transition-fast);
+}
+
+.btnCancel:hover {
+    color: var(--color-text-primary);
+}
