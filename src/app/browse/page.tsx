@@ -5,6 +5,7 @@ import { CATEGORIES, type Category } from "@/data/knownPlugins";
 import { trackEvent } from "@/lib/analytics";
 import { usePlugins } from "@/hooks/usePlugins";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useMyInstalls } from "@/hooks/useMyInstalls";
 import PluginCard from "@/components/PluginCard";
 import styles from "./page.module.css";
 
@@ -13,6 +14,7 @@ export default function BrowsePage() {
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
   const { plugins, loading, error } = usePlugins(active, debouncedQuery);
+  const myInstalls = useMyInstalls();
 
   useEffect(() => {
     if (debouncedQuery) {
@@ -71,7 +73,7 @@ export default function BrowsePage() {
       ) : (
         <div className={styles.grid}>
           {plugins.map((plugin) => (
-            <PluginCard key={plugin.id} plugin={plugin} />
+            <PluginCard key={plugin.id} plugin={plugin} isInstalled={myInstalls.has(plugin.id)} />
           ))}
         </div>
       )}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Check } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import PluginIcon from "./PluginIcon";
 import PluginCardActions from "./PluginCardActions";
@@ -10,9 +11,10 @@ import styles from "./PluginCard.module.css";
 
 interface PluginCardProps {
   plugin: PluginCardData;
+  isInstalled?: boolean;
 }
 
-export default function PluginCard({ plugin }: PluginCardProps) {
+export default function PluginCard({ plugin, isInstalled }: PluginCardProps) {
   function handleClick() {
     trackEvent("plugin_card_click", {
       pluginId: plugin.id,
@@ -31,6 +33,12 @@ export default function PluginCard({ plugin }: PluginCardProps) {
         <span className={styles.cardIcon}><PluginIcon name={plugin.icon} size={22} /></span>
         <span className={styles.cardName}>{plugin.name}</span>
         <TrustBadge trust={plugin.trust} />
+        {isInstalled && (
+          <span className={styles.installedBadge}>
+            <Check size={13} />
+            Installed
+          </span>
+        )}
       </div>
       <p className={styles.cardDesc}>{plugin.description}</p>
       <div className={styles.cardFooter}>
