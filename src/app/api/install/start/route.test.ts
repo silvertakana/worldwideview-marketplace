@@ -17,6 +17,9 @@ vi.mock('@/lib/prisma', () => ({
     plugin: {
       update: vi.fn(),
     },
+    linkedInstance: {
+      upsert: vi.fn(),
+    },
   },
 }))
 
@@ -30,6 +33,7 @@ const mockGetSupabaseUser = vi.mocked(getSupabaseUser)
 const mockGetOrCreate = vi.mocked(getOrCreateMarketplaceUser)
 const mockUpsert = vi.mocked(prisma.pluginInstall.upsert)
 const mockPluginUpdate = vi.mocked(prisma.plugin.update)
+const mockLinkedInstanceUpsert = vi.mocked(prisma.linkedInstance.upsert)
 
 // Helper to construct a valid NextRequest with all required params
 function makeValidRequest() {
@@ -99,6 +103,7 @@ describe('GET /api/install/start', () => {
     mockGetOrCreate.mockResolvedValue({ id: 'mkt-user-1' } as never)
     mockUpsert.mockResolvedValue({} as never)
     mockPluginUpdate.mockResolvedValue({} as never)
+    mockLinkedInstanceUpsert.mockResolvedValue({} as never)
 
     const req = makeValidRequest()
     const res = await GET(req)
@@ -132,5 +137,68 @@ describe('GET /api/install/start', () => {
     // Error was swallowed by .catch() -- redirect still happens, no 500
     expect(res.status).toBe(307)
     expect(res.headers.get('location')).toContain('install-redirect')
+  })
+
+  // --- LinkedInstance upsert tests (Plan 16-02) ---
+
+  it('calls linkedInstance.upsert with normalized origin on a successful install', async () => {
+    mockGetSupabaseUser.mockResolvedValue({ id: 'supa-123', email: 'test@example.com' } as never)
+    mockGetOrCreate.mockResolvedValue({ id: 'mkt-456', email: 'test@example.com', tier: 'free', supabaseUserId: 'supa-123', createdAt: new Date() } as never)
+    mockUpsert.mockResolvedValue({} as never)
+    mockPluginUpdate.mockResolvedValue({} as never)
+    mockLinkedInstanceUpsert.mockResolvedValue({} as never)
+
+    const req = makeValidRequest()
+    const res = await GET(req)
+
+    // Flush the three-step fire-and-forget chain (need extra ticks for three .then() calls)
+    await Promise.resolve()
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(res.status).toBe(307)
+    expect(mockLinkedInstanceUpsert).toHaveBeenCalledOnce()
+    expect(mockLinkedInstanceUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId_url: { userId: 'mkt-456', url: 'https://app.wwv.local:3000' } },
+        update: { lastUsedAt: expect.any(Date) },
+        create: { userId: 'mkt-456', url: 'https://app.wwv.local:3000' },
+      }),
+    )
+  })
+
+  it('still redirects when linkedInstance.upsert rejects (DB failure is swallowed)', async () => {
+    mockGetSupabaseUser.mockResolvedValue({ id: 'supa-123' } as never)
+    mockGetOrCreate.mockResolvedValue({ id: 'mkt-456' } as never)
+    mockUpsert.mockResolvedValue({} as never)
+    mockPluginUpdate.mockResolvedValue({} as never)
+    mockLinkedInstanceUpsert.mockRejectedValue(new Error('LinkedInstance DB exploded'))
+
+    const req = makeValidRequest()
+    const res = await GET(req)
+
+    // Flush all three .then() steps
+    await Promise.resolve()
+    await Promise.resolve()
+    await Promise.resolve()
+
+    // DB failure in linkedInstance.upsert is swallowed by the shared .catch()
+    expect(res.status).toBe(307)
+    expect(res.headers.get('location')).toContain('install-redirect')
+  })
+
+  it('does NOT call linkedInstance.upsert for unauthenticated requests', async () => {
+    process.env.NEXT_PUBLIC_AUTH_HOST_URL = 'https://wwv.local'
+    mockGetSupabaseUser.mockResolvedValue(null as never)
+
+    const req = makeValidRequest()
+    const res = await GET(req)
+
+    await Promise.resolve()
+
+    // Auth gate fires before reaching the fire-and-forget block
+    expect(res.status).toBe(307)
+    expect(res.headers.get('location')).toContain('/login?next=')
+    expect(mockLinkedInstanceUpsert).not.toHaveBeenCalled()
   })
 })
