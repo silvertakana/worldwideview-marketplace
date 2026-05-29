@@ -2,8 +2,13 @@
 
 import { useState, type MouseEvent } from "react";
 import { trackEvent } from "@/lib/analytics";
-import { getInstanceUrl } from "@/lib/instanceStore";
-import { KNOWN_PLUGINS } from "@/data/knownPlugins";
+import {
+  getInstanceUrl,
+  setInstanceUrl,
+  fetchUserInstances,
+  type SavedInstance,
+} from "@/lib/instanceStore";
+import InstancePicker from "./InstancePicker";
 import { getInstallManifest } from "@/data/pluginManifests";
 import { useInstalledIds } from "./InstalledPluginsProvider";
 import InstanceConfig from "./InstanceConfig";
@@ -12,18 +17,40 @@ import type { PluginCard as PluginCardData } from "@/data/types";
 
 interface Props {
   plugin: PluginCardData;
+  isAuthed?: boolean;
 }
 
-export default function PluginCardActions({ plugin }: Props) {
+export default function PluginCardActions({ plugin, isAuthed }: Props) {
   const { installedIds, pendingIds } = useInstalledIds();
   const [showConfig, setShowConfig] = useState(false);
+  const [pickerInstances, setPickerInstances] = useState<SavedInstance[] | null>(null);
 
   if (!plugin) return null;
 
   const isInstalled = installedIds.has(plugin.id);
   const isPending = pendingIds.has(plugin.id);
 
-  function buildRedirectUrl(instanceUrl: string): string {
+  // isAuthed === undefined means the auth check is still loading — show Install
+  // optimistically to avoid flicker; the route will redirect to login if needed.
+  if (isAuthed === false) {
+    const loginUrl = `${process.env.NEXT_PUBLIC_AUTH_HOST_URL}/login?next=${
+      typeof window !== "undefined" ? encodeURIComponent(window.location.href) : ""
+    }`;
+    return (
+      <button
+        className={`${styles.btn} ${styles.signIn}`}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          window.location.href = loginUrl;
+        }}
+      >
+        Sign in to install
+      </button>
+    );
+  }
+
+  function buildInstallStartUrl(instanceUrl: string): string {
     const detail = {
       id: plugin.id,
       npmPackage: plugin.npmPackage ?? plugin.id,
@@ -44,36 +71,58 @@ export default function PluginCardActions({ plugin }: Props) {
       changelog: (plugin as any).changelog ?? "",
     };
     const manifest = getInstallManifest(detail);
-    const manifestB64 = btoa(
-      unescape(encodeURIComponent(JSON.stringify(manifest)))
-    );
+    const manifestB64 = btoa(unescape(encodeURIComponent(JSON.stringify(manifest))));
     const redirectTo = window.location.href.split("?")[0];
 
-    const url = new URL(`${instanceUrl}/api/marketplace/install-redirect`);
+    const url = new URL("/api/install/start", window.location.origin);
     url.searchParams.set("pluginId", plugin.id);
     url.searchParams.set("version", plugin.version);
     url.searchParams.set("manifest", manifestB64);
+    url.searchParams.set("instanceUrl", instanceUrl);
     url.searchParams.set("redirectTo", redirectTo);
     return url.toString();
   }
 
-  function handleInstall(e: MouseEvent) {
+  async function handleInstall(e: MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
     trackEvent("plugin_install_click", { pluginId: plugin.id });
-    const instanceUrl = getInstanceUrl();
-    if (!instanceUrl) {
-      setShowConfig(true);
+
+    const cached = getInstanceUrl();
+    if (cached) {
+      window.location.href = buildInstallStartUrl(cached);
       return;
     }
-    window.location.href = buildRedirectUrl(instanceUrl);
+
+    const instances = await fetchUserInstances();
+    if (instances.length === 1) {
+      setInstanceUrl(instances[0].url);
+      window.location.href = buildInstallStartUrl(instances[0].url);
+      return;
+    }
+    if (instances.length > 1) {
+      setPickerInstances(instances);
+      return;
+    }
+    setShowConfig(true);
+  }
+
+  function handlePickerSelect(instance: SavedInstance) {
+    setInstanceUrl(instance.url);
+    setPickerInstances(null);
+    window.location.href = buildInstallStartUrl(instance.url);
+  }
+
+  function handlePickerAddNew() {
+    setPickerInstances(null);
+    setShowConfig(true);
   }
 
   function handleConfigured() {
     setShowConfig(false);
     const instanceUrl = getInstanceUrl();
     if (instanceUrl) {
-      window.location.href = buildRedirectUrl(instanceUrl);
+      window.location.href = buildInstallStartUrl(instanceUrl);
     }
   }
 
@@ -83,6 +132,15 @@ export default function PluginCardActions({ plugin }: Props) {
         <InstanceConfig
           onConfigured={handleConfigured}
           onCancel={() => setShowConfig(false)}
+        />
+      )}
+
+      {pickerInstances && (
+        <InstancePicker
+          instances={pickerInstances}
+          onSelect={handlePickerSelect}
+          onAddNew={handlePickerAddNew}
+          onCancel={() => setPickerInstances(null)}
         />
       )}
 
