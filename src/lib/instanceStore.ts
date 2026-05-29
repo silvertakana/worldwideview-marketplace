@@ -72,3 +72,26 @@ export function captureFromInstanceQuery(): string | null {
 
     return normalized;
 }
+
+/** A WorldWideView instance that the user has previously linked to their account. */
+export interface SavedInstance {
+    id: string;
+    url: string;
+    nickname?: string | null;
+}
+
+/**
+ * Fetches the list of linked instances for the currently authenticated user.
+ * Returns an empty array if unauthenticated or if the request fails.
+ * Never throws.
+ */
+export async function fetchUserInstances(): Promise<SavedInstance[]> {
+    try {
+        const res = await fetch("/api/me/instances");
+        if (!res.ok) return [];
+        const data = await res.json();
+        return (data.instances ?? []) as SavedInstance[];
+    } catch {
+        return [];
+    }
+}
