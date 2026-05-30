@@ -2,17 +2,24 @@
 
 import { useState, useEffect } from 'react';
 
-export function useMyInstalls(): Set<string> {
+interface MyInstallsResult {
+  ids: Set<string>;
+  isAuthed: boolean | undefined;
+}
+
+export function useMyInstalls(): MyInstallsResult {
   const [ids, setIds] = useState<Set<string>>(new Set());
+  const [isAuthed, setIsAuthed] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
 
     fetch('/api/me/installs')
       .then((res) => res.json())
-      .then((data: { pluginIds: string[] }) => {
+      .then((data: { authed: boolean; pluginIds: string[] }) => {
         if (!cancelled) {
           setIds(new Set(data.pluginIds));
+          setIsAuthed(data.authed);
         }
       })
       .catch(() => {});
@@ -22,5 +29,5 @@ export function useMyInstalls(): Set<string> {
     };
   }, []);
 
-  return ids;
+  return { ids, isAuthed };
 }

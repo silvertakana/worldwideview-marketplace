@@ -18,6 +18,12 @@
   color: #fff;
 }
 
+.signIn {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
 .install:hover {
   background: var(--color-accent-hover);
   box-shadow: var(--shadow-glow);

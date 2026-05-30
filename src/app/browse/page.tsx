@@ -14,7 +14,7 @@ export default function BrowsePage() {
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
   const { plugins, loading, error } = usePlugins(active, debouncedQuery);
-  const myInstalls = useMyInstalls();
+  const { ids: myInstalls, isAuthed } = useMyInstalls();
 
   useEffect(() => {
     if (debouncedQuery) {
@@ -73,7 +73,7 @@ export default function BrowsePage() {
       ) : (
         <div className={styles.grid}>
           {plugins.map((plugin) => (
-            <PluginCard key={plugin.id} plugin={plugin} isInstalled={myInstalls.has(plugin.id)} />
+            <PluginCard key={plugin.id} plugin={plugin} isInstalled={myInstalls.has(plugin.id)} isAuthed={isAuthed} />
           ))}
         </div>
       )}

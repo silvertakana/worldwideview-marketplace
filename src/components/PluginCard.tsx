@@ -12,9 +12,10 @@ import styles from "./PluginCard.module.css";
 interface PluginCardProps {
   plugin: PluginCardData;
   isInstalled?: boolean;
+  isAuthed?: boolean;
 }
 
-export default function PluginCard({ plugin, isInstalled }: PluginCardProps) {
+export default function PluginCard({ plugin, isInstalled, isAuthed }: PluginCardProps) {
   function handleClick() {
     trackEvent("plugin_card_click", {
       pluginId: plugin.id,
@@ -43,7 +44,7 @@ export default function PluginCard({ plugin, isInstalled }: PluginCardProps) {
       <p className={styles.cardDesc}>{plugin.description}</p>
       <div className={styles.cardFooter}>
         <span className={styles.categoryBadge}>{plugin.category}</span>
-        <PluginCardActions plugin={plugin} />
+        <PluginCardActions plugin={plugin} isAuthed={isAuthed} />
       </div>
     </Link>
   );

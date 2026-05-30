@@ -37,7 +37,7 @@ describe('GET /api/me/installs', () => {
     const body = await response.json()
 
     expect(response.status).toBe(200)
-    expect(body).toEqual({ pluginIds: ['plugin-a', 'plugin-b'] })
+    expect(body).toEqual({ authed: true, pluginIds: ['plugin-a', 'plugin-b'] })
     expect(mockFindMany).toHaveBeenCalledWith({
       where: { userId: 'user-123' },
       select: { pluginId: true },
@@ -52,7 +52,7 @@ describe('GET /api/me/installs', () => {
     const body = await response.json()
 
     expect(response.status).toBe(200)
-    expect(body).toEqual({ pluginIds: [] })
+    expect(body).toEqual({ authed: false, pluginIds: [] })
     expect(mockFindMany).not.toHaveBeenCalled()
   })
 
@@ -65,6 +65,6 @@ describe('GET /api/me/installs', () => {
     const body = await response.json()
 
     expect(response.status).toBe(200)
-    expect(body).toEqual({ pluginIds: [] })
+    expect(body).toEqual({ authed: true, pluginIds: [] })
   })
 })
