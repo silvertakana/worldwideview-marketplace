@@ -22,6 +22,21 @@ export default function BrowsePage() {
     }
   }, [debouncedQuery]);
 
+  // Scroll-position restoration after an install redirect.
+  // The install flow saves the target plugin's ID to sessionStorage before
+  // navigating away. On return we find the card by its stable DOM id,
+  // scroll it into view, then clear the key so it only fires once.
+  useEffect(() => {
+    const savedId = sessionStorage.getItem("browse_scroll_plugin_id");
+    if (!savedId) return;
+    sessionStorage.removeItem("browse_scroll_plugin_id");
+
+    const el = document.getElementById(`plugin-${savedId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [plugins]);
+
   function handleCategoryFilter(cat: Category) {
     setActive(cat);
     trackEvent("category_filter", { category: cat });

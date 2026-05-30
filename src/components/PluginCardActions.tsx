@@ -83,6 +83,10 @@ export default function PluginCardActions({ plugin, isAuthed }: Props) {
     return url.toString();
   }
 
+  function saveScrollAnchor() {
+    sessionStorage.setItem("browse_scroll_plugin_id", plugin.id);
+  }
+
   async function handleInstall(e: MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
@@ -90,6 +94,7 @@ export default function PluginCardActions({ plugin, isAuthed }: Props) {
 
     const cached = getInstanceUrl();
     if (cached) {
+      saveScrollAnchor();
       window.location.href = buildInstallStartUrl(cached);
       return;
     }
@@ -97,6 +102,7 @@ export default function PluginCardActions({ plugin, isAuthed }: Props) {
     const instances = await fetchUserInstances();
     if (instances.length === 1) {
       setInstanceUrl(instances[0].url);
+      saveScrollAnchor();
       window.location.href = buildInstallStartUrl(instances[0].url);
       return;
     }
@@ -110,6 +116,7 @@ export default function PluginCardActions({ plugin, isAuthed }: Props) {
   function handlePickerSelect(instance: SavedInstance) {
     setInstanceUrl(instance.url);
     setPickerInstances(null);
+    saveScrollAnchor();
     window.location.href = buildInstallStartUrl(instance.url);
   }
 
@@ -122,6 +129,7 @@ export default function PluginCardActions({ plugin, isAuthed }: Props) {
     setShowConfig(false);
     const instanceUrl = getInstanceUrl();
     if (instanceUrl) {
+      saveScrollAnchor();
       window.location.href = buildInstallStartUrl(instanceUrl);
     }
   }

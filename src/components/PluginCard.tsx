@@ -26,6 +26,7 @@ export default function PluginCard({ plugin, isInstalled, isAuthed }: PluginCard
 
   return (
     <Link
+      id={`plugin-${plugin.id}`}
       href={`/browse/${plugin.id}`}
       className={styles.card}
       onClick={handleClick}
