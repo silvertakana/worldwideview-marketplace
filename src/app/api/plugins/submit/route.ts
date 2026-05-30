@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSupabaseUser } from "@/lib/auth/requireSession";
 import { getOrCreateMarketplaceUser } from "@/lib/auth/getOrCreateMarketplaceUser";
+import { firePluginSubmitWebhook } from "@/lib/webhooks";
 
 export async function POST(req: Request) {
   const supabaseUser = await getSupabaseUser();
@@ -60,6 +61,25 @@ export async function POST(req: Request) {
         longDescription,
         trust: "pending",
       },
+    });
+
+    void firePluginSubmitWebhook({
+      event: "plugin.submitted",
+      timestamp: new Date().toISOString(),
+      plugin: {
+        id: plugin.id,
+        name: pkgData.name ?? npmPackage,
+        npmPackage,
+        version: pkgData.version ?? "unknown",
+        description: plugin.longDescription,
+        category: plugin.category,
+        icon: plugin.icon,
+      },
+      submittedBy: {
+        email: supabaseUser.email ?? null,
+        name: (supabaseUser.user_metadata?.full_name as string | undefined) ?? null,
+      },
+      adminUrl: (process.env.NEXT_PUBLIC_APP_URL ?? "") + "/admin",
     });
 
     return NextResponse.json({ success: true, plugin });
