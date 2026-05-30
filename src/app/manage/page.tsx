@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Link2, Inbox, AlertTriangle, RefreshCw, Settings } from "lucide-react";
 import { useInstalledPlugins } from "@/hooks/useInstalledPlugins";
 import InstalledPluginCard from "@/components/InstalledPluginCard";
 import InstanceConfig from "@/components/InstanceConfig";
+import LinkedInstancesPanel from "@/components/LinkedInstancesPanel";
 import { setMarketplaceToken } from "@/lib/instanceStore";
 import styles from "./page.module.css";
 
@@ -18,7 +20,7 @@ export default function ManagePage() {
     const tokenMatch = hash.match(/[#&]token=([^&]*)/);
     if (tokenMatch?.[1]) {
       setMarketplaceToken(tokenMatch[1]);
-      // Clean the fragment from URL
+      // Clean the fragment from URL without triggering a navigation
       window.history.replaceState({}, "", window.location.pathname + window.location.search);
       refetch();
     }
@@ -42,7 +44,7 @@ export default function ManagePage() {
       {/* Not configured — prompt to connect */}
       {!configured && !showConfig && (
         <div className={styles.emptyState}>
-          <span className={styles.emptyIcon}>🔗</span>
+          <Link2 size={40} className={styles.emptyIcon} strokeWidth={1.5} />
           <h2 className={styles.emptyTitle}>Connect Your Instance</h2>
           <p className={styles.emptyDesc}>
             Link your WorldWideView instance to manage installed plugins.
@@ -64,9 +66,11 @@ export default function ManagePage() {
       {/* Connection error */}
       {configured && error && (
         <div className={styles.errorState}>
-          <p className={styles.errorMsg}>⚠️ {error}</p>
+          <AlertTriangle size={20} className={styles.errorIcon} />
+          <p className={styles.errorMsg}>{error}</p>
           <div className={styles.errorActions}>
             <button className={styles.retryBtn} onClick={refetch}>
+              <RefreshCw size={14} />
               Retry
             </button>
             <button
@@ -106,13 +110,13 @@ export default function ManagePage() {
       {/* Empty — connected but nothing installed */}
       {configured && !loading && !error && plugins.length === 0 && (
         <div className={styles.emptyState}>
-          <span className={styles.emptyIcon}>📭</span>
+          <Inbox size={40} className={styles.emptyIcon} strokeWidth={1.5} />
           <h2 className={styles.emptyTitle}>No Plugins Installed</h2>
           <p className={styles.emptyDesc}>
             Browse the catalog and install plugins to see them here.
           </p>
           <Link href="/browse" className={styles.browseLink}>
-            Browse Plugins →
+            Browse Plugins
           </Link>
         </div>
       )}
@@ -124,10 +128,13 @@ export default function ManagePage() {
             className={styles.reconfigBtn}
             onClick={() => setShowConfig(true)}
           >
-            ⚙ Change Instance
+            <Settings size={14} />
+            Change Instance
           </button>
         </div>
       )}
+
+      <LinkedInstancesPanel onAddInstance={() => setShowConfig(true)} />
     </div>
   );
 }
