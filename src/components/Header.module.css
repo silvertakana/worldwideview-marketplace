@@ -93,24 +93,52 @@
   background: var(--color-accent-glow);
 }
 
-.userChip {
-  padding: var(--space-xs) var(--space-md);
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  max-width: 180px;
+.avatarChip {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  border: 1.5px solid var(--color-border);
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-.userChip:hover {
-  background: var(--color-bg-card-hover);
-  border-color: var(--color-border-hover);
+.avatarChip:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-subtle);
+}
+
+.avatarImg {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+/* AvatarInitials variant scaled for the 34px header chip */
+.chipAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: hsl(var(--avatar-hue, 350), 50%, 42%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+[data-theme="dark"] .chipAvatar {
+  background: hsl(var(--avatar-hue, 350), 45%, 38%);
 }
 
 .dropdownMenu {
