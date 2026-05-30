@@ -78,6 +78,7 @@ export interface SavedInstance {
     id: string;
     url: string;
     nickname?: string | null;
+    lastUsedAt: string;
 }
 
 /**
