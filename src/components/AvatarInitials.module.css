@@ -1,0 +1,21 @@
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  background: hsl(var(--avatar-hue, 350), 50%, 42%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+  user-select: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="dark"] .avatar {
+  background: hsl(var(--avatar-hue, 350), 45%, 38%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
