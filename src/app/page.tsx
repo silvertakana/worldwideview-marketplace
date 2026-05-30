@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { KNOWN_PLUGINS } from "@/data/knownPlugins";
 import PluginCard from "@/components/PluginCard";
@@ -67,7 +68,7 @@ export default function Home() {
             className={styles.primaryCta}
             onClick={() => trackEvent("cta_click", { label: "Browse Plugins" })}
           >
-            Browse Plugins →
+            Browse Plugins <ArrowRight size={16} />
           </Link>
           <span className={styles.secondaryCta}>
             Publish a Plugin
@@ -108,7 +109,7 @@ export default function Home() {
         <div className={styles.popularHeader}>
           <h2 className={styles.sectionTitle}>Popular Plugins</h2>
           <Link href="/browse" className={styles.viewAll}>
-            View All →
+            View All <ArrowRight size={14} />
           </Link>
         </div>
         <div className={styles.popularGrid}>
