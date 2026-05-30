@@ -12,6 +12,46 @@ type ManifestTemplate = Record<string, any>;
 
 export const PLUGIN_MANIFESTS: Record<string, ManifestTemplate> = {};
 
+/**
+ * WWV's validateManifest only accepts these trust values:
+ *   built-in | verified | unverified
+ * The marketplace DB may hold legacy / internal labels (e.g. "COMMUNITY",
+ * "pending"). Map anything we don't explicitly trust to "unverified" so the
+ * manifest passes WWV validation. Community / unreviewed plugins are
+ * unverified by definition.
+ */
+function normalizeTrust(trust: string | undefined): string {
+  switch ((trust ?? "").toLowerCase()) {
+    case "built-in":
+      return "built-in";
+    case "verified":
+      return "verified";
+    case "unverified":
+    case "community":
+    case "pending":
+    default:
+      return "unverified";
+  }
+}
+
+/**
+ * WWV's manifest format vocabulary is "bundle" | "static" | "declarative".
+ * The marketplace DB may hold internal labels (e.g. "ALL_BUNDLE"). Map any
+ * bundle-flavoured value to "bundle" so the entry-URL logic below runs.
+ */
+function normalizeFormat(format: string | undefined): string {
+  switch ((format ?? "").toLowerCase()) {
+    case "static":
+      return "static";
+    case "declarative":
+      return "declarative";
+    case "bundle":
+    case "all_bundle":
+    default:
+      return "bundle";
+  }
+}
+
 /** Get the install manifest for a plugin, or a minimal fallback. */
 export function getInstallManifest(detail: PluginDetail): ManifestTemplate {
   if (PLUGIN_MANIFESTS[detail.id]) return PLUGIN_MANIFESTS[detail.id];
@@ -21,12 +61,19 @@ export function getInstallManifest(detail: PluginDetail): ManifestTemplate {
     name: detail.name,
     version: detail.version,
     type: "data-layer",
-    format: detail.format,
-    trust: detail.trust,
+    format: normalizeFormat(detail.format),
+    trust: normalizeTrust(detail.trust),
     capabilities: detail.capabilities,
     category: detail.category,
     icon: detail.icon,
   };
+
+  // WWV requires a non-empty capabilities array. Community plugins seeded with
+  // an empty list would otherwise fail validation, so fall back to the minimal
+  // self-data capability.
+  if (!Array.isArray(base.capabilities) || base.capabilities.length === 0) {
+    base.capabilities = ["data:own"];
+  }
 
   // Fix faulty plugins that say "static" on NPM but are actually bundles missing dataFile config
   if (base.format === "static" && !base.dataFile) {
