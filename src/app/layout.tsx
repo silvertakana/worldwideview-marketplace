@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import ClientProviders from "@/components/ClientProviders";
+import ThemeProvider from "@/components/ThemeProvider";
 import InstanceCapture from "@/components/InstanceCapture";
 import InstanceHydrator from "@/components/InstanceHydrator";
 import WipBanner from "@/components/WipBanner";
@@ -39,7 +41,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={inter.className}>
       <head>
-        <script
+        {/* beforeInteractive renders this script outside the React tree so React
+            does not warn about inline scripts during client rendering. */}
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem("wwv-marketplace-theme")||"system";var r=t;if(t==="system"){r=window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"}document.documentElement.setAttribute("data-theme",r)}catch(e){}})();`,
           }}
@@ -51,14 +57,16 @@ export default function RootLayout({
         />
       </head>
       <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }} suppressHydrationWarning>
-        <Header />
-        <ClientProviders>
-          <InstanceCapture />
-          <InstanceHydrator />
-          <WipBanner />
-          <main style={{ flex: 1 }}>{children}</main>
-          <Footer />
-        </ClientProviders>
+        <ThemeProvider>
+          <Header />
+          <ClientProviders>
+            <InstanceCapture />
+            <InstanceHydrator />
+            <WipBanner />
+            <main style={{ flex: 1 }}>{children}</main>
+            <Footer />
+          </ClientProviders>
+        </ThemeProvider>
       </body>
     </html>
   );
