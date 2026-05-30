@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Script from "next/script";
 import ClientProviders from "@/components/ClientProviders";
 import ThemeProvider from "@/components/ThemeProvider";
 import InstanceCapture from "@/components/InstanceCapture";
@@ -41,13 +40,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={inter.className}>
       <head>
-        {/* beforeInteractive renders this script outside the React tree so React
-            does not warn about inline scripts during client rendering. */}
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
+        {/* Raw blocking script — no async/defer — so it runs before the browser
+            paints the body. next/script "beforeInteractive" is NOT render-blocking
+            in App Router streaming, which caused the light-mode flash on dark loads. */}
+        <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("wwv-marketplace-theme")||"system";var r=t;if(t==="system"){r=window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"}document.documentElement.setAttribute("data-theme",r)}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem("wwv-marketplace-theme")||"system";var r=t==="system"?(window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"):t;document.documentElement.setAttribute("data-theme",r);document.documentElement.classList.add("no-transition");requestAnimationFrame(function(){requestAnimationFrame(function(){document.documentElement.classList.remove("no-transition")});})}catch(e){}})();`,
           }}
         />
         <script

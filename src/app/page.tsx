@@ -70,10 +70,13 @@ export default function Home() {
           >
             Browse Plugins <ArrowRight size={16} />
           </Link>
-          <span className={styles.secondaryCta}>
-            Publish a Plugin
-            <span className={styles.comingSoon}>Coming Soon</span>
-          </span>
+          <Link
+            href="/submit"
+            className={styles.secondaryCta}
+            onClick={() => trackEvent("cta_click", { label: "Publish a Plugin" })}
+          >
+            Publish a Plugin <ArrowRight size={16} />
+          </Link>
         </div>
 
         <div className={styles.stats}>
