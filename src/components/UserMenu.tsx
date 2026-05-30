@@ -74,7 +74,7 @@ export default function UserMenu({ email, displayName, avatarUrl, authHostUrl, s
         aria-haspopup="true"
         aria-expanded={open}
       >
-        <img src={avatarUrl ?? diceBearUrl(displayName || email || 'user')} alt="" className={styles.avatarImg} />
+        <img src={avatarUrl ?? diceBearUrl(displayName || email || 'user')} alt="" width={34} height={34} className={styles.avatarImg} />
       </button>
       {open && (
         <div className={styles.dropdownMenu} role="menu">

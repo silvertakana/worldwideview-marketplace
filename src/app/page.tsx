@@ -73,9 +73,9 @@ export default function Home() {
           <Link
             href="/submit"
             className={styles.secondaryCta}
-            onClick={() => trackEvent("cta_click", { label: "Publish a Plugin" })}
+            onClick={() => trackEvent("cta_click", { label: "Submit a Plugin" })}
           >
-            Publish a Plugin <ArrowRight size={16} />
+            Submit a Plugin <ArrowRight size={16} />
           </Link>
         </div>
 
