@@ -6,13 +6,13 @@ on:
       - "Dockerfile"
       - "docker-entrypoint.sh"
       - "prisma/**"
-      - "src/data/**"
+      - "src/**"
   pull_request:
     paths:
       - "Dockerfile"
       - "docker-entrypoint.sh"
       - "prisma/**"
-      - "src/data/**"
+      - "src/**"
 
 jobs:
   docker-smoke:
