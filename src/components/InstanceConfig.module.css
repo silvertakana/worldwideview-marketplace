@@ -78,6 +78,31 @@
     line-height: 1.5;
 }
 
+.deprecationBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.bannerLink {
+    color: #818cf8;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 600;
+}
+
+.bannerLink:hover {
+    color: #a5b4fc;
+}
+
 .actions {
     display: flex;
     gap: var(--space-sm);

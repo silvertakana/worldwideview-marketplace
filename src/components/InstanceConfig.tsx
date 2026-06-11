@@ -2,8 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { ExternalLink } from "lucide-react";
 import { getInstanceUrl, setInstanceUrl } from "@/lib/instanceStore";
 import styles from "./InstanceConfig.module.css";
+
+/** When true, the new PKCE connect flow is available — show deprecation notice. */
+const PKCE_ENABLED = !!(
+    typeof process !== "undefined" &&
+    process.env.NEXT_PUBLIC_WWV_PKCE_ENABLED
+);
 
 interface Props {
     onConfigured: () => void;
@@ -110,6 +117,24 @@ export default function InstanceConfig({ onConfigured, onCancel, returnPath }: P
                     Enter the URL of your WorldWideView instance. You{"'"}ll be asked to
                     sign in when installing a plugin.
                 </p>
+
+                {PKCE_ENABLED && (
+                    <div className={styles.deprecationBanner}>
+                        <ExternalLink size={14} />
+                        <span>
+                            For a more secure connection,{" "}
+                            <a
+                                href={`${(getInstanceUrl() ?? "http://localhost:3000").replace(/\/+$/, "")}/api/marketplace/connect`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.bannerLink}
+                            >
+                                connect your account instead
+                            </a>
+                            .
+                        </span>
+                    </div>
+                )}
 
                 <label className={styles.label}>Instance URL</label>
                 <input
