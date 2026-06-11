@@ -87,6 +87,7 @@ model MarketplaceApiKey {
   id         String    @id @default(cuid())
   userId     String
   keyHash    String    @unique
+  keyPrefix  String?   // First 10 chars of raw key for display (e.g., "mk_a1b2c3d4")
   deviceId   String?
   name       String?
   createdAt  DateTime  @default(now())
