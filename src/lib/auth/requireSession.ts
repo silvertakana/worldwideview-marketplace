@@ -10,6 +10,7 @@ export async function getSupabaseUser() {
 export async function requireSupabaseUser(returnTo: string) {
   const user = await getSupabaseUser()
   if (!user) {
+    const authHost = process.env.NEXT_PUBLIC_AUTH_HOST_URL!
     // The auth host treats relative `next` values as relative to ITSELF, so
     // `next=/account` would land the user on the auth host's `/account` (which
     // does not exist) after login. Promote relative paths to absolute marketplace
