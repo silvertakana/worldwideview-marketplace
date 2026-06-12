@@ -24,12 +24,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/login",
-        destination: "https://www.worldwideview.dev/login",
+        destination: "https://worldwideview.dev/login",
         permanent: false,
       },
       {
         source: "/login/:path*",
-        destination: "https://www.worldwideview.dev/login/:path*",
+        destination: "https://worldwideview.dev/login/:path*",
         permanent: false,
       },
     ];
