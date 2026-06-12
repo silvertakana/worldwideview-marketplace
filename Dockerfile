@@ -20,10 +20,18 @@ RUN corepack enable pnpm
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Dummy env vars required for build — @supabase/ssr throws if URL/key are empty strings
+# Build args for Next.js build-time env inlining
+ARG NEXT_PUBLIC_SUPABASE_URL="https://placeholder.supabase.co"
+ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="placeholder-key-for-build"
+ARG NEXT_PUBLIC_SITE_URL="https://placeholder.marketplace.dev"
+ARG NEXT_PUBLIC_AUTH_HOST_URL="https://placeholder.auth.dev"
+ARG NEXT_PUBLIC_WWV_COOKIE_DOMAIN=".placeholder.dev"
 ENV DATABASE_URL="file:./dummy.db"
-ENV NEXT_PUBLIC_SUPABASE_URL="https://placeholder.supabase.co"
-ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="placeholder-key-for-build"
+ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+ENV NEXT_PUBLIC_AUTH_HOST_URL=${NEXT_PUBLIC_AUTH_HOST_URL}
+ENV NEXT_PUBLIC_WWV_COOKIE_DOMAIN=${NEXT_PUBLIC_WWV_COOKIE_DOMAIN}
 RUN npx prisma generate
 RUN pnpm run build
 
