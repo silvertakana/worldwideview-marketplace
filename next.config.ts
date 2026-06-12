@@ -22,6 +22,16 @@ const nextConfig: NextConfig = {
         destination: "https://worldwideview.dev/docs/:path*",
         permanent: false,
       },
+      {
+        source: "/login",
+        destination: "https://www.worldwideview.dev/login",
+        permanent: false,
+      },
+      {
+        source: "/login/:path*",
+        destination: "https://www.worldwideview.dev/login/:path*",
+        permanent: false,
+      },
     ];
   },
 };
