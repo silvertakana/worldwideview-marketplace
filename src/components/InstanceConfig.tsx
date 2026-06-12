@@ -80,6 +80,16 @@ export default function InstanceConfig({ onConfigured, onCancel, returnPath }: P
         }
         
         setInstanceUrl(sanitizedUrl);
+
+        // Fire-and-forget: also save this instance to the user's account
+        // server-side so future installs from new devices auto-detect it.
+        // 401 (anonymous) is fine — they'll re-link after signing in.
+        fetch("/api/instances/link", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ url: sanitizedUrl }),
+        }).catch(() => { /* ignore network errors */ });
+
         // Redirect to WWV to obtain a marketplace token via session auth.
         // WWV will redirect back to returnPath with ?token=<jwt>.
         const returnTo = returnPath ?? window.location.href.split("?")[0];

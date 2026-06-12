@@ -2,23 +2,26 @@
 .card {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: var(--space-lg);
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
   text-decoration: none;
   color: inherit;
-  transition: transform var(--transition-base),
+  /* Consistent height prevents grid ragging with short descriptions */
+  min-height: 180px;
+  transition:
+    transform var(--transition-base),
     border-color var(--transition-base),
     box-shadow var(--transition-base);
   cursor: pointer;
 }
 
 .card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
   border-color: var(--color-border-hover);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
   color: inherit;
 }
 
@@ -29,27 +32,38 @@
 }
 
 .cardIcon {
-  font-size: 1.6rem;
   width: 40px;
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg-elevated);
-  border-radius: var(--radius-sm);
+  background: var(--color-bg-card-hover);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   flex-shrink: 0;
 }
 
 .cardName {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text-primary);
+  /* Prevent very long plugin names from overflowing */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
 }
 
 .cardDesc {
-  font-size: 0.88rem;
+  font-size: 0.875rem;
   color: var(--color-text-secondary);
-  line-height: 1.5;
+  line-height: 1.55;
+  /* Clip to exactly 2 lines to keep grid rows consistent */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   flex: 1;
 }
 
@@ -57,20 +71,39 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: var(--space-xs);
+  margin-top: auto;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border);
 }
 
 .categoryBadge {
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 2px var(--space-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 3px var(--space-sm);
   border-radius: var(--radius-full);
   background: var(--color-accent-glow);
-  color: var(--color-accent-hover);
-  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  border: 1px solid currentColor;
+  text-transform: capitalize;
 }
 
 .installs {
   font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
   color: var(--color-text-muted);
+}
+
+.installedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }

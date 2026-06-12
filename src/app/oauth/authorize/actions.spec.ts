@@ -133,9 +133,7 @@ describe('denyAuthorization', () => {
       throw { __redirect: url }
     })
 
-    const fd = new FormData()
-    fd.set('redirect_uri', 'http://localhost:3000/api/marketplace/callback')
-    fd.set('state', 'random-state-xyz')
+    const fd = makeFormData()
 
     await expect(denyAuthorization(fd)).rejects.toMatchObject({ __redirect: expect.any(String) })
 

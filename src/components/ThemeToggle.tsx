@@ -1,39 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Sun, Moon } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import styles from "./ThemeToggle.module.css";
 
-const ICONS: Record<string, string> = {
-  light: "☀️",
-  dark: "🌙",
-  system: "💻",
-};
-
-const NEXT: Record<string, "light" | "dark" | "system"> = {
-  light: "dark",
-  dark: "system",
-  system: "light",
-};
-
 export default function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolved, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
-  /* Render a stable placeholder during SSR to avoid hydration mismatch */
-  const label = mounted ? theme : "system";
-  const icon = mounted ? ICONS[theme] : ICONS.system;
+  if (!mounted) return <div className={styles.placeholder} aria-hidden="true" />;
+
+  const isDark = resolved === "dark";
 
   return (
     <button
       className={styles.toggle}
-      onClick={() => setTheme(NEXT[theme])}
-      aria-label={`Switch theme (current: ${label})`}
-      title={`Theme: ${label}`}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+      title={`Switch to ${isDark ? "light" : "dark"} mode`}
     >
-      {icon}
+      {isDark ? <Sun size={16} /> : <Moon size={16} />}
     </button>
   );
 }

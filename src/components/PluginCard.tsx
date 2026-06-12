@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Check } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import PluginIcon from "./PluginIcon";
 import PluginCardActions from "./PluginCardActions";
@@ -10,9 +11,11 @@ import styles from "./PluginCard.module.css";
 
 interface PluginCardProps {
   plugin: PluginCardData;
+  isInstalled?: boolean;
+  isAuthed?: boolean;
 }
 
-export default function PluginCard({ plugin }: PluginCardProps) {
+export default function PluginCard({ plugin, isInstalled, isAuthed }: PluginCardProps) {
   function handleClick() {
     trackEvent("plugin_card_click", {
       pluginId: plugin.id,
@@ -23,6 +26,7 @@ export default function PluginCard({ plugin }: PluginCardProps) {
 
   return (
     <Link
+      id={`plugin-${plugin.id}`}
       href={`/browse/${plugin.id}`}
       className={styles.card}
       onClick={handleClick}
@@ -31,11 +35,17 @@ export default function PluginCard({ plugin }: PluginCardProps) {
         <span className={styles.cardIcon}><PluginIcon name={plugin.icon} size={22} /></span>
         <span className={styles.cardName}>{plugin.name}</span>
         <TrustBadge trust={plugin.trust} />
+        {isInstalled && (
+          <span className={styles.installedBadge}>
+            <Check size={13} />
+            Installed
+          </span>
+        )}
       </div>
       <p className={styles.cardDesc}>{plugin.description}</p>
       <div className={styles.cardFooter}>
         <span className={styles.categoryBadge}>{plugin.category}</span>
-        <PluginCardActions plugin={plugin} />
+        <PluginCardActions plugin={plugin} isAuthed={isAuthed} />
       </div>
     </Link>
   );

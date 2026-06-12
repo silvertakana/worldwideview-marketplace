@@ -85,6 +85,11 @@
   color-scheme: dark;
 }
 
+/* Suppress all transitions during initial theme application to prevent FOUC */
+.no-transition * {
+  transition: none !important;
+}
+
 /* ───────── Reset & Base ────────── */
 *,
 *::before,

@@ -5,17 +5,22 @@
   width: 34px;
   height: 34px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   background: var(--color-bg-card);
   cursor: pointer;
-  font-size: 1rem;
+  color: var(--color-text-secondary);
   transition: border-color var(--transition-fast),
     background var(--transition-fast),
-    transform var(--transition-fast);
+    color var(--transition-fast);
 }
 
 .toggle:hover {
   border-color: var(--color-border-hover);
   background: var(--color-bg-card-hover);
-  transform: scale(1.05);
+  color: var(--color-text-primary);
+}
+
+.placeholder {
+  width: 34px;
+  height: 34px;
 }
