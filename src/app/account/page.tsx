@@ -1,9 +1,11 @@
 import Link from 'next/link'
-import { ExternalLink, Link2, KeyRound, LogOut, Server, Package } from 'lucide-react'
+import { ExternalLink, Link2, KeyRound, LogOut, Server, Package, CreditCard, Zap } from 'lucide-react'
 import { requireSupabaseUser } from '@/lib/auth/requireSession'
 import { getOrCreateMarketplaceUser } from '@/lib/auth/getOrCreateMarketplaceUser'
 import { prisma } from '@/lib/prisma'
 import { diceBearUrl } from '@/lib/diceBear'
+import { getEffectiveTier } from '@/lib/auth/tierGating'
+import { ManageBillingButton } from './ManageBillingButton'
 import InstallHistory from '@/components/InstallHistory'
 import styles from './account.module.css'
 
@@ -23,6 +25,8 @@ export default async function AccountPage() {
       orderBy: { createdAt: 'desc' },
     }),
   ])
+
+  const effectiveTier = getEffectiveTier(marketplaceUser)
 
   const displayName: string =
     supabaseUser.user_metadata?.display_name ??
@@ -91,6 +95,44 @@ export default async function AccountPage() {
             Edit on WorldWideView Hub
             <ExternalLink size={14} className={styles.btnIcon} />
           </a>
+        </div>
+      </section>
+
+      {/* Subscription section */}
+      <section className={styles.card}>
+        <div className={styles.sectionHeading}>
+          <CreditCard size={18} className={styles.sectionIcon} />
+          <h2 className={styles.sectionTitle}>Subscription</h2>
+        </div>
+
+        <div className={styles.subscriptionCard}>
+          <div className={styles.tierBadge}>
+            <Zap size={16} />
+            <span>{effectiveTier === 'pro' ? 'Pro' : 'Free'}</span>
+          </div>
+
+          <div className={styles.subscriptionMeta}>
+            <p className={styles.subscriptionStatus}>
+              {effectiveTier === 'free'
+                ? 'You are on the Free plan.'
+                : 'You are on the Pro plan.'}
+            </p>
+            {marketplaceUser.stripeCurrentPeriodEnd && (
+              <p className={styles.subscriptionDetail}>
+                Renews{' '}
+                {new Intl.DateTimeFormat('en-US', {
+                  dateStyle: 'long',
+                }).format(new Date(marketplaceUser.stripeCurrentPeriodEnd))}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.subscriptionActions}>
+          <ManageBillingButton
+            hasSubscription={!!marketplaceUser.stripeCustomerId}
+            tier={effectiveTier}
+          />
         </div>
       </section>
 

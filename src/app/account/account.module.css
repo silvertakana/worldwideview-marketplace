@@ -276,6 +276,103 @@
   border: 1px solid var(--color-border);
 }
 
+/* ── Subscription card ── */
+.subscriptionCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+}
+
+.tierBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, var(--color-accent), #c0392b);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.subscriptionMeta {
+  flex: 1;
+  min-width: 0;
+}
+
+.subscriptionStatus {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.subscriptionDetail {
+  font-size: 0.83rem;
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
+}
+
+.subscriptionActions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.manageBillingButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+
+.manageBillingButton:hover {
+  background: var(--color-accent-hover);
+}
+
+.manageBillingButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.upgradeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-lg);
+  background: linear-gradient(135deg, var(--color-accent), #c0392b);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.upgradeButton:hover {
+  opacity: 0.9;
+  color: #fff;
+}
+
 /* ── Sign out ── */
 .signOutButton {
   display: inline-flex;
