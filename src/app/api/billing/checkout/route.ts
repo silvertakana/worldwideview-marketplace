@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 const PRICE_IDS: Record<string, string> = {
-    pro_monthly: "price_placeholder_monthly",
-    pro_yearly: "price_placeholder_yearly",
+    pro_monthly: "price_1ThpS3CnLxBZfLqIXTuEGV2S",
+    pro_yearly: "price_1ThpSDCnLxBZfLqIH5Y1Xjo4",
 };
 
 export async function POST(req: Request) {
