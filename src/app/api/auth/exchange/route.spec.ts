@@ -99,7 +99,7 @@ describe("Token Exchange Endpoint", () => {
         expect(decoded.sub).toBe(FIXTURE_USER.id);
         expect(decoded.aud).toBe("wwv-aviation-engine");
         expect(decoded.tier).toBe("pro");
-        expect(decoded.scope).toBe("plugins:read plugins:write");
+        expect(decoded.subscriptionStatus).toBe("active");
         expect(decoded.exp! - decoded.iat!).toBe(300);
         expect(decoded.nbf).toBeDefined();
         expect(decoded.jti).toBeDefined();

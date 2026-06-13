@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import * as jose from "jose";
 import { prisma } from "@/lib/prisma";
 import { hashApiKey } from "@/lib/auth/apiKeyHash";
-import { scopeFor } from "@/lib/auth/tierScope";
+import { getEffectiveTier } from "@/lib/auth/tierGating";
+import { buildTierClaims } from "@/lib/auth/tierClaims";
 import { getActiveKey } from "@/lib/auth/signingKey";
 
 export async function POST(req: NextRequest) {
@@ -33,9 +34,12 @@ export async function POST(req: NextRequest) {
         const { kid, privateKey } = await getActiveKey();
         const now = Math.floor(Date.now() / 1000);
 
+        const effectiveTier = getEffectiveTier(apiKeyRecord.user);
+        const claims = buildTierClaims(apiKeyRecord.user);
+
         const jwt = await new jose.SignJWT({
-            tier: apiKeyRecord.user.tier,
-            scope: scopeFor(apiKeyRecord.user.tier),
+            tier: effectiveTier,
+            subscriptionStatus: claims.subscriptionStatus,
         })
             .setProtectedHeader({ alg: "EdDSA", typ: "JWT", kid })
             .setIssuer("https://marketplace.worldwideview.dev")
