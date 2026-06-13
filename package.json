@@ -1,11 +1,11 @@
 {
   "name": "worldwideview-marketplace",
-  "version": "1.15.0",
+  "version": "1.9.1",
   "packageManager": "pnpm@10.33.0",
   "private": true,
   "description": "Marketplace for WorldWideView plugins — browse, publish, and install data sources",
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--use-system-ca next dev --webpack --port 3002 --hostname marketplace.wwv.local --experimental-https --experimental-https-key ./certs/marketplace.wwv.local-key.pem --experimental-https-cert ./certs/marketplace.wwv.local.pem",
+    "dev": "next dev --webpack --experimental-https --experimental-https-key ./certs/marketplace.wwv.local-key.pem --experimental-https-cert ./certs/marketplace.wwv.local.pem --hostname marketplace.wwv.local -p 3002",
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
@@ -24,14 +24,14 @@
     "next": "16.2.6",
     "prisma": "^7.5.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "stripe": "^22.2.1"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "typescript": "^5",

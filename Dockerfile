@@ -20,10 +20,16 @@ RUN corepack enable pnpm
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Dummy env vars required for build — @supabase/ssr throws if URL/key are empty strings
+# NEXT_PUBLIC_* env vars are INLINED at build time by Next.js.
+# They MUST be ARGs (Coolify passes them in as --build-arg), not hardcoded ENV.
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-https://placeholder.supabase.co}
+ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-placeholder-key-for-build}
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-pk_test_placeholder}
+# DATABASE_URL is not NEXT_PUBLIC_*, so it's not inlined — hardcoded default is fine for prisma generate
 ENV DATABASE_URL="file:./dummy.db"
-ENV NEXT_PUBLIC_SUPABASE_URL="https://placeholder.supabase.co"
-ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="placeholder-key-for-build"
 RUN npx prisma generate
 RUN pnpm run build
 

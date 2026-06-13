@@ -14,6 +14,7 @@ model Plugin {
   format          String          // "bundle" | "static" | "dynamic"
   trust           String          @default("pending") // "built-in", "verified", "unverified", "pending"
   capabilities    String          // JSON string array of capabilities
+  engineAudience  String?         // null = first-party (wwv-data-engine), or custom engine ID for third-party
   longDescription String
   changelog       String?
   addedAt         DateTime        @default(now())
@@ -44,6 +45,10 @@ model User {
   email           String                   @unique
   tier            String                   @default("free")
   createdAt       DateTime                 @default(now())
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
   apiKeys         MarketplaceApiKey[]
   oauthCodes      OAuthAuthorizationCode[]
   linkedInstances LinkedInstance[]
