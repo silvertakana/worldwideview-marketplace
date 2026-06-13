@@ -69,5 +69,7 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
+RUN npm install -g pm2@latest
+
 ENTRYPOINT ["./docker-entrypoint.sh"]
-CMD ["node", "server.js"]
+CMD ["pm2-runtime", "server.js", "-i", "max"]
