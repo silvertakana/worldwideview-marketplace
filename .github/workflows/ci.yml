@@ -62,7 +62,7 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
-      - uses: semgrep/semgrep-action@v2
+      - uses: semgrep/semgrep-action@v1
         with:
           config: p/typescript p/owasp-top-ten .semgrep/
         env:
