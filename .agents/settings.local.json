@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["C:/dev/wwv/.claude-hooks/validate.mjs", "edit"],
+            "timeout": 180,
+            "statusMessage": "Type-checking edited project…"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["C:/dev/wwv/.claude-hooks/validate.mjs", "stop"],
+            "timeout": 600,
+            "statusMessage": "Running build + tests…"
+          }
+        ]
+      }
+    ]
+  }
+}

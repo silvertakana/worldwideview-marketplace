@@ -1,0 +1,16 @@
+rules:
+  - id: unsanitized-redirect
+    pattern-either:
+      - pattern: redirect($PARAM)
+      - pattern: NextResponse.redirect($PARAM)
+      - pattern: permanentRedirect($PARAM)
+    message: Redirect to user-controlled URL without validation check
+    languages: [typescript]
+    severity: WARNING
+
+  - id: open-redirect-next-param
+    pattern: |
+      redirect(`${base}${next}`)
+    message: Open redirect - validate 'next' parameter before redirect
+    languages: [typescript]
+    severity: WARNING

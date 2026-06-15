@@ -1,0 +1,34 @@
+rules:
+  - id: getSession-for-auth
+    patterns:
+      - pattern: |
+          supabase.auth.getSession()
+      - pattern-not-inside: |
+          import "server-only"
+      - pattern-not-inside: |
+          require("server-only")
+    message: getSession() is unreliable for auth decisions - use getUser() which verifies with Supabase Auth server
+    languages: [typescript]
+    severity: WARNING
+
+  - id: auth-error-swallowed
+    patterns:
+      - pattern: |
+          const { error } = await supabase.auth.$ACTION(...)
+      - pattern-not: |
+          if (error) { ... }
+      - pattern-not: |
+          if (!error) { ... }
+      - pattern-not: |
+          if(error) { ... }
+    message: Auth error silently ignored - check and handle the error response
+    languages: [typescript]
+    severity: WARNING
+
+  - id: localStorage-jwt-storage
+    patterns:
+      - pattern: |
+          localStorage.setItem("wwv_marketplace_token", ...)
+    message: JWT stored in localStorage - consider httpOnly cookies to prevent XSS theft
+    languages: [typescript]
+    severity: WARNING

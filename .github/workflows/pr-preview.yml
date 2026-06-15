@@ -1,0 +1,32 @@
+name: PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    paths-ignore:
+      - '*.md'
+      - '.gitignore'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-preview:
+    if: github.event.action != 'closed'
+    uses: silvertakana/worldwideview/.github/workflows/shared-docker.yml@ci/infra-overhaul
+    with:
+      tags: |
+        type=ref,event=pr
+        type=sha,prefix=sha-
+      smoke-test-path: /
+      is-preview: true
+    secrets: inherit
+
+  cleanup:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Cleanup
+        run: echo "PR #${{ github.event.number }} closed, image cleanup pending"

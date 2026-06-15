@@ -1,0 +1,572 @@
+{
+  "communities": {
+    "0": [
+      "auth_getorcreatemarketplaceuser",
+      "auth_getorcreatemarketplaceuser_getorcreatemarketplaceuser",
+      "auth_requiresession",
+      "components_header",
+      "components_header_header",
+      "components_navlinks",
+      "components_navlinks_nav_links",
+      "components_navlinks_navlinks",
+      "components_themetoggle",
+      "components_themetoggle_themetoggle",
+      "cookies_route",
+      "cookies_route_get",
+      "export_route",
+      "export_route_get",
+      "id_page",
+      "id_page_plugindetailpage",
+      "id_page_props",
+      "id_route_params",
+      "id_route_patch",
+      "installs_route",
+      "installs_route_get",
+      "installs_route_test",
+      "installs_route_test_mockfindmany",
+      "installs_route_test_mockgetsupabaseuser",
+      "instances_route",
+      "instances_route_get",
+      "instances_route_test",
+      "instances_route_test_mockfindmany",
+      "instances_route_test_mockgetorcreate",
+      "instances_route_test_mockgetsupabaseuser",
+      "lib_instancevalidation",
+      "lib_instancevalidation_spec",
+      "lib_instancevalidation_validateinstanceurl",
+      "lib_webhooks",
+      "lib_webhooks_firepluginsubmitwebhook",
+      "lib_webhooks_pluginsubmitwebhookpayload",
+      "link_route",
+      "link_route_post",
+      "link_route_test",
+      "link_route_test_makelinkrequest",
+      "link_route_test_mockgetorcreate",
+      "link_route_test_mockgetsupabaseuser",
+      "link_route_test_mockupsert",
+      "src_app_api_instances_id_route_ts_id_route",
+      "src_app_api_instances_id_route_ts_id_route_delete",
+      "start_route",
+      "start_route_get",
+      "start_route_test",
+      "start_route_test_makevalidrequest",
+      "start_route_test_mockgetorcreate",
+      "start_route_test_mocklinkedinstanceupsert",
+      "start_route_test_mockpluginupdate",
+      "start_route_test_mockupsert",
+      "submit_route",
+      "submit_route_post"
+    ],
+    "1": [
+      "260530_gji_plan_document",
+      "260530_gji_summary_document",
+      "agents_document",
+      "components_installbutton",
+      "components_installbutton_props",
+      "components_installbutton_status",
+      "components_instancecapture",
+      "components_instancecapture_instancecapture",
+      "components_instanceconfig",
+      "components_instanceconfig_connectionstatus",
+      "components_instanceconfig_instanceconfig",
+      "components_instanceconfig_props",
+      "components_instancehydrator",
+      "components_instancehydrator_instancehydrator",
+      "components_instancepicker",
+      "components_instancepicker_displaylabel",
+      "components_instancepicker_formatlastused",
+      "components_instancepicker_props",
+      "components_linkedinstancespanel",
+      "components_linkedinstancespanel_derivednickname",
+      "components_linkedinstancespanel_formatlastused",
+      "components_linkedinstancespanel_linkedinstancespanel",
+      "components_linkedinstancespanel_props",
+      "components_plugincardactions",
+      "components_plugincardactions_props",
+      "data_pluginmanifests",
+      "data_pluginmanifests_getinstallmanifest",
+      "data_pluginmanifests_manifesttemplate",
+      "data_pluginmanifests_normalizeformat",
+      "data_pluginmanifests_normalizetrust",
+      "installbutton_component",
+      "instancepicker_component",
+      "instancestore_fetchuserinstances",
+      "instancestore_getinstanceurl",
+      "instancestore_module",
+      "instancestore_setinstanceurl",
+      "lib_instancestore",
+      "lib_instancestore_capturefrominstancequery",
+      "lib_instancestore_clearinstanceurl",
+      "lib_instancestore_clearmarketplacetoken",
+      "lib_instancestore_getmarketplacetoken",
+      "lib_instancestore_savedinstance",
+      "lib_instancestore_spec",
+      "lib_instancestore_spec_setupwindow",
+      "manage_page",
+      "manage_page_managepage",
+      "multi_instance_picker_flow_concept",
+      "plugincardactions_component",
+      "quick_260530_gji_requirement"
+    ],
+    "2": [
+      "package",
+      "package_dependencies",
+      "package_dependencies_better_sqlite3",
+      "package_dependencies_jose",
+      "package_dependencies_lucide_react",
+      "package_dependencies_next",
+      "package_dependencies_prisma",
+      "package_dependencies_prisma_adapter_better_sqlite3",
+      "package_dependencies_prisma_client",
+      "package_dependencies_react",
+      "package_dependencies_react_dom",
+      "package_dependencies_stripe",
+      "package_dependencies_supabase_ssr",
+      "package_dependencies_supabase_supabase_js",
+      "package_description",
+      "package_devdependencies",
+      "package_devdependencies_cross_env",
+      "package_devdependencies_eslint",
+      "package_devdependencies_eslint_config_next",
+      "package_devdependencies_types_better_sqlite3",
+      "package_devdependencies_types_node",
+      "package_devdependencies_types_react",
+      "package_devdependencies_types_react_dom",
+      "package_devdependencies_typescript",
+      "package_devdependencies_vitest",
+      "package_name",
+      "package_overrides_defu",
+      "package_overrides_fast_uri",
+      "package_packagemanager",
+      "package_pnpm",
+      "package_pnpm_onlybuiltdependencies",
+      "package_pnpm_overrides",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_docker_test",
+      "package_scripts_lint",
+      "package_scripts_start",
+      "package_scripts_test",
+      "package_scripts_typecheck",
+      "package_version"
+    ],
+    "3": [
+      "admin_rotatekey_route_ts",
+      "agents_md",
+      "agents_plans_decentralized_plugin_auth_md",
+      "auth_exchange_route_ts",
+      "auth_jwks_route_ts",
+      "ci_cd_pipeline",
+      "ci_yml",
+      "claude_code_review_yml",
+      "cron_revokeretiredkeys_route_ts",
+      "docker_compose_yml",
+      "docker_smoke_yml",
+      "docs_04_security_md",
+      "ed25519_keys",
+      "install_flow",
+      "install_start_route_ts",
+      "jwks_endpoint",
+      "jwt_auth",
+      "local_scripts_e2e_manage_png",
+      "local_scripts_e2e_picker_png",
+      "local_scripts_pr_body_txt",
+      "marketplace_bridge",
+      "mutation_testing_yml",
+      "nextjs_framework",
+      "planning_survey_instance_picker_md",
+      "prisma_database",
+      "public_favicon_svg",
+      "public_logo_logo_full_png",
+      "readme_md",
+      "signingkey_ts",
+      "src_app_icon_svg",
+      "supabase_auth",
+      "token_exchange",
+      "typescript_language",
+      "worldwideview_engine",
+      "worldwideview_marketplace"
+    ],
+    "4": [
+      "auth_checktier",
+      "auth_checktier_requirepaidtier",
+      "auth_checktier_spec",
+      "auth_checktier_tieruser",
+      "auth_tierclaims",
+      "auth_tierclaims_buildtierclaims",
+      "auth_tierclaims_spec",
+      "auth_tierclaims_subscriptionstatus",
+      "auth_tierclaims_tierclaims",
+      "auth_tierclaims_tieruser",
+      "auth_tiergating",
+      "auth_tiergating_geteffectivetier",
+      "auth_tiergating_getscope",
+      "auth_tiergating_isgraceperiodactive",
+      "auth_tiergating_issubscriptionactive",
+      "auth_tiergating_requirespaidtier",
+      "auth_tiergating_spec",
+      "auth_tiergating_tieruser",
+      "auth_tierscope",
+      "auth_tierscope_scopefor",
+      "exchange_route",
+      "exchange_route_post",
+      "exchange_route_spec",
+      "exchange_route_spec_fixture_key_hash",
+      "exchange_route_spec_fixture_user",
+      "exchange_route_spec_mockgetactivekey",
+      "exchange_route_spec_revoked_key_hash",
+      "src_app_api_billing_subscription_route_ts_subscription_route",
+      "src_app_api_internal_billing_subscription_route_ts_subscription_route",
+      "subscription_route_get",
+      "subscription_route_post"
+    ],
+    "5": [
+      "billing_webhookhandler",
+      "billing_webhookhandler_handlecheckoutcompleted",
+      "billing_webhookhandler_handleinvoicepaymentfailed",
+      "billing_webhookhandler_handleinvoicepaymentsucceeded",
+      "billing_webhookhandler_handlestripeevent",
+      "billing_webhookhandler_handlesubscriptionupdated",
+      "checkout_route",
+      "checkout_route_options",
+      "checkout_route_post",
+      "checkout_route_price_ids",
+      "portal_route",
+      "portal_route_options",
+      "portal_route_post",
+      "stripe_client",
+      "stripe_client_stripe",
+      "webhook_route",
+      "webhook_route_post"
+    ],
+    "6": [
+      "app_page",
+      "app_page_featuredplugins",
+      "app_page_features",
+      "app_page_home",
+      "app_page_popularplugins",
+      "app_page_userplugins",
+      "browse_page",
+      "browse_page_browsepage",
+      "components_plugincard",
+      "components_plugincard_plugincard",
+      "components_plugincard_plugincardprops",
+      "hooks_usemyinstalls",
+      "hooks_usemyinstalls_myinstallsresult",
+      "hooks_usemyinstalls_usemyinstalls"
+    ],
+    "7": [
+      "account_managebillingbutton",
+      "account_managebillingbutton_managebillingbutton",
+      "account_page",
+      "account_page_accountpage",
+      "account_page_metadata",
+      "components_installhistory",
+      "components_installhistory_installhistory",
+      "components_installhistory_props",
+      "components_usermenu",
+      "components_usermenu_usermenu",
+      "components_usermenu_usermenuprops",
+      "lib_dicebear",
+      "lib_dicebear_dicebearurl"
+    ],
+    "8": [
+      "auth_requiresession_requiresupabaseuser",
+      "authorize_actions",
+      "authorize_actions_approveauthorization",
+      "authorize_actions_denyauthorization",
+      "authorize_actions_isallowedredirecturi",
+      "authorize_actions_spec",
+      "authorize_actions_spec_base_fields",
+      "authorize_actions_spec_makeformdata",
+      "authorize_actions_spec_marketplace_user",
+      "authorize_actions_spec_supabase_user",
+      "authorize_page",
+      "authorize_page_authorizepage"
+    ],
+    "9": [
+      "app_layout",
+      "app_layout_inter",
+      "app_layout_metadata",
+      "app_layout_rootlayout",
+      "components_clientproviders",
+      "components_clientproviders_clientproviders",
+      "components_footer",
+      "components_footer_footer",
+      "components_wipbanner",
+      "components_wipbanner_wipbanner"
+    ],
+    "10": [
+      "api_keys_apikeylist",
+      "api_keys_apikeylist_apikeyitem",
+      "api_keys_apikeylist_apikeylist",
+      "api_keys_apikeylist_props",
+      "api_keys_page",
+      "api_keys_page_apikeyspage"
+    ],
+    "11": [
+      "registry_route",
+      "registry_route_delete",
+      "registry_route_get",
+      "registry_route_isauthorized",
+      "registry_route_patch",
+      "registry_route_post"
+    ],
+    "12": [
+      "cleanup_oauth_codes_route",
+      "cleanup_oauth_codes_route_get",
+      "cleanup_oauth_codes_route_spec",
+      "cleanup_oauth_codes_route_spec_makerequest",
+      "cleanup_oauth_codes_route_spec_mockdeletemany"
+    ],
+    "13": [
+      "components_avatarinitials",
+      "components_avatarinitials_avatarinitials",
+      "components_avatarinitials_deriveinitials",
+      "components_avatarinitials_hashhue",
+      "components_avatarinitials_props"
+    ],
+    "14": [
+      "query",
+      "query_cols",
+      "query_database",
+      "query_db",
+      "query_tables"
+    ],
+    "15": [
+      "id_route_spec",
+      "id_route_spec_makerequest",
+      "id_route_spec_mockgetuser_mockfinduser_mockfindapikey_mockupdateapikey_mockfindfirst"
+    ],
+    "16": [
+      "import_route",
+      "import_route_isauthorized",
+      "import_route_post"
+    ],
+    "17": [
+      "npm_cache_route",
+      "npm_cache_route_get",
+      "npm_cache_route_isauthorized"
+    ],
+    "18": [
+      "supabase_cookieoptions",
+      "supabase_cookieoptions_buildcookieoptions",
+      "supabase_cookieoptions_resolvecookiedomain"
+    ],
+    "19": [
+      "auth_apikeyissuance",
+      "auth_apikeyissuance_issueapikey"
+    ],
+    "20": [
+      "avatar_route",
+      "avatar_route_get"
+    ],
+    "21": [
+      "delete_user_route",
+      "delete_user_route_post"
+    ],
+    "22": [
+      "discover_route",
+      "discover_route_get"
+    ],
+    "23": [
+      "sign_out_route",
+      "sign_out_route_post"
+    ],
+    "24": [
+      "src_app_api_account_api_keys_id_route_ts_id_route",
+      "src_app_api_account_api_keys_id_route_ts_id_route_delete"
+    ],
+    "25": [
+      "sync_npm_route",
+      "sync_npm_route_get"
+    ],
+    "26": [
+      "checkout_route_spec"
+    ],
+    "27": [
+      "next_config"
+    ],
+    "28": [
+      "planning_state_md"
+    ],
+    "29": [
+      "portal_route_spec"
+    ],
+    "30": [
+      "public_logo_favicon_inverted_svg"
+    ],
+    "31": [
+      "public_logo_favicon_svg"
+    ],
+    "32": [
+      "public_logo_logo_icon_png"
+    ],
+    "33": [
+      "public_logo_logo_icon_svg"
+    ],
+    "34": [
+      "public_robots_txt"
+    ],
+    "35": [
+      "stripe_client_spec"
+    ],
+    "36": [
+      "webhook_route_spec"
+    ]
+  },
+  "cohesion": {
+    "0": 0.07811447811447811,
+    "1": 0.07653061224489796,
+    "2": 0.047619047619047616,
+    "3": 0.07899159663865546,
+    "4": 0.13333333333333333,
+    "5": 0.17647058823529413,
+    "6": 0.16483516483516483,
+    "7": 0.21794871794871795,
+    "8": 0.3181818181818182,
+    "9": 0.2,
+    "10": 0.4,
+    "11": 0.6,
+    "12": 0.5,
+    "13": 0.6,
+    "14": 0.4,
+    "15": 0.6666666666666666,
+    "16": 1.0,
+    "17": 1.0,
+    "18": 1.0,
+    "19": 1.0,
+    "20": 1.0,
+    "21": 1.0,
+    "22": 1.0,
+    "23": 1.0,
+    "24": 1.0,
+    "25": 1.0,
+    "26": 1.0,
+    "27": 1.0,
+    "28": 1.0,
+    "29": 1.0,
+    "30": 1.0,
+    "31": 1.0,
+    "32": 1.0,
+    "33": 1.0,
+    "34": 1.0,
+    "35": 1.0,
+    "36": 1.0
+  },
+  "gods": [
+    {
+      "id": "link_route_test_mockgetsupabaseuser",
+      "label": "mockGetSupabaseUser",
+      "degree": 27
+    },
+    {
+      "id": "auth_getorcreatemarketplaceuser_getorcreatemarketplaceuser",
+      "label": "getOrCreateMarketplaceUser()",
+      "degree": 22
+    },
+    {
+      "id": "auth_tiergating_geteffectivetier",
+      "label": "getEffectiveTier()",
+      "degree": 18
+    },
+    {
+      "id": "worldwideview_marketplace",
+      "label": "WorldWideView Marketplace",
+      "degree": 17
+    },
+    {
+      "id": "docs_04_security_md",
+      "label": "Security Audit Document (04-SECURITY.md)",
+      "degree": 9
+    },
+    {
+      "id": "auth_requiresession_requiresupabaseuser",
+      "label": "requireSupabaseUser()",
+      "degree": 9
+    },
+    {
+      "id": "instancestore_getinstanceurl",
+      "label": "getInstanceUrl",
+      "degree": 9
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
+      "degree": 8
+    },
+    {
+      "id": "plugincardactions_component",
+      "label": "PluginCardActions",
+      "degree": 8
+    },
+    {
+      "id": "auth_tierclaims_buildtierclaims",
+      "label": "buildTierClaims()",
+      "degree": 7
+    }
+  ],
+  "surprises": [
+    {
+      "source": "E2E Screenshot: Manage Page",
+      "target": "WorldWideView Marketplace",
+      "source_files": [
+        "local-scripts/e2e-manage.png",
+        "AGENTS.md"
+      ],
+      "confidence": "AMBIGUOUS",
+      "relation": "references",
+      "why": "ambiguous connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `E2E Screenshot: Manage Page` unexpectedly reaches hub `WorldWideView Marketplace`"
+    },
+    {
+      "source": "E2E Screenshot: Instance Picker",
+      "target": "WorldWideView Marketplace",
+      "source_files": [
+        "local-scripts/e2e-picker.png",
+        "AGENTS.md"
+      ],
+      "confidence": "AMBIGUOUS",
+      "relation": "references",
+      "why": "ambiguous connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `E2E Screenshot: Instance Picker` unexpectedly reaches hub `WorldWideView Marketplace`"
+    },
+    {
+      "source": "Favicon (light)",
+      "target": "WorldWideView Marketplace",
+      "source_files": [
+        "public/favicon.svg",
+        "AGENTS.md"
+      ],
+      "confidence": "AMBIGUOUS",
+      "relation": "references",
+      "why": "ambiguous connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `Favicon (light)` unexpectedly reaches hub `WorldWideView Marketplace`"
+    },
+    {
+      "source": "Full Logo PNG",
+      "target": "WorldWideView Marketplace",
+      "source_files": [
+        "public/logo/logo-full.png",
+        "AGENTS.md"
+      ],
+      "confidence": "AMBIGUOUS",
+      "relation": "references",
+      "why": "ambiguous connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `Full Logo PNG` unexpectedly reaches hub `WorldWideView Marketplace`"
+    },
+    {
+      "source": "App Icon SVG",
+      "target": "WorldWideView Marketplace",
+      "source_files": [
+        "src/app/icon.svg",
+        "AGENTS.md"
+      ],
+      "confidence": "AMBIGUOUS",
+      "relation": "references",
+      "why": "ambiguous connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `App Icon SVG` unexpectedly reaches hub `WorldWideView Marketplace`"
+    }
+  ],
+  "tokens": {
+    "input": 3786,
+    "output": 8019
+  }
+}

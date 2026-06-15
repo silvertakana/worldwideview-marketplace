@@ -8,7 +8,7 @@ import { getActiveKey } from "@/lib/auth/signingKey";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { apiKey, audience, plugin_id: _plugin_id } = body;
+        const { apiKey, audience } = body;
 
         if (!apiKey) {
             return NextResponse.json({ error: "apiKey is required" }, { status: 400 });
