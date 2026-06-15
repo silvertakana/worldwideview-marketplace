@@ -39,7 +39,7 @@ async function main() {
   const devUser = await prisma.user.upsert({
     where: { email: "dev@worldwideview.local" },
     update: {},
-    create: { email: "dev@worldwideview.local", tier: "pro" },
+    create: { email: "dev@worldwideview.local" },
   });
   await prisma.marketplaceApiKey.upsert({
     where: { keyHash: hashApiKey("dev-key-do-not-use-in-prod") },

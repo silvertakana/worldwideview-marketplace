@@ -39,17 +39,14 @@ model PluginInstall {
 }
 
 model User {
-  id                    String                   @id @default(cuid())
-  supabaseUserId        String?                  @unique
-  email                 String                   @unique
-  tier                  String                   @default("free")
-  stripeCustomerId      String?
-  stripeCurrentPeriodEnd DateTime?
-  createdAt             DateTime                 @default(now())
-  apiKeys               MarketplaceApiKey[]
-  oauthCodes            OAuthAuthorizationCode[]
-  linkedInstances       LinkedInstance[]
-  pluginInstalls        PluginInstall[]
+  id              String                   @id @default(cuid())
+  supabaseUserId  String?                  @unique
+  email           String                   @unique
+  createdAt       DateTime                 @default(now())
+  apiKeys         MarketplaceApiKey[]
+  oauthCodes      OAuthAuthorizationCode[]
+  linkedInstances LinkedInstance[]
+  pluginInstalls  PluginInstall[]
 }
 
 /// A WWV instance URL this user has installed plugins to. Persisted server-side
