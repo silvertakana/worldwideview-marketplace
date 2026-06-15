@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { revokeExpiredRetiredKeys } from "@/lib/auth/signingKey";
 
@@ -7,7 +8,11 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Service Unavailable: CRON_SECRET not configured" }, { status: 503 });
     }
     const auth = req.headers.get("authorization");
-    if (auth !== `Bearer ${secret}`) {
+    if (!auth || !auth.startsWith("Bearer ")) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const token = auth.slice("Bearer ".length);
+    if (token.length !== secret.length || !timingSafeEqual(Buffer.from(token), Buffer.from(secret))) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

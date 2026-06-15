@@ -3,12 +3,14 @@ name: Docker Smoke Test
 on:
   push:
     paths:
+      - ".github/workflows/docker-smoke.yml"
       - "Dockerfile"
       - "docker-entrypoint.sh"
       - "prisma/**"
       - "src/**"
   pull_request:
     paths:
+      - ".github/workflows/docker-smoke.yml"
       - "Dockerfile"
       - "docker-entrypoint.sh"
       - "prisma/**"
@@ -24,16 +26,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t marketplace-smoke .
+        run: docker build --no-cache -t marketplace-smoke .
 
       - name: Smoke test — entrypoint completes
         run: |
-          # Run the container with a short-lived command that exercises
-          # the entrypoint (migrations + seed) then prints a health line.
-          # The container runs the entrypoint, seeds the DB, then starts
-          # the node server. We wait for the server to become ready,
-          # curl it, and exit.
-          docker run -d --name smoke-test -p 3000:3000 marketplace-smoke
+          # Clean up any leftover container + data volume from a previous run.
+          docker rm -f smoke-test 2>/dev/null || true
+
+          docker run -d --name smoke-test -v /tmp/smoke-data:/app/data -p 3000:3000 marketplace-smoke
 
           echo "Waiting for server to start..."
           for i in $(seq 1 30); do
@@ -41,6 +41,7 @@ jobs:
               echo "Server is healthy!"
               docker logs smoke-test
               docker stop smoke-test
+              docker rm smoke-test
               exit 0
             fi
             sleep 1
@@ -49,4 +50,5 @@ jobs:
           echo "Server did not become healthy in 30s"
           docker logs smoke-test
           docker stop smoke-test
+          docker rm smoke-test
           exit 1
