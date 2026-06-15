@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/requireSession'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(_req: Request): Promise<NextResponse> {
   const user = await getSupabaseUser()
 
   if (!user) {

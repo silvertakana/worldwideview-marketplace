@@ -3,7 +3,7 @@ import { getSupabaseUser } from '@/lib/auth/requireSession'
 import { getOrCreateMarketplaceUser } from '@/lib/auth/getOrCreateMarketplaceUser'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(_req: Request): Promise<NextResponse> {
   const supabaseUser = await getSupabaseUser()
 
   if (!supabaseUser) {
