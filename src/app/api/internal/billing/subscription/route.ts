@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getEffectiveTier } from "@/lib/auth/tierGating";
 
 export async function POST(req: Request) {
     const secret = req.headers.get("x-internal-secret");
@@ -13,22 +11,13 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Missing userId" }, { status: 400 });
     }
 
-    const marketplaceUser = await prisma.user.findFirst({
-        where: { supabaseUserId: userId },
-    });
-
-    if (!marketplaceUser) {
-        return NextResponse.json({
-            tier: "free", effectiveTier: "free",
-            hasSubscription: false,
-            stripeCurrentPeriodEnd: null,
-        });
-    }
-
+    // Marketplace no longer stores tier/stripe info locally.
+    // The canonical source is worldwideview Account API via Phase 58 proxy.
+    // Phase 60 will add the proxy read. For now, default to "free".
     return NextResponse.json({
-        tier: marketplaceUser.tier,
-        effectiveTier: getEffectiveTier(marketplaceUser),
-        hasSubscription: !!marketplaceUser.stripeCustomerId,
-        stripeCurrentPeriodEnd: marketplaceUser.stripeCurrentPeriodEnd,
+        tier: "free",
+        effectiveTier: "free",
+        hasSubscription: false,
+        stripeCurrentPeriodEnd: null,
     });
 }

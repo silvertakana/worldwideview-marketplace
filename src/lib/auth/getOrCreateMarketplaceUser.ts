@@ -35,7 +35,6 @@ export async function getOrCreateMarketplaceUser(supabaseUser: SupabaseUser) {
       data: {
         supabaseUserId: supabaseUser.id,
         email,
-        tier: 'free',
       },
     })
   } catch (err: unknown) {

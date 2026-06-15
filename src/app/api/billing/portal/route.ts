@@ -20,7 +20,21 @@ export async function POST(req: Request) {
     const marketplaceUser = await prisma.user.findFirst({
         where: { supabaseUserId: user.id },
     });
-    if (!marketplaceUser || !marketplaceUser.stripeCustomerId) {
+    if (!marketplaceUser?.email) {
+        return NextResponse.json(
+            { error: "No Stripe customer found for this account" },
+            { status: 404 },
+        );
+    }
+
+    // Marketplace no longer stores stripeCustomerId locally.
+    // Look up the Stripe customer by email instead.
+    const customers = await stripe.customers.list({
+        email: marketplaceUser.email,
+        limit: 1,
+    });
+    const stripeCustomer = customers.data[0];
+    if (!stripeCustomer) {
         return NextResponse.json(
             { error: "No Stripe customer found for this account" },
             { status: 404 },
@@ -30,7 +44,7 @@ export async function POST(req: Request) {
     const origin = req.headers.get("origin") || "";
 
     const portalSession = await stripe.billingPortal.sessions.create({
-        customer: marketplaceUser.stripeCustomerId,
+        customer: stripeCustomer.id,
         return_url: origin
             ? `${origin}/billing`
             : "/billing",

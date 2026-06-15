@@ -33,9 +33,11 @@ export async function POST(req: NextRequest) {
         const { kid, privateKey } = await getActiveKey();
         const now = Math.floor(Date.now() / 1000);
 
+        // Marketplace no longer stores tier locally — default to "free".
+        // Phase 60 will add the proxy-based plan read if needed.
         const jwt = await new jose.SignJWT({
-            tier: apiKeyRecord.user.tier,
-            scope: scopeFor(apiKeyRecord.user.tier),
+            tier: "free",
+            scope: scopeFor("free"),
         })
             .setProtectedHeader({ alg: "EdDSA", typ: "JWT", kid })
             .setIssuer("https://marketplace.worldwideview.dev")

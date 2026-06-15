@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/lib/prisma";
-import { getEffectiveTier } from "@/lib/auth/tierGating";
 
 export async function GET() {
     try {
@@ -12,25 +10,15 @@ export async function GET() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const marketplaceUser = await prisma.user.findFirst({
-            where: { supabaseUserId: user.id },
-        });
-
-        if (!marketplaceUser) {
-            return NextResponse.json({
-                tier: "free",
-                effectiveTier: "free",
-                stripeCustomerId: null,
-                stripeCurrentPeriodEnd: null,
-            });
-        }
-
+        // Marketplace no longer stores tier/stripe info locally.
+        // The canonical source is worldwideview Account API via Phase 58 proxy.
+        // Phase 60 will add the proxy read. For now, default to "free".
         return NextResponse.json({
-            tier: marketplaceUser.tier,
-            effectiveTier: getEffectiveTier(marketplaceUser),
-            hasSubscription: !!marketplaceUser.stripeCustomerId,
-            stripeCustomerId: marketplaceUser.stripeCustomerId,
-            stripeCurrentPeriodEnd: marketplaceUser.stripeCurrentPeriodEnd,
+            tier: "free",
+            effectiveTier: "free",
+            hasSubscription: false,
+            stripeCustomerId: null,
+            stripeCurrentPeriodEnd: null,
         });
     } catch (error) {
         console.error("Subscription fetch failed:", error);
