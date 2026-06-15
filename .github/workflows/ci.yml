@@ -65,8 +65,6 @@ jobs:
       - uses: semgrep/semgrep-action@v1
         with:
           config: p/typescript p/owasp-top-ten .semgrep/
-        env:
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
   test:
     name: Unit Tests
