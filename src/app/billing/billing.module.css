@@ -55,13 +55,31 @@
 }
 
 .planBadgePro {
-  background: var(--color-success);
-  color: #fff;
+  background: #bbf7d0;
+  color: #166534;
+}
+
+.planBadgeEnterprise {
+  background: #bfdbfe;
+  color: #1e40af;
 }
 
 .planBadgeFree {
   background: var(--color-border);
   color: var(--color-text-secondary);
+}
+
+/* ── Trial badge ── */
+.trialBadge {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-full);
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-left: var(--space-sm);
+  line-height: 1;
 }
 
 /* ── Plan name ── */
@@ -135,6 +153,37 @@
 .portalButtonDisabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ── Manage / form-based subscription button ── */
+.manageButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-xl);
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  transition: background var(--transition-fast),
+    box-shadow var(--transition-fast);
+  text-decoration: none;
+  line-height: 1;
+}
+
+.manageButton:hover {
+  background: var(--color-accent-hover);
+  box-shadow: var(--shadow-glow);
+}
+
+.manageButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .portalButtonDisabled:hover {
