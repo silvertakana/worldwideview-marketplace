@@ -30,10 +30,10 @@ jobs:
 
       - name: Smoke test — entrypoint completes
         run: |
-          # Clean up any leftover container from a previous run on this runner.
+          # Clean up any leftover container + data volume from a previous run.
           docker rm -f smoke-test 2>/dev/null || true
 
-          docker run -d --name smoke-test -p 3000:3000 marketplace-smoke
+          docker run -d --name smoke-test -v /tmp/smoke-data:/app/data -p 3000:3000 marketplace-smoke
 
           echo "Waiting for server to start..."
           for i in $(seq 1 30); do
