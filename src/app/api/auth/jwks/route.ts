@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getJwksPublicKeys } from "@/lib/auth/signingKey";
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
     try {
         const keys = await getJwksPublicKeys();
         return NextResponse.json({ keys }, {

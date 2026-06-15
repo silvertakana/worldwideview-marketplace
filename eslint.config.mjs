@@ -13,6 +13,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "check.js",
+    "_query*.cjs",
+    "_query*.mjs",
     "local-scripts/**",
   ]),
   {

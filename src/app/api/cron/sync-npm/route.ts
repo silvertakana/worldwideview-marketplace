@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
               },
             });
             updated.push(pkg);
-          } catch (e) {
+          } catch {
             failed.push(pkg);
           }
         })
