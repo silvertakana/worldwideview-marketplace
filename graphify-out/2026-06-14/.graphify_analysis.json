@@ -1,0 +1,196 @@
+{
+  "communities": {
+    "0": [
+      "claude_code_review_yml",
+      "local_scripts_e2e_manage_png",
+      "local_scripts_e2e_picker_png",
+      "mutation_testing_yml",
+      "planning_survey_instance_picker_md",
+      "public_favicon_svg",
+      "public_logo_logo_full_png",
+      "readme_md",
+      "src_app_icon_svg",
+      "worldwideview_engine",
+      "worldwideview_marketplace"
+    ],
+    "1": [
+      "admin_rotatekey_route_ts",
+      "agents_plans_decentralized_plugin_auth_md",
+      "auth_exchange_route_ts",
+      "auth_jwks_route_ts",
+      "cron_revokeretiredkeys_route_ts",
+      "docs_04_security_md",
+      "ed25519_keys",
+      "jwks_endpoint",
+      "signingkey_ts",
+      "token_exchange"
+    ],
+    "2": [
+      "install_flow",
+      "install_start_route_ts",
+      "jwt_auth",
+      "local_scripts_pr_body_txt",
+      "marketplace_bridge",
+      "supabase_auth"
+    ],
+    "3": [
+      "agents_md",
+      "nextjs_framework",
+      "prisma_database",
+      "typescript_language"
+    ],
+    "4": [
+      "ci_cd_pipeline",
+      "ci_yml"
+    ],
+    "5": [
+      "docker_compose_yml",
+      "docker_smoke_yml"
+    ],
+    "6": [
+      "planning_state_md"
+    ],
+    "7": [
+      "public_logo_favicon_inverted_svg"
+    ],
+    "8": [
+      "public_logo_favicon_svg"
+    ],
+    "9": [
+      "public_logo_logo_icon_png"
+    ],
+    "10": [
+      "public_logo_logo_icon_svg"
+    ],
+    "11": [
+      "public_robots_txt"
+    ]
+  },
+  "cohesion": {
+    "0": 0.18181818181818182,
+    "1": 0.3333333333333333,
+    "2": 0.4,
+    "3": 0.5,
+    "4": 1.0,
+    "5": 1.0,
+    "6": 1.0,
+    "7": 1.0,
+    "8": 1.0,
+    "9": 1.0,
+    "10": 1.0,
+    "11": 1.0
+  },
+  "gods": [
+    {
+      "id": "worldwideview_marketplace",
+      "label": "WorldWideView Marketplace",
+      "degree": 17
+    },
+    {
+      "id": "docs_04_security_md",
+      "label": "Security Audit Document (04-SECURITY.md)",
+      "degree": 9
+    },
+    {
+      "id": "agents_md",
+      "label": "Agent Rules (AGENTS.md)",
+      "degree": 6
+    },
+    {
+      "id": "ed25519_keys",
+      "label": "Ed25519 Key Lifecycle",
+      "degree": 5
+    },
+    {
+      "id": "install_flow",
+      "label": "Plugin Install Flow",
+      "degree": 5
+    },
+    {
+      "id": "agents_plans_decentralized_plugin_auth_md",
+      "label": "Decentralized Plugin Auth Plan (Agent)",
+      "degree": 4
+    },
+    {
+      "id": "jwt_auth",
+      "label": "JWT Authentication",
+      "degree": 3
+    },
+    {
+      "id": "jwks_endpoint",
+      "label": "JWKS Endpoint",
+      "degree": 3
+    },
+    {
+      "id": "token_exchange",
+      "label": "Token Exchange Endpoint",
+      "degree": 3
+    },
+    {
+      "id": "marketplace_bridge",
+      "label": "Marketplace Bridge",
+      "degree": 3
+    }
+  ],
+  "surprises": [
+    {
+      "source": "E2E Screenshot: Manage Page",
+      "target": "WorldWideView Marketplace",
+      "source_files": [
+        "local-scripts/e2e-manage.png",
+        "AGENTS.md"
+      ],
+      "confidence": "AMBIGUOUS",
+      "relation": "references",
+      "why": "ambiguous connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `E2E Screenshot: Manage Page` unexpectedly reaches hub `WorldWideView Marketplace`"
+    },
+    {
+      "source": "E2E Screenshot: Instance Picker",
+      "target": "WorldWideView Marketplace",
+      "source_files": [
+        "local-scripts/e2e-picker.png",
+        "AGENTS.md"
+      ],
+      "confidence": "AMBIGUOUS",
+      "relation": "references",
+      "why": "ambiguous connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `E2E Screenshot: Instance Picker` unexpectedly reaches hub `WorldWideView Marketplace`"
+    },
+    {
+      "source": "Favicon (light)",
+      "target": "WorldWideView Marketplace",
+      "source_files": [
+        "public/favicon.svg",
+        "AGENTS.md"
+      ],
+      "confidence": "AMBIGUOUS",
+      "relation": "references",
+      "why": "ambiguous connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `Favicon (light)` unexpectedly reaches hub `WorldWideView Marketplace`"
+    },
+    {
+      "source": "Full Logo PNG",
+      "target": "WorldWideView Marketplace",
+      "source_files": [
+        "public/logo/logo-full.png",
+        "AGENTS.md"
+      ],
+      "confidence": "AMBIGUOUS",
+      "relation": "references",
+      "why": "ambiguous connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `Full Logo PNG` unexpectedly reaches hub `WorldWideView Marketplace`"
+    },
+    {
+      "source": "App Icon SVG",
+      "target": "WorldWideView Marketplace",
+      "source_files": [
+        "src/app/icon.svg",
+        "AGENTS.md"
+      ],
+      "confidence": "AMBIGUOUS",
+      "relation": "references",
+      "why": "ambiguous connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `App Icon SVG` unexpectedly reaches hub `WorldWideView Marketplace`"
+    }
+  ],
+  "tokens": {
+    "input": 13450,
+    "output": 11863
+  }
+}

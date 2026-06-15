@@ -1,0 +1,1163 @@
+diff --git a/src/app/manage/page.module.css b/src/app/manage/page.module.css
+index 200b5b9..8dcea62 100644
+--- a/src/app/manage/page.module.css
++++ b/src/app/manage/page.module.css
+@@ -1,5 +1,5 @@
+ .page {
+-  max-width: 800px;
++  max-width: 860px;
+   margin: 0 auto;
+   padding: var(--space-2xl) var(--space-lg);
+   min-height: calc(100vh - 60px);
+@@ -32,21 +32,23 @@
+ .emptyState {
+   text-align: center;
+   padding: var(--space-3xl) var(--space-lg);
+-  background: var(--color-bg-card);
++  background: var(--color-bg-elevated);
+   border: 1px dashed var(--color-border);
+   border-radius: var(--radius-lg);
+ }
+ 
+ .emptyIcon {
+-  font-size: 2.5rem;
++  color: var(--color-text-muted);
++  opacity: 0.5;
+   display: block;
+-  margin-bottom: var(--space-md);
++  margin: 0 auto var(--space-md);
+ }
+ 
+ .emptyTitle {
+-  font-size: 1.15rem;
++  font-size: 1.1rem;
+   font-weight: 600;
+   margin-bottom: var(--space-sm);
++  color: var(--color-text-primary);
+ }
+ 
+ .emptyDesc {
+@@ -66,7 +68,7 @@
+   font-size: 0.9rem;
+   font-weight: 600;
+   cursor: pointer;
+-  transition: all var(--transition-fast);
++  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+ }
+ 
+ .connectBtn:hover {
+@@ -82,7 +84,7 @@
+   border-radius: var(--radius-sm);
+   font-size: 0.9rem;
+   font-weight: 600;
+-  transition: all var(--transition-fast);
++  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+ }
+ 
+ .browseLink:hover {
+@@ -93,26 +95,38 @@
+ 
+ /* ── Error state ── */
+ .errorState {
+-  text-align: center;
+   padding: var(--space-xl);
+-  background: var(--color-bg-card);
++  background: var(--color-bg-elevated);
+   border: 1px solid var(--color-danger);
+   border-radius: var(--radius-md);
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  gap: var(--space-md);
++  text-align: center;
++}
++
++.errorIcon {
++  color: var(--color-danger);
++  flex-shrink: 0;
+ }
+ 
+ .errorMsg {
+   color: var(--color-danger);
+   font-size: 0.9rem;
+-  margin-bottom: var(--space-md);
+ }
+ 
+ .errorActions {
+   display: flex;
+   gap: var(--space-sm);
+   justify-content: center;
++  flex-wrap: wrap;
+ }
+ 
+ .retryBtn {
++  display: inline-flex;
++  align-items: center;
++  gap: var(--space-xs);
+   padding: var(--space-sm) var(--space-lg);
+   background: var(--color-accent);
+   color: #fff;
+@@ -121,7 +135,7 @@
+   font-size: 0.85rem;
+   font-weight: 600;
+   cursor: pointer;
+-  transition: all var(--transition-fast);
++  transition: background var(--transition-fast);
+ }
+ 
+ .retryBtn:hover {
+@@ -129,6 +143,9 @@
+ }
+ 
+ .reconfigBtn {
++  display: inline-flex;
++  align-items: center;
++  gap: var(--space-xs);
+   padding: var(--space-sm) var(--space-lg);
+   background: transparent;
+   color: var(--color-text-secondary);
+@@ -136,7 +153,7 @@
+   border-radius: var(--radius-sm);
+   font-size: 0.85rem;
+   cursor: pointer;
+-  transition: all var(--transition-fast);
++  transition: border-color var(--transition-fast), color var(--transition-fast);
+ }
+ 
+ .reconfigBtn:hover {
+@@ -153,7 +170,7 @@
+ 
+ .skeleton {
+   height: 88px;
+-  background: var(--color-bg-card);
++  background: var(--color-bg-elevated);
+   border: 1px solid var(--color-border);
+   border-radius: var(--radius-md);
+   animation: pulse 1.5s ease-in-out infinite;
+@@ -161,7 +178,7 @@
+ 
+ @keyframes pulse {
+   0%, 100% { opacity: 1; }
+-  50% { opacity: 0.5; }
++  50% { opacity: 0.45; }
+ }
+ 
+ /* ── Footer ── */
+diff --git a/src/app/manage/page.tsx b/src/app/manage/page.tsx
+index 2fc1221..d7b085f 100644
+--- a/src/app/manage/page.tsx
++++ b/src/app/manage/page.tsx
+@@ -2,9 +2,11 @@
+ 
+ import { useState, useEffect } from "react";
+ import Link from "next/link";
++import { Link2, Inbox, AlertTriangle, RefreshCw, Settings } from "lucide-react";
+ import { useInstalledPlugins } from "@/hooks/useInstalledPlugins";
+ import InstalledPluginCard from "@/components/InstalledPluginCard";
+ import InstanceConfig from "@/components/InstanceConfig";
++import LinkedInstancesPanel from "@/components/LinkedInstancesPanel";
+ import { setMarketplaceToken } from "@/lib/instanceStore";
+ import styles from "./page.module.css";
+ 
+@@ -18,7 +20,7 @@ export default function ManagePage() {
+     const tokenMatch = hash.match(/[#&]token=([^&]*)/);
+     if (tokenMatch?.[1]) {
+       setMarketplaceToken(tokenMatch[1]);
+-      // Clean the fragment from URL
++      // Clean the fragment from URL without triggering a navigation
+       window.history.replaceState({}, "", window.location.pathname + window.location.search);
+       refetch();
+     }
+@@ -42,7 +44,7 @@ export default function ManagePage() {
+       {/* Not configured — prompt to connect */}
+       {!configured && !showConfig && (
+         <div className={styles.emptyState}>
+-          <span className={styles.emptyIcon}>🔗</span>
++          <Link2 size={40} className={styles.emptyIcon} strokeWidth={1.5} />
+           <h2 className={styles.emptyTitle}>Connect Your Instance</h2>
+           <p className={styles.emptyDesc}>
+             Link your WorldWideView instance to manage installed plugins.
+@@ -64,9 +66,11 @@ export default function ManagePage() {
+       {/* Connection error */}
+       {configured && error && (
+         <div className={styles.errorState}>
+-          <p className={styles.errorMsg}>⚠️ {error}</p>
++          <AlertTriangle size={20} className={styles.errorIcon} />
++          <p className={styles.errorMsg}>{error}</p>
+           <div className={styles.errorActions}>
+             <button className={styles.retryBtn} onClick={refetch}>
++              <RefreshCw size={14} />
+               Retry
+             </button>
+             <button
+@@ -106,13 +110,13 @@ export default function ManagePage() {
+       {/* Empty — connected but nothing installed */}
+       {configured && !loading && !error && plugins.length === 0 && (
+         <div className={styles.emptyState}>
+-          <span className={styles.emptyIcon}>📭</span>
++          <Inbox size={40} className={styles.emptyIcon} strokeWidth={1.5} />
+           <h2 className={styles.emptyTitle}>No Plugins Installed</h2>
+           <p className={styles.emptyDesc}>
+             Browse the catalog and install plugins to see them here.
+           </p>
+           <Link href="/browse" className={styles.browseLink}>
+-            Browse Plugins →
++            Browse Plugins
+           </Link>
+         </div>
+       )}
+@@ -124,10 +128,13 @@ export default function ManagePage() {
+             className={styles.reconfigBtn}
+             onClick={() => setShowConfig(true)}
+           >
+-            ⚙ Change Instance
++            <Settings size={14} />
++            Change Instance
+           </button>
+         </div>
+       )}
++
++      <LinkedInstancesPanel onAddInstance={() => setShowConfig(true)} />
+     </div>
+   );
+ }
+diff --git a/src/app/page.module.css b/src/app/page.module.css
+index cd7ea09..6a0c758 100644
+--- a/src/app/page.module.css
++++ b/src/app/page.module.css
+@@ -4,55 +4,60 @@
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+-  min-height: 75vh;
++  min-height: 80vh;
+   text-align: center;
+-  padding: var(--space-2xl) var(--space-lg);
++  padding: var(--space-3xl) var(--space-lg);
++  background: var(--color-bg-elevated);
++  position: relative;
+ }
+ 
+ .hero h1 {
+-  font-size: 3rem;
+-  font-weight: 700;
+-  letter-spacing: -0.02em;
+-  margin-bottom: var(--space-md);
+-  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover), #e88a98);
+-  -webkit-background-clip: text;
+-  -webkit-text-fill-color: transparent;
+-  background-clip: text;
++  font-size: clamp(2.25rem, 5vw, 3.5rem);
++  font-weight: 800;
++  letter-spacing: -0.03em;
++  line-height: 1.1;
++  margin-bottom: var(--space-lg);
++  color: var(--color-text-primary);
+ }
+ 
+ .hero p {
+   font-size: 1.15rem;
+   color: var(--color-text-secondary);
+-  max-width: 600px;
++  max-width: 580px;
+   margin-bottom: var(--space-xl);
+-  line-height: 1.7;
++  line-height: 1.75;
+ }
+ 
++/* ── Badge ── */
+ .badge {
+   display: inline-flex;
+   align-items: center;
+   gap: var(--space-xs);
+-  padding: var(--space-xs) var(--space-md);
++  padding: 6px var(--space-md);
+   background: var(--color-bg-card);
+   border: 1px solid var(--color-border);
+   border-radius: var(--radius-full);
+-  font-size: 0.85rem;
+-  color: var(--color-text-secondary);
++  font-size: 0.8rem;
++  font-weight: 600;
++  letter-spacing: 0.04em;
++  text-transform: uppercase;
++  color: var(--color-accent);
+   margin-bottom: var(--space-lg);
+ }
+ 
+ .badge::before {
+   content: "";
+-  width: 8px;
+-  height: 8px;
++  width: 7px;
++  height: 7px;
+   border-radius: 50%;
+   background: var(--color-success);
+-  animation: pulse 2s infinite;
++  flex-shrink: 0;
++  animation: pulse 2s ease-in-out infinite;
+ }
+ 
+ @keyframes pulse {
+-  0%, 100% { opacity: 1; }
+-  50% { opacity: 0.4; }
++  0%, 100% { opacity: 1; transform: scale(1); }
++  50% { opacity: 0.5; transform: scale(0.85); }
+ }
+ 
+ /* ── CTAs ── */
+@@ -62,20 +67,23 @@
+   align-items: center;
+   flex-wrap: wrap;
+   justify-content: center;
++  margin-bottom: var(--space-2xl);
+ }
+ 
+ .primaryCta {
+   display: inline-flex;
+   align-items: center;
+   gap: var(--space-sm);
+-  padding: var(--space-sm) var(--space-xl);
++  padding: 12px var(--space-xl);
++  min-height: 44px;
+   font-size: 1rem;
+   font-weight: 600;
+   color: #fff;
+   background: var(--color-accent);
+   border-radius: var(--radius-md);
+   text-decoration: none;
+-  transition: background var(--transition-fast),
++  transition:
++    background var(--transition-fast),
+     box-shadow var(--transition-fast),
+     transform var(--transition-fast);
+ }
+@@ -91,7 +99,8 @@
+   display: inline-flex;
+   align-items: center;
+   gap: var(--space-sm);
+-  padding: var(--space-sm) var(--space-xl);
++  padding: 12px var(--space-xl);
++  min-height: 44px;
+   font-size: 1rem;
+   font-weight: 500;
+   color: var(--color-text-muted);
+@@ -102,10 +111,10 @@
+ }
+ 
+ .comingSoon {
+-  font-size: 0.7rem;
+-  font-weight: 600;
++  font-size: 0.68rem;
++  font-weight: 700;
+   text-transform: uppercase;
+-  letter-spacing: 0.05em;
++  letter-spacing: 0.06em;
+   padding: 2px var(--space-sm);
+   background: var(--color-border);
+   border-radius: var(--radius-full);
+@@ -115,25 +124,49 @@
+ /* ── Stats ── */
+ .stats {
+   display: flex;
+-  gap: var(--space-xl);
+-  margin-top: var(--space-2xl);
++  gap: 0;
++  margin-top: var(--space-xl);
++  background: var(--color-bg-card);
++  border: 1px solid var(--color-border);
++  border-radius: var(--radius-lg);
++  overflow: hidden;
+ }
+ 
+ .stat {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
++  padding: var(--space-lg) var(--space-2xl);
++  flex: 1;
++  position: relative;
++}
++
++/* Divider between stat cells */
++.stat + .stat::before {
++  content: "";
++  position: absolute;
++  left: 0;
++  top: 20%;
++  height: 60%;
++  width: 1px;
++  background: var(--color-border);
+ }
+ 
+ .statValue {
+-  font-size: 2rem;
+-  font-weight: 700;
++  font-size: 2.25rem;
++  font-weight: 800;
++  font-variant-numeric: tabular-nums;
+   color: var(--color-accent);
++  line-height: 1.1;
+ }
+ 
+ .statLabel {
+-  font-size: 0.85rem;
++  font-size: 0.8rem;
++  font-weight: 500;
++  letter-spacing: 0.03em;
++  text-transform: uppercase;
+   color: var(--color-text-muted);
++  margin-top: var(--space-xs);
+ }
+ 
+ /* ── Features Section ── */
+@@ -146,49 +179,64 @@
+ .sectionTitle {
+   font-size: 1.75rem;
+   font-weight: 700;
+-  letter-spacing: -0.01em;
++  letter-spacing: -0.02em;
+   margin-bottom: var(--space-xl);
++  color: var(--color-text-primary);
++  /* Subtle left accent bar for section identity */
++  padding-left: var(--space-md);
++  border-left: 3px solid var(--color-accent);
+ }
+ 
+ .featuresGrid {
+   display: grid;
+-  grid-template-columns: repeat(3, 1fr);
++  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+   gap: var(--space-lg);
+ }
+ 
+ .featureCard {
+   background: var(--color-bg-card);
+   border: 1px solid var(--color-border);
+-  border-radius: var(--radius-md);
++  border-radius: var(--radius-lg);
+   padding: var(--space-xl);
+-  transition: border-color var(--transition-base),
+-    box-shadow var(--transition-base);
++  transition:
++    border-color var(--transition-base),
++    box-shadow var(--transition-base),
++    transform var(--transition-base);
+ }
+ 
+ .featureCard:hover {
+   border-color: var(--color-border-hover);
+-  box-shadow: var(--shadow-sm);
++  box-shadow: var(--shadow-md);
++  transform: translateY(-3px);
+ }
+ 
+ .featureIcon {
+-  font-size: 2rem;
+-  display: block;
+-  margin-bottom: var(--space-sm);
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  width: 48px;
++  height: 48px;
++  border-radius: var(--radius-md);
++  background: var(--color-accent-glow);
++  color: var(--color-accent);
++  margin-bottom: var(--space-md);
++  flex-shrink: 0;
+ }
+ 
+ .featureCard h3 {
+-  font-size: 1.1rem;
+-  font-weight: 600;
++  font-size: 1.05rem;
++  font-weight: 700;
++  color: var(--color-text-primary);
+   margin-bottom: var(--space-xs);
+ }
+ 
+ .featureCard p {
+   font-size: 0.9rem;
+   color: var(--color-text-secondary);
+-  line-height: 1.6;
++  line-height: 1.65;
+ }
+ 
+-/* ── Popular Plugins ── */
++/* ── Popular Plugins Section ── */
+ .popular {
+   max-width: 1200px;
+   margin: 0 auto;
+@@ -203,26 +251,80 @@
+ }
+ 
+ .viewAll {
+-  font-size: 0.95rem;
+-  font-weight: 500;
++  display: inline-flex;
++  align-items: center;
++  gap: 4px;
++  font-size: 0.9rem;
++  font-weight: 600;
+   color: var(--color-accent);
+   text-decoration: none;
+-  transition: color var(--transition-fast);
++  padding: 6px var(--space-md);
++  border: 1px solid var(--color-accent);
++  border-radius: var(--radius-full);
++  transition:
++    background var(--transition-fast),
++    color var(--transition-fast),
++    box-shadow var(--transition-fast);
+ }
+ 
+ .viewAll:hover {
+-  color: var(--color-accent-hover);
++  background: var(--color-accent);
++  color: #fff;
++  box-shadow: var(--shadow-glow);
+ }
+ 
+ .popularGrid {
+   display: grid;
+-  grid-template-columns: repeat(3, 1fr);
++  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+   gap: var(--space-lg);
+ }
+ 
+ /* ── Responsive ── */
+ @media (max-width: 768px) {
+-  .hero h1 { font-size: 2rem; }
+-  .featuresGrid { grid-template-columns: 1fr; }
+-  .popularGrid { grid-template-columns: 1fr; }
++  .hero h1 {
++    font-size: 2rem;
++  }
++
++  .hero p {
++    font-size: 1rem;
++  }
++
++  .stats {
++    flex-direction: column;
++    border-radius: var(--radius-md);
++  }
++
++  .stat + .stat::before {
++    top: 0;
++    left: 20%;
++    width: 60%;
++    height: 1px;
++  }
++
++  .stat {
++    padding: var(--space-md) var(--space-xl);
++  }
++
++  .ctas {
++    flex-direction: column;
++    width: 100%;
++  }
++
++  .primaryCta,
++  .secondaryCta {
++    width: 100%;
++    justify-content: center;
++  }
++
++  .featuresGrid {
++    grid-template-columns: 1fr;
++  }
++
++  .popularGrid {
++    grid-template-columns: 1fr;
++  }
++
++  .sectionTitle {
++    font-size: 1.4rem;
++  }
+ }
+diff --git a/src/app/page.tsx b/src/app/page.tsx
+index b27661c..3b4acf9 100644
+--- a/src/app/page.tsx
++++ b/src/app/page.tsx
+@@ -1,6 +1,7 @@
+ "use client";
+ 
+ import Link from "next/link";
++import { ArrowRight } from "lucide-react";
+ import { trackEvent } from "@/lib/analytics";
+ import { KNOWN_PLUGINS } from "@/data/knownPlugins";
+ import PluginCard from "@/components/PluginCard";
+@@ -67,7 +68,7 @@ export default function Home() {
+             className={styles.primaryCta}
+             onClick={() => trackEvent("cta_click", { label: "Browse Plugins" })}
+           >
+-            Browse Plugins →
++            Browse Plugins <ArrowRight size={16} />
+           </Link>
+           <span className={styles.secondaryCta}>
+             Publish a Plugin
+@@ -108,7 +109,7 @@ export default function Home() {
+         <div className={styles.popularHeader}>
+           <h2 className={styles.sectionTitle}>Popular Plugins</h2>
+           <Link href="/browse" className={styles.viewAll}>
+-            View All →
++            View All <ArrowRight size={14} />
+           </Link>
+         </div>
+         <div className={styles.popularGrid}>
+diff --git a/src/components/ClientProviders.tsx b/src/components/ClientProviders.tsx
+index 002ae71..4faafb5 100644
+--- a/src/components/ClientProviders.tsx
++++ b/src/components/ClientProviders.tsx
+@@ -1,20 +1,18 @@
+ "use client";
+ 
+ import type { ReactNode } from "react";
+-import ThemeProvider from "./ThemeProvider";
+ import InstalledPluginsProvider from "./InstalledPluginsProvider";
+ 
+ /**
+  * Client-side providers wrapper.
+  * Keeps layout.tsx as a server component while providing
+- * client contexts (theme + installed plugins) to the tree.
++ * client contexts to the tree.
++ * ThemeProvider is lifted up to layout.tsx so it wraps the Header too.
+  */
+ export default function ClientProviders({ children }: { children: ReactNode }) {
+   return (
+-    <ThemeProvider>
+-      <InstalledPluginsProvider>
+-        {children}
+-      </InstalledPluginsProvider>
+-    </ThemeProvider>
++    <InstalledPluginsProvider>
++      {children}
++    </InstalledPluginsProvider>
+   );
+ }
+diff --git a/src/components/Header.module.css b/src/components/Header.module.css
+index 3d82697..a676c65 100644
+--- a/src/components/Header.module.css
++++ b/src/components/Header.module.css
+@@ -93,24 +93,52 @@
+   background: var(--color-accent-glow);
+ }
+ 
+-.userChip {
+-  padding: var(--space-xs) var(--space-md);
+-  font-size: 0.85rem;
+-  font-weight: 500;
+-  color: var(--color-text-primary);
+-  background: var(--color-bg-card);
+-  border: 1px solid var(--color-border);
+-  border-radius: var(--radius-full);
+-  cursor: pointer;
+-  max-width: 180px;
++.avatarChip {
++  width: 34px;
++  height: 34px;
++  padding: 0;
++  border-radius: 50%;
+   overflow: hidden;
+-  text-overflow: ellipsis;
+-  white-space: nowrap;
+-  transition: background var(--transition-fast), border-color var(--transition-fast);
++  border: 1.5px solid var(--color-border);
++  background: none;
++  cursor: pointer;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+ }
+-.userChip:hover {
+-  background: var(--color-bg-card-hover);
+-  border-color: var(--color-border-hover);
++.avatarChip:hover {
++  border-color: var(--color-accent);
++  box-shadow: 0 0 0 2px var(--color-accent-subtle);
++}
++
++.avatarImg {
++  width: 34px;
++  height: 34px;
++  border-radius: 50%;
++  object-fit: cover;
++  display: block;
++}
++
++/* AvatarInitials variant scaled for the 34px header chip */
++.chipAvatar {
++  width: 34px;
++  height: 34px;
++  border-radius: 50%;
++  background: hsl(var(--avatar-hue, 350), 50%, 42%);
++  color: #fff;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  font-size: 0.8rem;
++  font-weight: 700;
++  letter-spacing: -0.02em;
++  flex-shrink: 0;
++  user-select: none;
++}
++
++[data-theme="dark"] .chipAvatar {
++  background: hsl(var(--avatar-hue, 350), 45%, 38%);
+ }
+ 
+ .dropdownMenu {
+diff --git a/src/components/InstalledPluginCard.module.css b/src/components/InstalledPluginCard.module.css
+index e0970be..71c3da0 100644
+--- a/src/components/InstalledPluginCard.module.css
++++ b/src/components/InstalledPluginCard.module.css
+@@ -56,9 +56,9 @@
+   font-weight: 600;
+   padding: 2px var(--space-sm);
+   border-radius: var(--radius-full);
+-  background: var(--color-accent-glow);
+-  color: var(--color-accent);
+-  border: 1px solid var(--color-accent);
++  background: var(--color-bg-card-hover);
++  color: var(--color-text-secondary);
++  border: 1px solid var(--color-border);
+   text-transform: uppercase;
+   letter-spacing: 0.04em;
+ }
+diff --git a/src/components/PluginCard.module.css b/src/components/PluginCard.module.css
+index c45cbf8..e7c85d3 100644
+--- a/src/components/PluginCard.module.css
++++ b/src/components/PluginCard.module.css
+@@ -2,23 +2,26 @@
+ .card {
+   background: var(--color-bg-card);
+   border: 1px solid var(--color-border);
+-  border-radius: var(--radius-md);
++  border-radius: var(--radius-lg);
+   padding: var(--space-lg);
+   display: flex;
+   flex-direction: column;
+   gap: var(--space-sm);
+   text-decoration: none;
+   color: inherit;
+-  transition: transform var(--transition-base),
++  /* Consistent height prevents grid ragging with short descriptions */
++  min-height: 180px;
++  transition:
++    transform var(--transition-base),
+     border-color var(--transition-base),
+     box-shadow var(--transition-base);
+   cursor: pointer;
+ }
+ 
+ .card:hover {
+-  transform: translateY(-4px);
++  transform: translateY(-5px);
+   border-color: var(--color-border-hover);
+-  box-shadow: var(--shadow-md);
++  box-shadow: var(--shadow-lg);
+   color: inherit;
+ }
+ 
+@@ -29,27 +32,38 @@
+ }
+ 
+ .cardIcon {
+-  font-size: 1.6rem;
+   width: 40px;
+   height: 40px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+-  background: var(--color-bg-elevated);
+-  border-radius: var(--radius-sm);
++  background: var(--color-bg-card-hover);
++  color: var(--color-text-primary);
++  border: 1px solid var(--color-border);
++  border-radius: var(--radius-md);
+   flex-shrink: 0;
+ }
+ 
+ .cardName {
+   font-size: 1rem;
+-  font-weight: 600;
++  font-weight: 700;
+   color: var(--color-text-primary);
++  /* Prevent very long plugin names from overflowing */
++  overflow: hidden;
++  text-overflow: ellipsis;
++  white-space: nowrap;
++  flex: 1;
+ }
+ 
+ .cardDesc {
+-  font-size: 0.88rem;
++  font-size: 0.875rem;
+   color: var(--color-text-secondary);
+-  line-height: 1.5;
++  line-height: 1.55;
++  /* Clip to exactly 2 lines to keep grid rows consistent */
++  display: -webkit-box;
++  -webkit-line-clamp: 2;
++  -webkit-box-orient: vertical;
++  overflow: hidden;
+   flex: 1;
+ }
+ 
+@@ -57,20 +71,25 @@
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+-  margin-top: var(--space-xs);
++  margin-top: auto;
++  padding-top: var(--space-sm);
++  border-top: 1px solid var(--color-border);
+ }
+ 
+ .categoryBadge {
+-  font-size: 0.75rem;
+-  font-weight: 500;
+-  padding: 2px var(--space-sm);
++  font-size: 0.72rem;
++  font-weight: 600;
++  letter-spacing: 0.03em;
++  padding: 3px var(--space-sm);
+   border-radius: var(--radius-full);
+   background: var(--color-accent-glow);
+-  color: var(--color-accent-hover);
+-  border: 1px solid var(--color-accent);
++  color: var(--color-accent);
++  border: 1px solid currentColor;
++  text-transform: capitalize;
+ }
+ 
+ .installs {
+   font-size: 0.78rem;
++  font-variant-numeric: tabular-nums;
+   color: var(--color-text-muted);
+ }
+diff --git a/src/components/ThemeToggle.module.css b/src/components/ThemeToggle.module.css
+index cd4b69e..3a94d08 100644
+--- a/src/components/ThemeToggle.module.css
++++ b/src/components/ThemeToggle.module.css
+@@ -5,17 +5,22 @@
+   width: 34px;
+   height: 34px;
+   border: 1px solid var(--color-border);
+-  border-radius: var(--radius-sm);
++  border-radius: var(--radius-full);
+   background: var(--color-bg-card);
+   cursor: pointer;
+-  font-size: 1rem;
++  color: var(--color-text-secondary);
+   transition: border-color var(--transition-fast),
+     background var(--transition-fast),
+-    transform var(--transition-fast);
++    color var(--transition-fast);
+ }
+ 
+ .toggle:hover {
+   border-color: var(--color-border-hover);
+   background: var(--color-bg-card-hover);
+-  transform: scale(1.05);
++  color: var(--color-text-primary);
++}
++
++.placeholder {
++  width: 34px;
++  height: 34px;
+ }
+diff --git a/src/components/ThemeToggle.tsx b/src/components/ThemeToggle.tsx
+index 5df9ba2..87c72c4 100644
+--- a/src/components/ThemeToggle.tsx
++++ b/src/components/ThemeToggle.tsx
+@@ -1,39 +1,28 @@
+ "use client";
+ 
+ import { useEffect, useState } from "react";
++import { Sun, Moon } from "lucide-react";
+ import { useTheme } from "./ThemeProvider";
+ import styles from "./ThemeToggle.module.css";
+ 
+-const ICONS: Record<string, string> = {
+-  light: "☀️",
+-  dark: "🌙",
+-  system: "💻",
+-};
+-
+-const NEXT: Record<string, "light" | "dark" | "system"> = {
+-  light: "dark",
+-  dark: "system",
+-  system: "light",
+-};
+-
+ export default function ThemeToggle() {
+-  const { theme, setTheme } = useTheme();
++  const { resolved, setTheme } = useTheme();
+   const [mounted, setMounted] = useState(false);
+ 
+   useEffect(() => setMounted(true), []);
+ 
+-  /* Render a stable placeholder during SSR to avoid hydration mismatch */
+-  const label = mounted ? theme : "system";
+-  const icon = mounted ? ICONS[theme] : ICONS.system;
++  if (!mounted) return <div className={styles.placeholder} aria-hidden="true" />;
++
++  const isDark = resolved === "dark";
+ 
+   return (
+     <button
+       className={styles.toggle}
+-      onClick={() => setTheme(NEXT[theme])}
+-      aria-label={`Switch theme (current: ${label})`}
+-      title={`Theme: ${label}`}
++      onClick={() => setTheme(isDark ? "light" : "dark")}
++      aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
++      title={`Switch to ${isDark ? "light" : "dark"} mode`}
+     >
+-      {icon}
++      {isDark ? <Sun size={16} /> : <Moon size={16} />}
+     </button>
+   );
+ }
+diff --git a/src/components/WipBanner.module.css b/src/components/WipBanner.module.css
+index 185e4fc..ff8bb16 100644
+--- a/src/components/WipBanner.module.css
++++ b/src/components/WipBanner.module.css
+@@ -1,79 +1,55 @@
+ /* ───────── WIP Banner ────────── */
+ .banner {
+   position: relative;
+-  z-index: 1100;
+   display: flex;
+   align-items: center;
+-  justify-content: center;
+   gap: var(--space-sm);
+-  padding: var(--space-xs) var(--space-md);
+-  background: repeating-linear-gradient(
+-    -45deg,
+-    var(--color-warning),
+-    var(--color-warning) 10px,
+-    #c47f00 10px,
+-    #c47f00 20px
+-  );
+-  color: #fff;
++  padding: 0.6rem var(--space-lg);
++  background: rgba(139, 34, 50, 0.08);
++  border-bottom: 1px solid rgba(139, 34, 50, 0.30);
++  border-left: 3px solid var(--color-accent);
+   font-family: var(--font-sans);
+-  font-size: 0.8rem;
+-  font-weight: 700;
+-  letter-spacing: 0.04em;
+-  text-transform: uppercase;
+-  text-align: center;
+-  line-height: 1.4;
++  font-size: 0.78rem;
++  color: var(--color-text-secondary);
++  line-height: 1.5;
+   user-select: none;
+-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+-}
+-
+-/* dark overlay for better text contrast */
+-.banner::before {
+-  content: "";
+-  position: absolute;
+-  inset: 0;
+-  background: rgba(0, 0, 0, 0.35);
+-  pointer-events: none;
+ }
+ 
+-/* ensure content sits above the overlay */
+-.icon,
+-.text,
+-.close {
+-  position: relative;
+-  z-index: 1;
++[data-theme="dark"] .banner {
++  background: rgba(196, 60, 76, 0.08);
++  border-bottom-color: rgba(196, 60, 76, 0.30);
+ }
+ 
+ .icon {
+-  font-size: 1rem;
+   flex-shrink: 0;
++  color: var(--color-accent);
++  opacity: 0.8;
+ }
+ 
+ .text {
+-  white-space: nowrap;
++  flex: 1;
+ }
+ 
+ .close {
+   all: unset;
+   cursor: pointer;
+-  position: relative;
+-  z-index: 1;
++  display: flex;
++  align-items: center;
++  justify-content: center;
+   margin-left: var(--space-sm);
+-  font-size: 1.1rem;
+-  font-weight: 900;
+-  line-height: 1;
+-  color: #fff;
+-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+-  opacity: 0.9;
+-  transition: opacity 0.15s ease;
++  flex-shrink: 0;
++  color: var(--color-text-muted);
++  opacity: 0.7;
++  transition: opacity var(--transition-fast), color var(--transition-fast);
+ }
+ 
+ .close:hover {
+   opacity: 1;
++  color: var(--color-text-primary);
+ }
+ 
+ @media (max-width: 480px) {
+   .banner {
+-    font-size: 0.7rem;
+-    padding: var(--space-xs) var(--space-sm);
++    padding: 0.5rem var(--space-md);
+   }
+ }
+diff --git a/src/components/WipBanner.tsx b/src/components/WipBanner.tsx
+index fa3a8fb..1417a2e 100644
+--- a/src/components/WipBanner.tsx
++++ b/src/components/WipBanner.tsx
+@@ -1,28 +1,29 @@
+ "use client";
+ 
+ import { useState } from "react";
++import { Info, X } from "lucide-react";
+ import styles from "./WipBanner.module.css";
+ 
++/** Dismissible info banner shown while the marketplace is under active development. */
+ export default function WipBanner() {
+   const [visible, setVisible] = useState(true);
+ 
+   if (!visible) return null;
+ 
+   return (
+-    <div role="status" aria-label="Work in progress" className={styles.banner}>
+-      <span className={styles.icon}>🚧</span>
++    <div role="status" aria-label="Work in progress notice" className={styles.banner}>
++      <Info size={14} className={styles.icon} aria-hidden="true" />
+       <span className={styles.text}>
+-        This marketplace is under active development — features may be
++        This marketplace is under active development. Features may be
+         incomplete or change without notice.
+       </span>
+-      <span className={styles.icon}>🚧</span>
+       <button
+         type="button"
+         className={styles.close}
+         onClick={() => setVisible(false)}
+         aria-label="Dismiss banner"
+       >
+-        ✕
++        <X size={14} aria-hidden="true" />
+       </button>
+     </div>
+   );
+diff --git a/src/lib/auth/getOrCreateMarketplaceUser.ts b/src/lib/auth/getOrCreateMarketplaceUser.ts
+index 4d3b1d6..4d8594d 100644
+--- a/src/lib/auth/getOrCreateMarketplaceUser.ts
++++ b/src/lib/auth/getOrCreateMarketplaceUser.ts
+@@ -2,16 +2,56 @@ import { prisma } from '@/lib/prisma'
+ import type { User as SupabaseUser } from '@supabase/supabase-js'
+ 
+ export async function getOrCreateMarketplaceUser(supabaseUser: SupabaseUser) {
+-  const existing = await prisma.user.findUnique({
++  // Primary lookup: by Supabase user ID (fast path for returning users).
++  const byId = await prisma.user.findUnique({
+     where: { supabaseUserId: supabaseUser.id },
+   })
+-  if (existing) return existing
++  if (byId) return byId
+ 
+-  return prisma.user.create({
+-    data: {
+-      supabaseUserId: supabaseUser.id,
+-      email: supabaseUser.email ?? `${supabaseUser.id}@no-email`,
+-      tier: 'free',
+-    },
++  const email = supabaseUser.email ?? `${supabaseUser.id}@no-email`
++
++  // Secondary lookup: by email. Handles the case where a row was created
++  // without a supabaseUserId (e.g. pre-provisioned row, or a prior orphaned
++  // sign-up), or after linkIdentity() merges a new OAuth identity into an
++  // existing account and the row's supabaseUserId doesn't match yet.
++  const byEmail = await prisma.user.findUnique({
++    where: { email },
+   })
++  if (byEmail) {
++    // Backfill the supabaseUserId so future lookups hit the fast path.
++    if (byEmail.supabaseUserId !== supabaseUser.id) {
++      return prisma.user.update({
++        where: { id: byEmail.id },
++        data: { supabaseUserId: supabaseUser.id },
++      })
++    }
++    return byEmail
++  }
++
++  // No row exists yet — create one. If a concurrent request races here and
++  // inserts first, catch the unique-constraint violation and re-fetch.
++  try {
++    return await prisma.user.create({
++      data: {
++        supabaseUserId: supabaseUser.id,
++        email,
++        tier: 'free',
++      },
++    })
++  } catch (err: unknown) {
++    if (
++      typeof err === 'object' &&
++      err !== null &&
++      'code' in err &&
++      (err as { code: string }).code === 'P2002'
++    ) {
++      // Unique constraint violation from a race — return whichever row won.
++      const recovered = await prisma.user.findUnique({
++        where: { supabaseUserId: supabaseUser.id },
++      })
++      if (recovered) return recovered
++      return prisma.user.findUniqueOrThrow({ where: { email } })
++    }
++    throw err
++  }
+ }
+diff --git a/src/lib/auth/requireSession.ts b/src/lib/auth/requireSession.ts
+index d757f99..107c6f0 100644
+--- a/src/lib/auth/requireSession.ts
++++ b/src/lib/auth/requireSession.ts
+@@ -11,7 +11,17 @@ export async function requireSupabaseUser(returnTo: string) {
+   const user = await getSupabaseUser()
+   if (!user) {
+     const authHost = process.env.NEXT_PUBLIC_AUTH_HOST_URL!
+-    redirect(`${authHost}/login?callbackUrl=${encodeURIComponent(returnTo)}`)
++    // The auth host treats relative `next` values as relative to ITSELF, so
++    // `next=/account` would land the user on the auth host's `/account` (which
++    // does not exist) after login. Promote relative paths to absolute marketplace
++    // URLs so the auth host's safeNext recognises the cookie-domain sibling and
++    // redirects cross-origin back to the marketplace.
++    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
++    let absoluteReturnTo = returnTo
++    if (returnTo.startsWith('/') && siteUrl) {
++      absoluteReturnTo = `${siteUrl.replace(/\/+$/, '')}${returnTo}`
++    }
++    redirect(`${authHost}/login?next=${encodeURIComponent(absoluteReturnTo)}`)
+   }
+   return user
+ }

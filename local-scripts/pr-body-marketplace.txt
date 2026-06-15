@@ -1,0 +1,26 @@
+## Summary
+
+- New `/api/install/start` route: validates `instanceUrl` (http/https, not self), enforces Supabase auth, calls `getOrCreateMarketplaceUser` (tier: free), then bounces browser to the WWV install-redirect endpoint.
+- `InstallButton.handleInstall` now routes through `/api/install/start` instead of building the WWV redirect URL client-side with no auth check (`buildRedirectUrl` renamed to `buildInstallStartUrl`).
+- `requireSupabaseUser`: rename `?next=` to `?callbackUrl=` to match WWV login page.
+- `buildCookieOptions`: add `httpOnly: true`.
+
+## Depends on
+
+worldwideview PR #192 (Phase 2 — `@supabase/ssr` migration, `/login` fix, `/signup` route).
+
+## Local dev setup (one-time prerequisite)
+
+Add to hosts file: `127.0.0.1 marketplace.wwv.local`.
+
+Set `NEXT_PUBLIC_WWV_COOKIE_DOMAIN=.wwv.local` and `NEXT_PUBLIC_AUTH_HOST_URL=http://wwv.local:3000` in `.env.local`.
+
+## Test plan
+
+- [ ] `pnpm test` passes (52 tests, 8 files)
+- [ ] `pnpm build` passes
+- [ ] Click Install on a plugin while logged out — should redirect to `wwv.local:3000/login?callbackUrl=<encoded install/start URL>`
+- [ ] After login, browser returns to `/api/install/start` which completes the install
+- [ ] `prisma.user` row created with `supabaseUserId`, `email`, `tier: 'free'`
+- [ ] `instanceUrl=javascript:alert(1)` returns 400
+- [ ] `instanceUrl` matching marketplace origin returns 400

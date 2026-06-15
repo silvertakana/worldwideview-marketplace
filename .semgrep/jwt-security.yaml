@@ -1,0 +1,43 @@
+rules:
+  - id: jwt-alg-none
+    patterns:
+      - pattern-inside: |
+          new jose.SignJWT(...)
+      - pattern: |
+          $JWT.setProtectedHeader({alg: "none"})
+    message: JWT with alg:none bypasses signature verification
+    languages: [typescript]
+    severity: ERROR
+
+  - id: jwt-missing-expiration
+    patterns:
+      - pattern: |
+          new jose.SignJWT(...)
+      - pattern-not: |
+          new jose.SignJWT(...).setExpirationTime(...)
+    message: JWT missing expiration time - token never expires
+    languages: [typescript]
+    severity: ERROR
+
+  - id: jwt-dynamic-algorithm
+    patterns:
+      - pattern-inside: |
+          new jose.SignJWT(...)
+      - pattern: |
+          $JWT.setProtectedHeader({alg: $ALG})
+      - metavariable-regex:
+          metavariable: $ALG
+          regex: ^(?!["'](EdDSA|ES256|ES384|ES512|RS256|RS384|RS512|PS256|PS384|PS512|HS256|HS384|HS512)["']).+$
+    message: Dynamic or unusual JWT algorithm - ensure algorithm is not attacker-controlled
+    languages: [typescript]
+    severity: WARNING
+
+  - id: jwt-weak-secret
+    patterns:
+      - pattern: |
+          $SIGNED.sign("...")
+      - pattern: |
+          $SIGNED.sign(Buffer.from(...))
+    message: JWT signed with a string/Buffer secret - use CryptoKey via importJWK or generateKeyPair
+    languages: [typescript]
+    severity: WARNING
