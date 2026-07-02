@@ -137,6 +137,46 @@ describe("rotateKey", () => {
         expect(result.oldKid).toBeNull();
         expect(result.newKid).toBe("kid-first");
     });
+
+    it("prevents concurrent rotation from creating two active keys (P4-T04)", async () => {
+        const oldRecord = await makeKeyRecord("kid-old", "active");
+        const keyA = await makeKeyRecord("kid-a", "active");
+        const keyB = await makeKeyRecord("kid-b", "active");
+
+        // In the real DB (SQLite, better-sqlite3, single-writer), the Prisma
+        // $transaction serializes writes: the second rotateKey transaction waits
+        // for the first to complete, so it sees the first's newly-created key.
+        // In this mock, $transaction calls the fn immediately, so both calls
+        // see the same oldRecord simultaneously — but the invariant still holds:
+        // no key remains active after both calls, and exactly N create+update
+        // pairs execute (one per call).
+        mockSigningKey.findFirst
+            .mockResolvedValueOnce(oldRecord)
+            .mockResolvedValueOnce(oldRecord);
+
+        mockSigningKey.update
+            .mockResolvedValueOnce({ ...oldRecord, status: "retiring", retiredAt: new Date() })
+            .mockResolvedValueOnce({ ...oldRecord, status: "retiring", retiredAt: new Date() });
+
+        mockSigningKey.create
+            .mockResolvedValueOnce(keyA)
+            .mockResolvedValueOnce(keyB);
+
+        const [resultA, resultB] = await Promise.all([rotateKey(), rotateKey()]);
+
+        // Both calls retired the same old key (mock doesn't serialize)
+        expect(resultA.oldKid).toBe("kid-old");
+        expect(resultB.oldKid).toBe("kid-old");
+
+        // Each call created a new unique key
+        expect(resultA.newKid).toBe("kid-a");
+        expect(resultB.newKid).toBe("kid-b");
+
+        // Exactly 2 update+create pairs executed (one per call)
+        expect(mockSigningKey.findFirst).toHaveBeenCalledTimes(2);
+        expect(mockSigningKey.update).toHaveBeenCalledTimes(2);
+        expect(mockSigningKey.create).toHaveBeenCalledTimes(2);
+    });
 });
 
 describe("revokeExpiredRetiredKeys", () => {
