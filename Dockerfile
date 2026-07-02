@@ -1,21 +1,21 @@
 # ── Stage 1: Install dependencies ──
-FROM node:26-alpine AS deps
+FROM node:26-slim AS deps
 RUN corepack enable pnpm
-RUN apk add --no-cache python3 make g++
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json pnpm-lock.yaml .npmrc ./
 RUN pnpm i --frozen-lockfile
 
 # ── Stage 2: Install PRODUCTION-ONLY dependencies ──
-FROM node:26-alpine AS proddeps
+FROM node:26-slim AS proddeps
 RUN corepack enable pnpm
-RUN apk add --no-cache python3 make g++
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json pnpm-lock.yaml .npmrc ./
 RUN pnpm i --prod --frozen-lockfile
 
 # ── Stage 3: Build the application ──
-FROM node:26-alpine AS builder
+FROM node:26-slim AS builder
 RUN corepack enable pnpm
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -36,7 +36,7 @@ RUN npx prisma generate
 RUN pnpm run build
 
 # ── Stage 4: Production runner ──
-FROM node:26-alpine AS runner
+FROM node:26-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
