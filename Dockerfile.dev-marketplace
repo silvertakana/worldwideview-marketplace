@@ -1,0 +1,32 @@
+# Dev-mode Dockerfile for the marketplace Next.js app
+# Uses pnpm dev with webpack and volume mounts for hot reload
+FROM node:26-alpine
+
+# Install pnpm via npm (corepack not bundled in node:26-alpine)
+RUN npm install -g pnpm@latest
+
+# Install build deps for better-sqlite3 native module
+RUN apk add --no-cache python3 make g++ openssl
+
+WORKDIR /app
+
+# Copy package files first for layer caching
+COPY package.json pnpm-lock.yaml ./
+
+# Install all deps (including dev)
+RUN pnpm install --frozen-lockfile
+
+# Copy Prisma schema for client generation
+COPY prisma ./prisma
+RUN npx prisma generate
+
+# Copy the rest of the source
+COPY . .
+
+# Expose the dev server port
+EXPOSE 3002
+
+# Run pnpm dev with file watching tuned for Docker on Windows
+ENV WATCHPACK_POLLING=true
+ENV NEXT_TELEMETRY_DISABLED=1
+CMD ["pnpm", "dev"]

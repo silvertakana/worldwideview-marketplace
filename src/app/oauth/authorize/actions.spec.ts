@@ -37,7 +37,7 @@ import { approveAuthorization, denyAuthorization } from './actions'
 // ── fixtures ──────────────────────────────────────────────────────────────────
 
 const SUPABASE_USER = { id: 'supabase-uuid-123', email: 'user@example.com' }
-const MARKETPLACE_USER = { id: 'marketplace-cuid-456', email: 'user@example.com', tier: 'free' }
+const MARKETPLACE_USER = { id: 'marketplace-cuid-456', email: 'user@example.com' }
 
 const BASE_FIELDS: Record<string, string> = {
   client_id: 'local-app',

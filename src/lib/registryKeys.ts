@@ -2,7 +2,7 @@ import { createPrivateKey, createPublicKey, sign, verify } from "crypto";
 
 /** Public key for verifying the signed registry (shared with WWV). */
 export const REGISTRY_PUBLIC_KEY =
-  "MCowBQYDK2VwAyEAkYDmLpCrHu1fnsu8CCdICOHg3IUGuDDkA4fpUeJANJk=";
+  "MCowBQYDK2VwAyEAk7T+s8Us85H4pR9pJt78pG2H17bUYqLSGi6ngbDvGo8=";
 
 /** Sign data with the registry private key (from env). */
 export function signRegistry(data: string): string {

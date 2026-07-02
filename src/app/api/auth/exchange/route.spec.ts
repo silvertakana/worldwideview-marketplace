@@ -14,7 +14,7 @@ vi.mock("next/server", async (importOriginal) => {
     };
 });
 
-const FIXTURE_USER = { id: "user-abc123", email: "test@example.com", tier: "pro", createdAt: new Date() };
+const FIXTURE_USER = { id: "user-abc123", email: "test@example.com", createdAt: new Date() };
 const FIXTURE_KEY_RAW = "test-api-key-fixture-32bytes-xyz";
 const FIXTURE_KEY_HASH = hashApiKey(FIXTURE_KEY_RAW);
 const REVOKED_KEY_RAW = "revoked-api-key-fixture-32bytes!";
@@ -98,8 +98,8 @@ describe("Token Exchange Endpoint", () => {
         expect(decoded.iss).toBe("https://marketplace.worldwideview.dev");
         expect(decoded.sub).toBe(FIXTURE_USER.id);
         expect(decoded.aud).toBe("wwv-aviation-engine");
-        expect(decoded.tier).toBe("pro");
-        expect(decoded.scope).toBe("plugins:read plugins:write");
+        expect(decoded.tier).toBe("free");
+        expect(decoded.scope).toBe("plugins:read");
         expect(decoded.exp! - decoded.iat!).toBe(300);
         expect(decoded.nbf).toBeDefined();
         expect(decoded.jti).toBeDefined();

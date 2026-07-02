@@ -143,7 +143,7 @@ describe('GET /api/install/start', () => {
 
   it('calls linkedInstance.upsert with normalized origin on a successful install', async () => {
     mockGetSupabaseUser.mockResolvedValue({ id: 'supa-123', email: 'test@example.com' } as never)
-    mockGetOrCreate.mockResolvedValue({ id: 'mkt-456', email: 'test@example.com', tier: 'free', supabaseUserId: 'supa-123', createdAt: new Date() } as never)
+    mockGetOrCreate.mockResolvedValue({ id: 'mkt-456', email: 'test@example.com', supabaseUserId: 'supa-123', createdAt: new Date() } as never)
     mockUpsert.mockResolvedValue({} as never)
     mockPluginUpdate.mockResolvedValue({} as never)
     mockLinkedInstanceUpsert.mockResolvedValue({} as never)
