@@ -14,6 +14,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
+    "lint:urls": "node scripts/lint-urls.mjs",
     "docker:test": "docker build -t marketplace-test . && docker run --rm marketplace-test"
   },
   "dependencies": {

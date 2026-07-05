@@ -95,7 +95,7 @@ describe("Token Exchange Endpoint", () => {
         expect(token).toBeDefined();
 
         const decoded = jose.decodeJwt(token);
-        expect(decoded.iss).toBe("https://marketplace.worldwideview.dev");
+        expect(decoded.iss).toBe("https://marketplace.worldwideview.dev"); // lint-url: allow
         expect(decoded.sub).toBe(FIXTURE_USER.id);
         expect(decoded.aud).toBe("wwv-aviation-engine");
         expect(decoded.tier).toBe("free");

@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
             scope: scopeFor("free"),
         })
             .setProtectedHeader({ alg: "EdDSA", typ: "JWT", kid })
-            .setIssuer("https://marketplace.worldwideview.dev")
+            .setIssuer(process.env.JWT_ISSUER ?? "https://marketplace.worldwideview.dev")
             .setSubject(apiKeyRecord.userId)
             .setAudience(audience ?? "wwv-data-engine")
             .setExpirationTime(now + 300)

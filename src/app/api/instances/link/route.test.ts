@@ -27,7 +27,7 @@ const mockGetSupabaseUser = vi.mocked(getSupabaseUser)
 const mockGetOrCreate = vi.mocked(getOrCreateMarketplaceUser)
 const mockUpsert = vi.mocked(prisma.linkedInstance.upsert)
 
-function makeLinkRequest(body: unknown, origin = 'https://marketplace.worldwideview.dev') {
+function makeLinkRequest(body: unknown, origin = 'https://marketplace.worldwideview.dev') { // lint-url: allow
   return new NextRequest(`${origin}/api/instances/link`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

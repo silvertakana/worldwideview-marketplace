@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { href: '/browse', label: 'Browse' },
   { href: '/manage', label: 'My Plugins' },
   { href: '/submit', label: 'Submit Plugin' },
-  { href: 'https://worldwideview.dev/docs', label: 'Docs' },
+  { href: process.env.NEXT_PUBLIC_DOCS_URL ?? 'https://worldwideview.dev/docs', label: 'Docs' },
 ]
 
 export default function NavLinks() {

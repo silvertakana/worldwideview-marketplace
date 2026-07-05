@@ -1,5 +1,7 @@
 import styles from "./Footer.module.css";
 
+const legalBase = process.env.NEXT_PUBLIC_LEGAL_URL ?? "https://worldwideview.dev/legal";
+
 export default function Footer() {
   const year = new Date().getFullYear();
 
@@ -21,7 +23,7 @@ export default function Footer() {
         </span>
         <span className={styles.legal}>
           <a
-            href="https://worldwideview.dev/legal/privacy-policy"
+            href={`${legalBase}/privacy-policy`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -29,7 +31,7 @@ export default function Footer() {
           </a>
           {" · "}
           <a
-            href="https://worldwideview.dev/legal/marketplace-terms"
+            href={`${legalBase}/marketplace-terms`}
             target="_blank"
             rel="noopener noreferrer"
           >
