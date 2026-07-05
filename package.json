@@ -1,6 +1,6 @@
 {
   "name": "worldwideview-marketplace",
-  "version": "1.15.1",
+  "version": "1.15.2",
   "packageManager": "pnpm@10.33.0",
   "private": true,
   "description": "Marketplace for WorldWideView plugins — browse, publish, and install data sources",
@@ -11,6 +11,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
+    "lint:urls": "node scripts/lint-urls.mjs",
     "docker:test": "docker build -t marketplace-test . && docker run --rm marketplace-test"
   },
   "dependencies": {

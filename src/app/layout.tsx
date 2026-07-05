@@ -48,11 +48,13 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem("wwv-marketplace-theme")||"system";var r=t==="system"?(window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"):t;document.documentElement.setAttribute("data-theme",r);document.documentElement.classList.add("no-transition");requestAnimationFrame(function(){requestAnimationFrame(function(){document.documentElement.classList.remove("no-transition")});})}catch(e){}})();`,
           }}
         />
-        <script
-          defer
-          src="https://analytics.worldwideview.dev/script.js"
-          data-website-id="66565d0f-5206-4fa6-91b6-3159b67bf866"
-        />
+        {process.env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL && (
+          <script
+            defer
+            src={process.env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL}
+            data-website-id="66565d0f-5206-4fa6-91b6-3159b67bf866"
+          />
+        )}
       </head>
       <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }} suppressHydrationWarning>
         <ThemeProvider>

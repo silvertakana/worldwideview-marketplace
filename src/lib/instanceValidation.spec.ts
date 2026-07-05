@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { validateInstanceUrl } from "./instanceValidation";
 
-const MARKETPLACE_ORIGIN = "https://marketplace.worldwideview.dev";
+const MARKETPLACE_ORIGIN = "https://marketplace.worldwideview.dev"; // lint-url: allow
 
 describe("validateInstanceUrl", () => {
     it("normalises a valid URL to its origin", () => {
@@ -41,7 +41,7 @@ describe("validateInstanceUrl", () => {
     });
 
     it("accepts other subdomains of the same parent domain", () => {
-        const result = validateInstanceUrl("https://app.worldwideview.dev", MARKETPLACE_ORIGIN);
-        expect(result).toEqual({ ok: true, url: "https://app.worldwideview.dev" });
+        const result = validateInstanceUrl("https://app.worldwideview.dev", MARKETPLACE_ORIGIN); // lint-url: allow
+        expect(result).toEqual({ ok: true, url: "https://app.worldwideview.dev" }); // lint-url: allow
     });
 });

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { captureFromInstanceQuery } from "./instanceStore";
 
-const MARKETPLACE_ORIGIN = "https://marketplace.worldwideview.dev";
+const MARKETPLACE_ORIGIN = "https://marketplace.worldwideview.dev"; // lint-url: allow
 const STORAGE_KEY = "wwv_instance_url";
 
 describe("captureFromInstanceQuery", () => {
