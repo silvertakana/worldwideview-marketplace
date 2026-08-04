@@ -1,5 +1,5 @@
 import { isLookalikeHostname } from '@/lib/lookalikeDomain'
-import type { RedirectClassification } from './actions'
+import type { RedirectClassification } from '@/lib/redirectTier'
 import styles from './page.module.css'
 
 /**
