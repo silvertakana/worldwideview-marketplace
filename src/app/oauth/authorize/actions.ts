@@ -9,9 +9,6 @@ import { classifyRedirectTier } from '@/lib/redirectTier'
 
 const CODE_TTL_SECONDS = 60
 
-export { classifyRedirectTier }
-export type { RedirectTier, RedirectClassification } from '@/lib/redirectTier'
-
 export async function approveAuthorization(form: FormData) {
   const clientId      = String(form.get('client_id') ?? '')
   const redirectUri   = String(form.get('redirect_uri') ?? '')

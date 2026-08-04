@@ -32,7 +32,8 @@ import { redirect } from 'next/navigation'
 import { requireSupabaseUser } from '@/lib/auth/requireSession'
 import { getOrCreateMarketplaceUser } from '@/lib/auth/getOrCreateMarketplaceUser'
 import { prisma } from '@/lib/prisma'
-import { approveAuthorization, denyAuthorization, classifyRedirectTier } from './actions'
+import { approveAuthorization, denyAuthorization } from './actions'
+import { classifyRedirectTier } from '@/lib/redirectTier'
 
 // ── fixtures ──────────────────────────────────────────────────────────────────
 
