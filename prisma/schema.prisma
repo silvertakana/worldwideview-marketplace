@@ -88,12 +88,14 @@ model MarketplaceApiKey {
   keyHash    String    @unique
   deviceId   String?
   name       String?
+  origin     String? // Normalised origin the key was issued for, e.g. "https://myglobe.com" (null for wwv:// loopback)
   createdAt  DateTime  @default(now())
   lastUsedAt DateTime?
   revokedAt  DateTime?
   user       User      @relation(fields: [userId], references: [id])
 
   @@index([userId])
+  @@index([origin])
 }
 
 model SigningKey {

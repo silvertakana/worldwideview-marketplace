@@ -43,8 +43,23 @@ vi.mock('@/lib/prisma', () => ({
     marketplaceApiKey: {
       create: vi.fn(),
     },
+    linkedInstance: {
+      upsert: vi.fn(),
+    },
   },
 }))
+
+// The tokenFailureLimiter singleton (5/min) leaks state across tests in this
+// file — 7 failure cases would trip a 429. Give each request a unique client IP
+// so the real limiter logic runs but never blocks in unit tests.
+vi.mock('@/lib/rateLimiters', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/rateLimiters')>()
+  let call = 0
+  return {
+    ...actual,
+    getClientIp: vi.fn(() => `test-ip-${++call}`),
+  }
+})
 
 // ── import after mocks (gets the mocked module) ───────────────────────────────
 
@@ -94,10 +109,12 @@ describe('POST /api/oauth/token', () => {
   const findUnique = vi.mocked(prisma.oAuthAuthorizationCode.findUnique)
   const deleteCode = vi.mocked(prisma.oAuthAuthorizationCode.delete)
   const createKey  = vi.mocked(prisma.marketplaceApiKey.create)
+  const upsertLinked = vi.mocked(prisma.linkedInstance.upsert)
 
   beforeEach(() => {
     vi.clearAllMocks()
     createKey.mockResolvedValue({} as never)
+    upsertLinked.mockResolvedValue({} as never)
   })
 
   it('valid code + matching verifier → 200, access_token returned, code deleted', async () => {
@@ -111,6 +128,68 @@ describe('POST /api/oauth/token', () => {
     expect(res.body.access_token).toMatch(/^mk_/)
     expect(res.body.token_type).toBe('Bearer')
     expect(deleteCode).toHaveBeenCalledWith({ where: { code: STORED_CODE } })
+  })
+
+  it('binds the issued key to the redeemed redirect origin', async () => {
+    findUnique.mockResolvedValueOnce(makeStoredCode() as never)
+    deleteCode.mockResolvedValueOnce({} as never)
+
+    await POST(makeFormBody(VALID_FIELDS))
+
+    expect(createKey).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        userId: STORED_USER_ID,
+        origin: 'http://localhost:3000',
+        name: 'localhost:3000',
+      }),
+    })
+  })
+
+  it('wwv:// redirect → key origin null, fallback name', async () => {
+    findUnique.mockResolvedValueOnce(makeStoredCode({ redirectUri: 'wwv://oauth/callback' }) as never)
+    deleteCode.mockResolvedValueOnce({} as never)
+
+    await POST(makeFormBody({ ...VALID_FIELDS, redirect_uri: 'wwv://oauth/callback' }))
+
+    expect(createKey).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        origin: null,
+        name: 'Local App (PKCE)',
+      }),
+    })
+  })
+
+  it('upserts a LinkedInstance row for the redeemed origin (enables Disconnect)', async () => {
+    findUnique.mockResolvedValueOnce(makeStoredCode() as never)
+    deleteCode.mockResolvedValueOnce({} as never)
+
+    await POST(makeFormBody(VALID_FIELDS))
+
+    expect(upsertLinked).toHaveBeenCalledWith({
+      where: { userId_url: { userId: STORED_USER_ID, url: 'http://localhost:3000' } },
+      update: { lastUsedAt: expect.any(Date) },
+      create: { userId: STORED_USER_ID, url: 'http://localhost:3000' },
+    })
+  })
+
+  it('does NOT upsert a LinkedInstance row for wwv:// redirect (no web origin)', async () => {
+    findUnique.mockResolvedValueOnce(makeStoredCode({ redirectUri: 'wwv://oauth/callback' }) as never)
+    deleteCode.mockResolvedValueOnce({} as never)
+
+    await POST(makeFormBody({ ...VALID_FIELDS, redirect_uri: 'wwv://oauth/callback' }))
+
+    expect(upsertLinked).not.toHaveBeenCalled()
+  })
+
+  it('linkedInstance.upsert rejection does not fail the token response (fire-and-forget)', async () => {
+    findUnique.mockResolvedValueOnce(makeStoredCode() as never)
+    deleteCode.mockResolvedValueOnce({} as never)
+    upsertLinked.mockRejectedValueOnce(new Error('LinkedInstance DB exploded'))
+
+    const res: any = await POST(makeFormBody(VALID_FIELDS))
+
+    expect(res.init).toBeUndefined() // still 200
+    expect(res.body.access_token).toBeDefined()
   })
 
   it('mismatched verifier → 400 invalid_grant, code still deleted (single-use)', async () => {

@@ -8,6 +8,7 @@ export async function issueApiKey(opts: {
   userId: string
   name?: string
   deviceId?: string
+  origin?: string
 }) {
   const raw = API_KEY_PREFIX + randomBytes(32).toString('base64url')
   const keyHash = hashApiKey(raw)
@@ -17,6 +18,7 @@ export async function issueApiKey(opts: {
       keyHash,
       name: opts.name ?? null,
       deviceId: opts.deviceId ?? null,
+      origin: opts.origin ?? null,
     },
   })
   return { apiKey: raw } // plaintext returned ONCE; never stored

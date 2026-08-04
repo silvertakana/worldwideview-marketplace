@@ -235,6 +235,28 @@
   flex-shrink: 0;
 }
 
+/* ── Disconnect button ── */
+.disconnectButton {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-xs) var(--space-md);
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.disconnectButton:hover {
+  background: var(--color-danger);
+  color: #fff;
+}
+
 /* ── API Key list ── */
 .keyList {
   list-style: none;
