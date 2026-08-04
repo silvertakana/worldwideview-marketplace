@@ -5,6 +5,13 @@ const packages = fs.readdirSync(packagesDir)
   .filter(name => name.startsWith('wwv-plugin-') && name !== 'wwv-plugin-sdk')
   .map(name => ({ id: `@worldwideview/${name}` }));
 
+const MARKETPLACE_API_KEY = process.env.MARKETPLACE_API_KEY ?? '';
+
+if (!MARKETPLACE_API_KEY) {
+  console.error('Missing MARKETPLACE_API_KEY env var. Set it before running this script.');
+  process.exit(1);
+}
+
 console.log(`Found ${packages.length} plugins. Sending to Admin Registry...`);
 
 async function run() {
@@ -12,7 +19,7 @@ async function run() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer Ghsdhzhd_135789'
+      'Authorization': `Bearer ${MARKETPLACE_API_KEY}`
     },
     body: JSON.stringify({ plugins: packages })
   });
