@@ -1,10 +1,11 @@
 import Link from 'next/link'
-import { ExternalLink, Link2, KeyRound, LogOut, Server, Package } from 'lucide-react'
+import { ExternalLink, KeyRound, LogOut, Package, Server } from 'lucide-react'
 import { requireSupabaseUser } from '@/lib/auth/requireSession'
 import { getOrCreateMarketplaceUser } from '@/lib/auth/getOrCreateMarketplaceUser'
 import { prisma } from '@/lib/prisma'
 import { diceBearUrl } from '@/lib/diceBear'
 import InstallHistory from '@/components/InstallHistory'
+import InstanceList from './InstanceList'
 import styles from './account.module.css'
 
 export const metadata = { title: 'Your Account' }
@@ -100,30 +101,7 @@ export default async function AccountPage() {
           <Server size={18} className={styles.sectionIcon} />
           <h2 className={styles.sectionTitle}>Linked Instances</h2>
         </div>
-
-        {linkedInstances.length === 0 ? (
-          <div className={styles.emptyState}>
-            <Link2 size={32} className={styles.emptyIcon} />
-            <p className={styles.emptyTitle}>No instances linked yet</p>
-            <p className={styles.emptyDesc}>
-              Install a plugin from the{' '}
-              <Link href="/browse" className={styles.inlineLink}>Browse</Link>{' '}
-              page to link your first instance.
-            </p>
-          </div>
-        ) : (
-          <ul className={styles.instanceList}>
-            {linkedInstances.map((inst) => (
-              <li key={inst.id} className={styles.instanceItem}>
-                <Server size={14} className={styles.instanceIcon} />
-                <span className={styles.instanceUrl}>{inst.url}</span>
-                {inst.nickname && (
-                  <span className={styles.instanceNickname}>{inst.nickname}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+        <InstanceList instances={linkedInstances} />
       </section>
 
       {/* API keys section */}
@@ -132,7 +110,6 @@ export default async function AccountPage() {
           <KeyRound size={18} className={styles.sectionIcon} />
           <h2 className={styles.sectionTitle}>API Keys</h2>
         </div>
-
         <p className={styles.sectionHint}>
           Full install history and key management are available in{' '}
           <Link href="/manage" className={styles.inlineLink}>My Plugins</Link>.

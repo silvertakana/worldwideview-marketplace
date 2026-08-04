@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 // ── mocks ────────────────────────────────────────────────────────────────────
 // Note: vi.mock factories are hoisted before const declarations.
@@ -32,7 +32,7 @@ import { redirect } from 'next/navigation'
 import { requireSupabaseUser } from '@/lib/auth/requireSession'
 import { getOrCreateMarketplaceUser } from '@/lib/auth/getOrCreateMarketplaceUser'
 import { prisma } from '@/lib/prisma'
-import { approveAuthorization, denyAuthorization } from './actions'
+import { approveAuthorization, denyAuthorization, classifyRedirectTier } from './actions'
 
 // ── fixtures ──────────────────────────────────────────────────────────────────
 
@@ -140,5 +140,85 @@ describe('denyAuthorization', () => {
     const parsed = new URL(captured!)
     expect(parsed.searchParams.get('error')).toBe('access_denied')
     expect(parsed.searchParams.get('state')).toBe('random-state-xyz')
+  })
+
+  it('rejects non-local-app client_id', async () => {
+    await expect(denyAuthorization(makeFormData({ client_id: 'evil-client' }))).rejects.toThrow('access_denied')
+  })
+
+  it('rejects a rejected redirect URI', async () => {
+    await expect(denyAuthorization(makeFormData({ redirect_uri: 'http://evil.example.com/cb' }))).rejects.toThrow('access_denied')
+  })
+})
+
+describe('classifyRedirectTier', () => {
+  beforeEach(() => {
+    // Deterministic env: no operator allowlist unless a test stubs it
+    vi.stubEnv('OPERATOR_ORIGINS', '')
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('allows http://localhost loopback', () => {
+    const result = classifyRedirectTier('http://localhost:3000/api/marketplace/callback')
+    expect(result.allowed).toBe(true)
+    expect(result.tier).toBe('loopback')
+    expect(result.origin).toBe('http://localhost:3000')
+  })
+
+  it('allows http://127.0.0.1 loopback', () => {
+    const result = classifyRedirectTier('http://127.0.0.1:4000/callback')
+    expect(result.allowed).toBe(true)
+    expect(result.tier).toBe('loopback')
+    expect(result.origin).toBe('http://127.0.0.1:4000')
+  })
+
+  it('allows operator allowlist match', () => {
+    vi.stubEnv('OPERATOR_ORIGINS', 'https://demo.worldwideview.dev, https://app.worldwideview.dev')
+    const result = classifyRedirectTier('https://demo.worldwideview.dev/api/marketplace/callback')
+    expect(result.allowed).toBe(true)
+    expect(result.tier).toBe('operator')
+    expect(result.origin).toBe('https://demo.worldwideview.dev')
+  })
+
+  it('rejects operator mismatch (http to a non-loopback host)', () => {
+    vi.stubEnv('OPERATOR_ORIGINS', 'https://demo.worldwideview.dev')
+    const result = classifyRedirectTier('http://demo.worldwideview.dev/api/marketplace/callback')
+    expect(result.allowed).toBe(false)
+    expect(result.tier).toBe('rejected')
+  })
+
+  it('allows self-hosted https', () => {
+    const result = classifyRedirectTier('https://myinstance.example.com/oauth/callback')
+    expect(result.allowed).toBe(true)
+    expect(result.tier).toBe('self-hosted')
+    expect(result.origin).toBe('https://myinstance.example.com')
+  })
+
+  it('rejects self-hosted http', () => {
+    const result = classifyRedirectTier('http://myinstance.example.com/oauth/callback')
+    expect(result.allowed).toBe(false)
+    expect(result.tier).toBe('rejected')
+  })
+
+  it('allows wwv:// custom scheme', () => {
+    const result = classifyRedirectTier('wwv://oauth/callback')
+    expect(result.allowed).toBe(true)
+    expect(result.tier).toBe('loopback')
+    expect(result.origin).toBe('')
+  })
+
+  it('rejects malformed URIs', () => {
+    const result = classifyRedirectTier('not a url')
+    expect(result.allowed).toBe(false)
+    expect(result.tier).toBe('rejected')
+  })
+
+  it('rejects non-http(s) schemes', () => {
+    const result = classifyRedirectTier('ftp://example.com/file')
+    expect(result.allowed).toBe(false)
+    expect(result.tier).toBe('rejected')
   })
 })

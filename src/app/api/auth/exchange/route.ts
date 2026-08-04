@@ -4,8 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { hashApiKey } from "@/lib/auth/apiKeyHash";
 import { scopeFor } from "@/lib/auth/tierScope";
 import { getActiveKey } from "@/lib/auth/signingKey";
+import { exchangeLimiter, getClientIp } from "@/lib/rateLimiters";
 
 export async function POST(req: NextRequest) {
+    const limiter = exchangeLimiter.check(getClientIp(req));
+    if (limiter) return limiter;
+
     try {
         const body = await req.json();
         const { apiKey, audience } = body;
@@ -15,6 +19,14 @@ export async function POST(req: NextRequest) {
         }
 
         const keyHash = hashApiKey(apiKey);
+
+        // Per-key limiter — prevents a single leaked/stolen API key from
+        // hammering the exchange endpoint (composite key, shared limiter).
+        if (keyHash) {
+            const keyLimiter = exchangeLimiter.check(`key:${keyHash}`);
+            if (keyLimiter) return keyLimiter;
+        }
+
         const apiKeyRecord = await prisma.marketplaceApiKey.findUnique({
             where: { keyHash },
             include: { user: true },
