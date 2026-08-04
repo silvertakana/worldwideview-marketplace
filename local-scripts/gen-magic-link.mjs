@@ -5,8 +5,13 @@
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = 'https://kvlnzjtcstnaqkpqrquf.supabase.co';
-const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2bG56anRjc3RuYXFrcHFycXVmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTcxOTEzMCwiZXhwIjoyMDkxMjk1MTMwfQ.D3Y2-0gh_Q2ZvZ2tii9vgTf8f19SAMC1eUlLebtvFzU';
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
 const EMAIL = 'docoka9834@noyavip.com';
+
+if (!SERVICE_ROLE_KEY) {
+  console.error('Missing SUPABASE_SERVICE_ROLE_KEY env var. Set it before running this script.');
+  process.exit(1);
+}
 
 // wwv.local callback will exchange code for session then redirect to marketplace browse
 const REDIRECT_TO = 'https://wwv.local:3001/api/auth/callback?next=https://marketplace.wwv.local:3002/browse';
