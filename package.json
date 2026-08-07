@@ -33,17 +33,26 @@
     "stripe": "^22.2.1"
   },
   "devDependencies": {
+    "@size-limit/preset-app": "^12.1.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.10",
     "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "eslint-plugin-security": "^4.0.1",
+    "size-limit": "^12.1.0",
     "typescript": "^5",
     "vitest": "^4.1.6"
   },
+  "size-limit": [
+    {
+      "path": ".next/static/chunks/**",
+      "limit": "2 MB"
+    }
+  ],
   "pnpm": {
     "onlyBuiltDependencies": [
       "@prisma/engines",
