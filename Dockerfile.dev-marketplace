@@ -3,7 +3,9 @@
 FROM node:26-alpine
 
 # Install pnpm via npm (corepack not bundled in node:26-alpine)
-RUN npm install -g pnpm@latest
+# Pin to packageManager version in package.json so pnpm install --frozen-lockfile
+# can verify the @pnpm/exe native binary against pnpm-lock.yaml
+RUN npm install -g pnpm@10.33.0
 
 # Install build deps for better-sqlite3 native module
 RUN apk add --no-cache python3 make g++ openssl
