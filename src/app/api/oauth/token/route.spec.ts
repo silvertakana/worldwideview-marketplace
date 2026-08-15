@@ -21,6 +21,20 @@ function makeFormBody(fields: Record<string, string>): Request {
   })
 }
 
+/** Shape of the mocked NextResponse.json return value in this spec. */
+interface MockJsonResponse<TBody> {
+  body: TBody
+  init?: { status?: number }
+}
+
+/** Union of fields the endpoint can return across its success/error branches. */
+interface TokenResponseBody {
+  access_token?: string
+  token_type?: string
+  error?: string
+  error_description?: string
+}
+
 // ── mocks ────────────────────────────────────────────────────────────────────
 
 vi.mock('next/server', async (importOriginal) => {
@@ -121,7 +135,7 @@ describe('POST /api/oauth/token', () => {
     findUnique.mockResolvedValueOnce(makeStoredCode() as never)
     deleteCode.mockResolvedValueOnce({} as never)
 
-    const res: any = await POST(makeFormBody(VALID_FIELDS))
+    const res = (await POST(makeFormBody(VALID_FIELDS))) as unknown as MockJsonResponse<TokenResponseBody>
 
     expect(res.init).toBeUndefined() // no explicit status → 200
     expect(res.body.access_token).toBeDefined()
@@ -186,7 +200,7 @@ describe('POST /api/oauth/token', () => {
     deleteCode.mockResolvedValueOnce({} as never)
     upsertLinked.mockRejectedValueOnce(new Error('LinkedInstance DB exploded'))
 
-    const res: any = await POST(makeFormBody(VALID_FIELDS))
+    const res = (await POST(makeFormBody(VALID_FIELDS))) as unknown as MockJsonResponse<TokenResponseBody>
 
     expect(res.init).toBeUndefined() // still 200
     expect(res.body.access_token).toBeDefined()
@@ -196,7 +210,7 @@ describe('POST /api/oauth/token', () => {
     findUnique.mockResolvedValueOnce(makeStoredCode() as never)
     deleteCode.mockResolvedValueOnce({} as never)
 
-    const res: any = await POST(makeFormBody({ ...VALID_FIELDS, code_verifier: 'wrong-verifier' }))
+    const res = (await POST(makeFormBody({ ...VALID_FIELDS, code_verifier: 'wrong-verifier' }))) as unknown as MockJsonResponse<TokenResponseBody>
 
     expect(res.init?.status).toBe(400)
     expect(res.body.error).toBe('invalid_grant')
@@ -208,7 +222,7 @@ describe('POST /api/oauth/token', () => {
     findUnique.mockResolvedValueOnce(makeStoredCode({ expiresAt: new Date(Date.now() - 1000) }) as never)
     deleteCode.mockResolvedValueOnce({} as never)
 
-    const res: any = await POST(makeFormBody(VALID_FIELDS))
+    const res = (await POST(makeFormBody(VALID_FIELDS))) as unknown as MockJsonResponse<TokenResponseBody>
 
     expect(res.init?.status).toBe(400)
     expect(res.body.error).toBe('invalid_grant')
@@ -219,7 +233,7 @@ describe('POST /api/oauth/token', () => {
     findUnique.mockResolvedValueOnce(makeStoredCode() as never)
     deleteCode.mockResolvedValueOnce({} as never)
 
-    const res: any = await POST(makeFormBody({ ...VALID_FIELDS, client_id: 'evil-client' }))
+    const res = (await POST(makeFormBody({ ...VALID_FIELDS, client_id: 'evil-client' }))) as unknown as MockJsonResponse<TokenResponseBody>
 
     expect(res.init?.status).toBe(400)
     expect(res.body.error).toBe('invalid_grant')
@@ -230,7 +244,7 @@ describe('POST /api/oauth/token', () => {
     findUnique.mockResolvedValueOnce(makeStoredCode() as never)
     deleteCode.mockResolvedValueOnce({} as never)
 
-    const res: any = await POST(makeFormBody({ ...VALID_FIELDS, redirect_uri: 'http://evil.example.com/callback' }))
+    const res = (await POST(makeFormBody({ ...VALID_FIELDS, redirect_uri: 'http://evil.example.com/callback' }))) as unknown as MockJsonResponse<TokenResponseBody>
 
     expect(res.init?.status).toBe(400)
     expect(res.body.error).toBe('invalid_grant')
@@ -238,7 +252,7 @@ describe('POST /api/oauth/token', () => {
   })
 
   it('missing required fields → 400 invalid_request', async () => {
-    const res: any = await POST(makeFormBody({ grant_type: 'authorization_code' }))
+    const res = (await POST(makeFormBody({ grant_type: 'authorization_code' }))) as unknown as MockJsonResponse<TokenResponseBody>
 
     expect(res.init?.status).toBe(400)
     expect(res.body.error).toBe('invalid_request')
@@ -246,7 +260,7 @@ describe('POST /api/oauth/token', () => {
   })
 
   it('unsupported grant_type → 400 unsupported_grant_type', async () => {
-    const res: any = await POST(makeFormBody({ ...VALID_FIELDS, grant_type: 'client_credentials' }))
+    const res = (await POST(makeFormBody({ ...VALID_FIELDS, grant_type: 'client_credentials' }))) as unknown as MockJsonResponse<TokenResponseBody>
 
     expect(res.init?.status).toBe(400)
     expect(res.body.error).toBe('unsupported_grant_type')
@@ -262,7 +276,7 @@ describe('POST /api/oauth/token', () => {
     // Second call: code already gone
     findUnique.mockResolvedValueOnce(null)
 
-    const res: any = await POST(makeFormBody(VALID_FIELDS))
+    const res = (await POST(makeFormBody(VALID_FIELDS))) as unknown as MockJsonResponse<TokenResponseBody>
 
     expect(res.init?.status).toBe(400)
     expect(res.body.error).toBe('invalid_grant')

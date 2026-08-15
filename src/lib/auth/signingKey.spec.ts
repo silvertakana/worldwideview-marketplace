@@ -13,7 +13,7 @@ const mockSigningKey = {
 vi.mock("@/lib/prisma", () => ({
     prisma: {
         signingKey: mockSigningKey,
-        $transaction: vi.fn(async (fn: (tx: any) => Promise<any>) => fn({ signingKey: mockSigningKey })),
+        $transaction: vi.fn(async (fn: (tx: unknown) => Promise<unknown>) => fn({ signingKey: mockSigningKey })),
     },
 }));
 
@@ -89,8 +89,8 @@ describe("getJwksPublicKeys", () => {
         const keys = await getJwksPublicKeys();
 
         expect(keys).toHaveLength(2);
-        expect((keys[0] as any).kid).toBe("kid-active");
-        expect((keys[1] as any).kid).toBe("kid-retiring");
+        expect((keys[0] as jose.JWK).kid).toBe("kid-active");
+        expect((keys[1] as jose.JWK).kid).toBe("kid-retiring");
     });
 
     it("private key material (d) is not present in returned keys", async () => {
@@ -101,7 +101,7 @@ describe("getJwksPublicKeys", () => {
 
         const keys = await getJwksPublicKeys();
 
-        expect((keys[0] as any).d).toBeUndefined();
+        expect((keys[0] as jose.JWK).d).toBeUndefined();
     });
 });
 

@@ -4,6 +4,18 @@ import { NextRequest } from "next/server";
 import * as jose from "jose";
 import { hashApiKey } from "@/lib/auth/apiKeyHash";
 
+/** Shape of the mocked NextResponse.json return value in this spec. */
+interface MockJsonResponse<TBody> {
+    body: TBody;
+    init?: { status?: number };
+}
+
+/** Union of fields the endpoint can return across its success/error branches. */
+interface ExchangeResponseBody {
+    token?: string;
+    error?: string;
+}
+
 vi.mock("next/server", async (importOriginal) => {
     const actual = await importOriginal<typeof import("next/server")>();
     return {
@@ -58,7 +70,7 @@ describe("Token Exchange Endpoint", () => {
             body: JSON.stringify({}),
             headers: { "Content-Type": "application/json" },
         });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<ExchangeResponseBody>;
         expect(res.init?.status).toBe(400);
     });
 
@@ -68,7 +80,7 @@ describe("Token Exchange Endpoint", () => {
             body: JSON.stringify({ apiKey: "unknown-key" }),
             headers: { "Content-Type": "application/json" },
         });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<ExchangeResponseBody>;
         expect(res.init?.status).toBe(401);
     });
 
@@ -78,7 +90,7 @@ describe("Token Exchange Endpoint", () => {
             body: JSON.stringify({ apiKey: REVOKED_KEY_RAW }),
             headers: { "Content-Type": "application/json" },
         });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<ExchangeResponseBody>;
         expect(res.init?.status).toBe(401);
     });
 
@@ -88,13 +100,13 @@ describe("Token Exchange Endpoint", () => {
             body: JSON.stringify({ apiKey: FIXTURE_KEY_RAW, audience: "wwv-aviation-engine", plugin_id: "aviation" }),
             headers: { "Content-Type": "application/json" },
         });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<ExchangeResponseBody>;
 
         expect(res.init?.status).toBe(200);
         const token = res.body.token;
         expect(token).toBeDefined();
 
-        const decoded = jose.decodeJwt(token);
+        const decoded = jose.decodeJwt(token!);
         expect(decoded.iss).toBe("https://marketplace.worldwideview.dev"); // lint-url: allow
         expect(decoded.sub).toBe(FIXTURE_USER.id);
         expect(decoded.aud).toBe("wwv-aviation-engine");
@@ -104,7 +116,7 @@ describe("Token Exchange Endpoint", () => {
         expect(decoded.nbf).toBeDefined();
         expect(decoded.jti).toBeDefined();
 
-        const header = jose.decodeProtectedHeader(token);
+        const header = jose.decodeProtectedHeader(token!);
         expect(header.kid).toBe("test-kid-exchange");
         expect(header.alg).toBe("EdDSA");
     });
@@ -115,10 +127,10 @@ describe("Token Exchange Endpoint", () => {
             body: JSON.stringify({ apiKey: FIXTURE_KEY_RAW }),
             headers: { "Content-Type": "application/json" },
         });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<ExchangeResponseBody>;
 
         expect(res.init?.status).toBe(200);
-        const decoded = jose.decodeJwt(res.body.token);
+        const decoded = jose.decodeJwt(res.body.token!);
         expect(decoded.aud).toBe("wwv-data-engine");
     });
 
@@ -130,7 +142,7 @@ describe("Token Exchange Endpoint", () => {
             body: JSON.stringify({ apiKey: FIXTURE_KEY_RAW }),
             headers: { "Content-Type": "application/json" },
         });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<ExchangeResponseBody>;
         expect(res.init?.status).toBe(500);
     });
 });

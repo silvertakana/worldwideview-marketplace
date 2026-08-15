@@ -2,6 +2,21 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "./route";
 import { NextRequest } from "next/server";
 
+/** Shape of the mocked NextResponse.json return value in this spec. */
+interface MockJsonResponse<TBody> {
+    body: TBody;
+    init?: { status?: number };
+}
+
+/** Union of fields the endpoint can return across its success/error branches. */
+interface RotateKeyResponseBody {
+    success?: boolean;
+    oldKid?: string | null;
+    newKid?: string;
+    message?: string;
+    error?: string;
+}
+
 vi.mock("next/server", async (importOriginal) => {
     const actual = await importOriginal<typeof import("next/server")>();
     return {
@@ -49,7 +64,7 @@ describe("Admin Rotate Key Endpoint", () => {
             method: "POST",
             headers: { authorization: "Bearer test-secret" },
         });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<RotateKeyResponseBody>;
 
         expect(res.init?.status).toBeUndefined(); // 200 default
         expect(res.body.success).toBe(true);
@@ -61,7 +76,7 @@ describe("Admin Rotate Key Endpoint", () => {
         delete process.env.CRON_SECRET;
 
         const req = new NextRequest("http://localhost/api/admin/rotate-key", { method: "POST" });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<RotateKeyResponseBody>;
 
         expect(res.init?.status).toBe(401);
         expect(mockRotateKey).not.toHaveBeenCalled();
@@ -74,7 +89,7 @@ describe("Admin Rotate Key Endpoint", () => {
             method: "POST",
             headers: { authorization: "Bearer wrong-secret" },
         });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<RotateKeyResponseBody>;
 
         expect(res.init?.status).toBe(401);
     });
@@ -87,7 +102,7 @@ describe("Admin Rotate Key Endpoint", () => {
             method: "POST",
             headers: { authorization: "Bearer super-secret" },
         });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<RotateKeyResponseBody>;
 
         expect(res.body.success).toBe(true);
         expect(mockRotateKey).toHaveBeenCalledOnce();
@@ -107,7 +122,7 @@ describe("Admin Rotate Key Endpoint", () => {
             method: "POST",
             headers: { authorization: "Bearer mk_valid_key_123" },
         });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<RotateKeyResponseBody>;
 
         expect(res.body.success).toBe(true);
         expect(mockRotateKey).toHaveBeenCalledOnce();
@@ -126,7 +141,7 @@ describe("Admin Rotate Key Endpoint", () => {
             method: "POST",
             headers: { authorization: "Bearer mk_revoked_key" },
         });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<RotateKeyResponseBody>;
 
         expect(res.init?.status).toBe(401);
         expect(mockRotateKey).not.toHaveBeenCalled();
@@ -140,7 +155,7 @@ describe("Admin Rotate Key Endpoint", () => {
             method: "POST",
             headers: { authorization: "Bearer test-secret" },
         });
-        const res: any = await POST(req);
+        const res = (await POST(req)) as unknown as MockJsonResponse<RotateKeyResponseBody>;
 
         expect(res.init?.status).toBe(500);
     });
