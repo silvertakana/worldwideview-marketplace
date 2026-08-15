@@ -7,8 +7,20 @@ import type { PluginDetail } from "./types";
  * because they're hard-coded in AppShell.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-type ManifestTemplate = Record<string, any>;
+/** Minimal WWV manifest shape sent to the bridge during install. */
+interface ManifestTemplate {
+  id: string;
+  name: string;
+  version: string;
+  type: "data-layer";
+  format: string;
+  trust: string;
+  capabilities: string[];
+  category: string;
+  icon: string;
+  entry?: string;
+  dataFile?: string;
+}
 
 export const PLUGIN_MANIFESTS: Record<string, ManifestTemplate> = {};
 

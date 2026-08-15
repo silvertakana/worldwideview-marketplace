@@ -2,6 +2,26 @@ import type { NpmPackageMeta } from "./types";
 
 const NPM_REGISTRY = "https://registry.npmjs.org";
 
+/** Author field of an npm manifest: plain string or { name }. */
+type NpmAuthor = string | { name?: string };
+
+/** Minimal shape of a single version entry in an npm packument. */
+interface NpmRegistryVersion {
+  author?: NpmAuthor;
+}
+
+/** Minimal shape of the npm packument fields we consume. */
+interface NpmRegistryManifest {
+  name?: string;
+  description?: string;
+  readme?: string;
+  keywords?: string[];
+  author?: NpmAuthor;
+  repository?: { url?: string };
+  "dist-tags"?: { latest?: string };
+  versions?: Record<string, NpmRegistryVersion>;
+  time?: Record<string, string>;
+}
 
 /**
  * Fetch metadata for a single @worldwideview package from the npm registry.
@@ -19,8 +39,7 @@ export async function fetchPackageMeta(
     });
     if (!res.ok) return null;
 
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    const json: any = await res.json();
+    const json = (await res.json()) as NpmRegistryManifest;
     const latestTag = json["dist-tags"]?.latest;
     const latestVersion = latestTag
       ? json.versions?.[latestTag]
@@ -65,13 +84,13 @@ export async function fetchAllPackageMeta(
 
 /* ---------- helpers ---------- */
 
-function extractAuthor(obj: any): string {
+function extractAuthor(obj: NpmRegistryVersion | NpmRegistryManifest): string {
   if (typeof obj?.author === "string") return obj.author;
   if (typeof obj?.author?.name === "string") return obj.author.name;
   return "WorldWideView";
 }
 
-function extractUpdatedAt(json: any, latestTag?: string): string {
+function extractUpdatedAt(json: NpmRegistryManifest, latestTag?: string): string {
   if (latestTag && json.time?.[latestTag]) {
     return json.time[latestTag].slice(0, 10); // "YYYY-MM-DD"
   }
@@ -81,7 +100,7 @@ function extractUpdatedAt(json: any, latestTag?: string): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function extractRepoUrl(json: any): string | undefined {
+function extractRepoUrl(json: NpmRegistryManifest): string | undefined {
   const url = json.repository?.url;
   if (!url) return undefined;
   return url.replace(/^git\+/, "").replace(/\.git$/, "");
