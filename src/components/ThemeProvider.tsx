@@ -44,27 +44,26 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     return "system";
   });
 
-  const [resolved, setResolved] = useState<"light" | "dark">(() => {
-    if (typeof window === "undefined") return "dark";
-    return (document.documentElement.getAttribute("data-theme") as "light" | "dark") || resolveTheme("system");
-  });
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() =>
+    typeof window === "undefined"
+      ? false
+      : window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
 
-  /* Apply theme to <html> whenever it changes */
+  /* `resolved` is derived state: theme preference + current system scheme. */
+  const resolved: "light" | "dark" =
+    theme === "system" ? (systemPrefersDark ? "dark" : "light") : theme;
+
+  /* Sync the <html> attribute whenever the resolved theme changes */
   useEffect(() => {
-    const r = resolveTheme(theme);
-    setResolved(r);
-    document.documentElement.setAttribute("data-theme", r);
-  }, [theme]);
+    document.documentElement.setAttribute("data-theme", resolved);
+  }, [resolved]);
 
   /* Listen for system preference changes when in "system" mode */
   useEffect(() => {
     if (theme !== "system") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => {
-      const r = resolveTheme("system");
-      setResolved(r);
-      document.documentElement.setAttribute("data-theme", r);
-    };
+    const handler = () => setSystemPrefersDark(mq.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, [theme]);

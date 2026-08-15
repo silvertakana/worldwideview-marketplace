@@ -36,26 +36,32 @@ export function useInstalledPlugins(): HookResult {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const instanceUrl = getInstanceUrl();
-    if (!instanceUrl || !configured) {
-      setPlugins([]);
-      return;
-    }
-
     let cancelled = false;
 
-    fetch(`${instanceUrl}/api/marketplace/status`, {
-      headers: {
-        ...(getMarketplaceToken()
-          ? { Authorization: `Bearer ${getMarketplaceToken()}` }
-          : {}),
-      },
-      signal: AbortSignal.timeout(8000),
-    })
-      .then(async (res) => {
-        if (cancelled) return;
+    Promise.resolve()
+      .then(() => {
+        const instanceUrl = getInstanceUrl();
+        if (!instanceUrl || !configured) {
+          if (cancelled) return null;
+          setPlugins([]);
+          return null;
+        }
+        return fetch(`${instanceUrl}/api/marketplace/status`, {
+          headers: {
+            ...(getMarketplaceToken()
+              ? { Authorization: `Bearer ${getMarketplaceToken()}` }
+              : {}),
+          },
+          signal: AbortSignal.timeout(8000),
+        });
+      })
+      .then((res) => {
+        if (cancelled || !res) return;
         if (!res.ok) throw new Error(`Server returned ${res.status}`);
-        const data = await res.json();
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
         setPlugins(data.plugins ?? []);
       })
       .catch((err) => {

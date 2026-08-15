@@ -5,7 +5,7 @@ import { LoginForm } from "./components/LoginForm";
 import { Toolbar } from "./components/Toolbar";
 import { BulkAddForm } from "./components/BulkAddForm";
 import { PluginTable } from "./components/PluginTable";
-import { ImportModal } from "./components/ImportModal";
+import { ImportModal, type RegistryPluginImport } from "./components/ImportModal";
 import { DiscoveryModal } from "./components/DiscoveryModal";
 import styles from "./page.module.css";
 
@@ -94,7 +94,7 @@ export default function AdminRegistryPage() {
     if (res.ok) {
       const body = await res.json();
       if (body.errors && body.errors.length > 0) {
-        alert("Some plugins failed to add:\n" + body.errors.map((e: any) => `- ${e.package}: ${e.error}`).join("\n"));
+        alert("Some plugins failed to add:\n" + body.errors.map((e: { package: string; error: string }) => `- ${e.package}: ${e.error}`).join("\n"));
       } else {
         alert(`Successfully added ${body.plugins?.length || 0} plugin(s)!`);
       }
@@ -145,7 +145,7 @@ export default function AdminRegistryPage() {
     URL.revokeObjectURL(url);
   }
 
-  async function handleImport(importPlugins: any[], mode: "merge" | "overwrite") {
+  async function handleImport(importPlugins: RegistryPluginImport[], mode: "merge" | "overwrite") {
     const res = await fetch("/api/admin/registry/import", {
       method: "POST",
       headers: headers(),

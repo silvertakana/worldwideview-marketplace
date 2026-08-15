@@ -44,7 +44,12 @@ export default function LinkedInstancesPanel({ onAddInstance }: Props) {
     }
 
     useEffect(() => {
-        refresh();
+        let cancelled = false;
+        fetchUserInstances().then((list) => {
+            if (cancelled) return;
+            setInstances(list);
+        });
+        return () => { cancelled = true; };
     }, []);
 
     async function handleDelete(instance: SavedInstance) {

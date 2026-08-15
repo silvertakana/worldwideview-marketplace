@@ -13,10 +13,13 @@ import { getInstallManifest } from "@/data/pluginManifests";
 import { useInstalledIds } from "./InstalledPluginsProvider";
 import InstanceConfig from "./InstanceConfig";
 import styles from "./PluginCardActions.module.css";
-import type { PluginCard as PluginCardData } from "@/data/types";
+import type { PluginCard as PluginCardData, PluginDetail } from "@/data/types";
 
 interface Props {
-  plugin: PluginCardData;
+  plugin: PluginCardData &
+    Partial<
+      Pick<PluginDetail, "capabilities" | "longDescription" | "compatibility" | "changelog">
+    >;
   isAuthed?: boolean;
 }
 
@@ -51,7 +54,7 @@ export default function PluginCardActions({ plugin, isAuthed }: Props) {
   }
 
   function buildInstallStartUrl(instanceUrl: string): string {
-    const detail = {
+    const detail: PluginDetail = {
       id: plugin.id,
       npmPackage: plugin.npmPackage ?? plugin.id,
       name: plugin.name ?? plugin.id,
@@ -59,16 +62,16 @@ export default function PluginCardActions({ plugin, isAuthed }: Props) {
       version: plugin.version,
       format: plugin.format ?? "bundle",
       trust: plugin.trust ?? "unverified",
-      capabilities: (plugin as any).capabilities ?? ["data:own"],
+      capabilities: plugin.capabilities ?? ["data:own"],
       category: plugin.category ?? "Custom",
       icon: plugin.icon ?? "Package",
       installs: plugin.installs ?? 0,
       author: plugin.author ?? "WorldWideView",
       tags: plugin.tags ?? [],
       updatedAt: plugin.updatedAt ?? "",
-      longDescription: (plugin as any).longDescription ?? "",
-      compatibility: (plugin as any).compatibility ?? ">=0.1.0",
-      changelog: (plugin as any).changelog ?? "",
+      longDescription: plugin.longDescription ?? "",
+      compatibility: plugin.compatibility ?? ">=0.1.0",
+      changelog: plugin.changelog ?? "",
     };
     const manifest = getInstallManifest(detail);
     const manifestB64 = btoa(unescape(encodeURIComponent(JSON.stringify(manifest))));

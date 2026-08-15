@@ -17,15 +17,19 @@ export async function POST(req: Request) {
             sig,
             process.env.STRIPE_WEBHOOK_SECRET!,
         );
-    } catch (err: any) {
-        return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
+    } catch (err) {
+        return new NextResponse(`Webhook Error: ${err instanceof Error ? err.message : "Unknown signature error"}`, { status: 400 });
     }
 
     try {
         switch (event.type) {
             case "checkout.session.completed": {
-                const session = event.data.object as { id: string };
-                const userId = (session as any).client_reference_id || (session as any).metadata?.userId;
+                const session = event.data.object as {
+                    id: string;
+                    client_reference_id?: string;
+                    metadata?: { userId?: string };
+                };
+                const userId = session.client_reference_id ?? session.metadata?.userId;
                 console.log(`[webhook] checkout.session.completed for user ${userId ?? "unknown"}`);
                 break;
             }
@@ -55,8 +59,8 @@ export async function POST(req: Request) {
                 break;
             }
         }
-    } catch (err: any) {
-        console.error(`[webhook] Error handling ${(event as any)?.type ?? "unknown"}:`, err);
+    } catch (err) {
+        console.error(`[webhook] Error handling ${event.type}:`, err);
     }
 
     return new NextResponse(null, { status: 200 });

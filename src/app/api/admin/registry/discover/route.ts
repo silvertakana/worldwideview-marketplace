@@ -36,7 +36,17 @@ export async function GET(request: Request) {
 
     // 2. Filter raw NPM packages with exact regex prefix matching
     const prefixRegex = /^(@[\w-]+\/)?wwv-plugin-/;
-    const matchingMap = new Map<string, any>();
+    // Minimal shape of an npm registry search hit's `package` object.
+    interface NpmSearchPackage {
+      name: string;
+      description?: string;
+      version?: string;
+      publisher?: { username?: string; email?: string };
+      keywords?: string[];
+      date?: string;
+      links?: { repository?: string };
+    }
+    const matchingMap = new Map<string, NpmSearchPackage>();
     const BLACKLIST = new Set(["@worldwideview/wwv-plugin-sdk"]);
     
     for (const obj of objects) {
@@ -85,7 +95,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({ discovered });
-  } catch (err: any) {
+  } catch (err) {
     console.error("NPM Discovery Error:", err);
     return NextResponse.json({ error: "An internal error occurred." }, { status: 500 });
   }

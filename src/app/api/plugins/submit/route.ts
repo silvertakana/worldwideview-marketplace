@@ -83,8 +83,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, plugin });
-  } catch (err: any) {
-    if (err.code === "P2002") {
+  } catch (err) {
+    if (err instanceof Error && (err as Error & { code?: string }).code === "P2002") {
       return NextResponse.json({ error: "Plugin ID or NPM Package is already registered." }, { status: 400 });
     }
     console.error("[Submit Plugin] Error:", err);

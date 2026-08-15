@@ -1,15 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Sun, Moon } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import styles from "./ThemeToggle.module.css";
 
 export default function ThemeToggle() {
   const { resolved, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  // Client-only mount detection without effect-driven setState: the subscribe
+  // function never changes, and the snapshot differs only between server
+  // (false) and client (true), so no state update is ever needed.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   if (!mounted) return <div className={styles.placeholder} aria-hidden="true" />;
 

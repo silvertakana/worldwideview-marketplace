@@ -3,9 +3,16 @@
 import { useState } from "react";
 import styles from "../page.module.css";
 
+/** Shape accepted by the admin registry import endpoint. */
+export interface RegistryPluginImport {
+  id?: string;
+  npmPackage?: string;
+  [key: string]: unknown;
+}
+
 interface ImportModalProps {
   onClose: () => void;
-  onImport: (plugins: any[], mode: "overwrite" | "merge") => Promise<void>;
+  onImport: (plugins: RegistryPluginImport[], mode: "overwrite" | "merge") => Promise<void>;
 }
 
 export function ImportModal({ onClose, onImport }: ImportModalProps) {
@@ -43,11 +50,11 @@ export function ImportModal({ onClose, onImport }: ImportModalProps) {
       return;
     }
 
-    let parsed: any[];
+    let parsed: RegistryPluginImport[];
     try {
       parsed = JSON.parse(jsonText);
-    } catch (err: any) {
-      setError(`Invalid JSON: ${err.message}`);
+    } catch (err) {
+      setError(`Invalid JSON: ${err instanceof Error ? err.message : String(err)}`);
       return;
     }
 
@@ -65,8 +72,8 @@ export function ImportModal({ onClose, onImport }: ImportModalProps) {
     try {
       await onImport(parsed, mode);
       onClose();
-    } catch (err: any) {
-      setError(err.message || "Failed to import plugins.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to import plugins.");
       setIsSubmitting(false);
     }
   }

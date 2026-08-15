@@ -34,8 +34,8 @@ export function DiscoveryModal({ onClose, onImport }: DiscoveryModalProps) {
         setPlugins(data.discovered || []);
         // Select all by default
         setSelected(new Set((data.discovered || []).map((p: NpmPackageMeta) => p.name)));
-      } catch (err: any) {
-        setError(err.message || "An error occurred");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
         setLoading(false);
       }
@@ -59,8 +59,8 @@ export function DiscoveryModal({ onClose, onImport }: DiscoveryModalProps) {
     try {
       await onImport(payloads);
       onClose();
-    } catch (err: any) {
-      setError(err.message || "Failed to add plugins.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add plugins.");
       setIsSubmitting(false);
     }
   }
