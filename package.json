@@ -1,6 +1,6 @@
 {
   "name": "worldwideview-marketplace",
-  "version": "1.15.5",
+  "version": "1.15.6",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=26.0.0"
@@ -14,8 +14,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
-    "lint:urls": "node scripts/lint-urls.mjs",
-    "docker:test": "docker build -t marketplace-test . && docker run --rm marketplace-test"
+    "lint:urls": "node scripts/lint-urls.mjs"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.5.0",
