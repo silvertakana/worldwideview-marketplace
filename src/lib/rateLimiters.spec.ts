@@ -6,6 +6,8 @@ import {
   installStartLimiter,
   adminLimiter,
   instancesLinkLimiter,
+  deleteUserLimiter,
+  portalLimiter,
 } from './rateLimiters'
 
 /**
@@ -50,5 +52,13 @@ describe('rateLimiters', () => {
 
   it('instancesLinkLimiter blocks at 31 requests/min (30 limit)', () => {
     expectBlocksAtLimitPlusOne(instancesLinkLimiter, 30, 'test:instances-link')
+  })
+
+  it('deleteUserLimiter blocks at 11 requests/min per IP (10 limit)', () => {
+    expectBlocksAtLimitPlusOne(deleteUserLimiter, 10, 'test:delete-user-ip')
+  })
+
+  it('portalLimiter blocks at 11 requests/min per user (10 limit)', () => {
+    expectBlocksAtLimitPlusOne(portalLimiter, 10, 'test:portal-user')
   })
 })

@@ -80,3 +80,15 @@ export const instancesLinkLimiter = new RateLimiter({
     windowMs: 60_000,
     maxRequests: 30,
 });
+
+/** POST /api/internal/delete-user — brute-force guard for the MARKETPLACE_INTERNAL_SECRET bearer + destructive $transaction. */
+export const deleteUserLimiter = new RateLimiter({
+    windowMs: 60_000,
+    maxRequests: 10,
+});
+
+/** POST /api/billing/portal — Stripe portal-session creation cost surface; per-user, generous. */
+export const portalLimiter = new RateLimiter({
+    windowMs: 60_000,
+    maxRequests: 10,
+});

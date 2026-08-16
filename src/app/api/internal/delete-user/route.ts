@@ -1,7 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { deleteUserLimiter, getClientIp } from '@/lib/rateLimiters'
 
 export async function POST(request: NextRequest) {
+  // IP limiter runs BEFORE the secret check so failed bearer guesses also
+  // consume budget — brute-force protection for MARKETPLACE_INTERNAL_SECRET.
+  const limiter = deleteUserLimiter.check(getClientIp(request))
+  if (limiter) return limiter
+
   const secret = process.env.MARKETPLACE_INTERNAL_SECRET
   if (!secret) {
     return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
