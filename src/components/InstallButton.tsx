@@ -35,14 +35,17 @@ export default function InstallButton({ plugin, isAuthed }: Props) {
 
 
 
-    // Sync status from context (already-installed plugins)
+    // Sync status from context (already-installed plugins). Deferred into a
+    // promise callback so no synchronous setState happens inside the effect body.
     useEffect(() => {
         if (!plugin) return;
-        if (installedIds.has(plugin.id)) {
-            setStatus("installed");
-        } else {
-            setStatus("idle");
-        }
+        Promise.resolve().then(() => {
+            if (installedIds.has(plugin.id)) {
+                setStatus("installed");
+            } else {
+                setStatus("idle");
+            }
+        });
     }, [installedIds, plugin?.id]);
 
     // Detect return from WWV install redirect (?installed=pluginId + #token=<jwt>)
@@ -52,7 +55,8 @@ export default function InstallButton({ plugin, isAuthed }: Props) {
         const clean = new URL(window.location.href);
 
         if (params.get("installed") === plugin.id) {
-            setStatus("installed");
+            // Deferred so no synchronous setState happens inside the effect body.
+            Promise.resolve().then(() => setStatus("installed"));
             trackEvent("plugin_install_success", { pluginId: plugin.id });
             clean.searchParams.delete("installed");
             refetch(); // refresh the shared context

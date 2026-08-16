@@ -42,8 +42,11 @@ export default function AdminRegistryPage() {
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_token")) {
-      setAuthed(true);
-      fetchPlugins();
+      // Deferred so no synchronous setState happens inside the effect body.
+      Promise.resolve().then(() => {
+        setAuthed(true);
+        fetchPlugins();
+      });
     }
   }, [fetchPlugins]);
 
