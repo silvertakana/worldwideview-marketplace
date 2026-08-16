@@ -9,8 +9,8 @@ This project is licensed under the [Business Source License 1.1](./LICENSE).
 ## Getting Started
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the marketplace.
@@ -19,5 +19,5 @@ Open [http://localhost:3000](http://localhost:3000) to view the marketplace.
 
 - **Framework**: Next.js 16 (App Router)
 - **Styling**: Vanilla CSS
-- **Database**: Supabase (PostgreSQL + Auth)
+- **Database**: SQLite via Prisma (`better-sqlite3` adapter)
 - **Language**: TypeScript
