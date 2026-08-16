@@ -17,18 +17,18 @@
     "lint:urls": "node scripts/lint-urls.mjs"
   },
   "dependencies": {
-    "@prisma/adapter-better-sqlite3": "^7.5.0",
-    "@prisma/client": "^7.5.0",
-    "@supabase/ssr": "^0.10.3",
-    "@supabase/supabase-js": "2.105.3",
+    "@prisma/adapter-better-sqlite3": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "2.112.3",
     "better-sqlite3": "^13.0.3",
-    "jose": "^6.2.3",
+    "jose": "^6.2.8",
     "lucide-react": "^1.31.0",
-    "next": "16.2.11",
-    "prisma": "^7.5.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "stripe": "^22.2.1"
+    "next": "16.3.0",
+    "prisma": "^7.9.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "stripe": "^22.5.0"
   },
   "devDependencies": {
     "@size-limit/preset-app": "^12.1.0",
@@ -39,11 +39,11 @@
     "@vitest/coverage-v8": "^4.1.10",
     "cross-env": "^10.1.0",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.3.0",
     "eslint-plugin-security": "^4.0.1",
     "size-limit": "^12.1.0",
     "typescript": "^5",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.10"
   },
   "size-limit": [
     {
