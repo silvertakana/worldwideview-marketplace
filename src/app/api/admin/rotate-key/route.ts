@@ -3,8 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { rotateKey } from "@/lib/auth/signingKey";
 import { prisma } from "@/lib/prisma";
 import { hashApiKey } from "@/lib/auth/apiKeyHash";
+import { adminLimiter, getClientIp } from "@/lib/rateLimiters";
 
 export async function POST(req: NextRequest) {
+    const limiter = adminLimiter.check(getClientIp(req));
+    if (limiter) return limiter;
+
     const auth = req.headers.get("authorization");
     if (!auth || !auth.startsWith("Bearer ")) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
