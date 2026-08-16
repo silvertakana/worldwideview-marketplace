@@ -237,6 +237,17 @@ describe("getAllPlugins", () => {
         expect(cards[0].updatedAt).toBe("—");
     });
 
+    it("surfaces the stored unknown updatedAt when the npm cache has no date", async () => {
+        mockPlugin.findMany.mockResolvedValueOnce([makePlugin()]);
+        mockNpmCache.findMany.mockResolvedValueOnce([
+            makeCache({ updatedAt: "unknown" }),
+        ]);
+
+        const cards = await getAllPlugins();
+
+        expect(cards[0].updatedAt).toBe("unknown");
+    });
+
     it("filters by category when a category is given", async () => {
         mockPlugin.findMany.mockResolvedValueOnce([
             makePlugin(),

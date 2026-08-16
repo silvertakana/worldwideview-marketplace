@@ -90,14 +90,19 @@ function extractAuthor(obj: NpmRegistryVersion | NpmRegistryManifest): string {
   return "WorldWideView";
 }
 
-function extractUpdatedAt(json: NpmRegistryManifest, latestTag?: string): string {
+function extractUpdatedAt(
+  json: NpmRegistryManifest,
+  latestTag?: string,
+): string | undefined {
   if (latestTag && json.time?.[latestTag]) {
     return json.time[latestTag].slice(0, 10); // "YYYY-MM-DD"
   }
   if (json.time?.modified) {
     return json.time.modified.slice(0, 10);
   }
-  return new Date().toISOString().slice(0, 10);
+  // No published/modified date in the packument: return undefined instead of
+  // fabricating "today" so callers can render an honest "unknown".
+  return undefined;
 }
 
 function extractRepoUrl(json: NpmRegistryManifest): string | undefined {
