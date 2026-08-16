@@ -29,8 +29,8 @@ export default function SubmitPage() {
 
       setSuccess(true);
       form.reset();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Submission failed");
     } finally {
       setLoading(false);
     }

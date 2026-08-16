@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       updated,
       failed,
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error("[sync-npm] Unexpected error:", err);
     return NextResponse.json({ success: false, error: "An internal error occurred." }, { status: 500 });
   }

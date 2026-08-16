@@ -20,6 +20,21 @@ interface PluginTableProps {
   onRemove: (id: string) => void;
 }
 
+/** Shape returned by the /api/admin/npm-cache endpoint. */
+interface NpmCacheData {
+  npmPackage: string;
+  name: string;
+  description: string;
+  version: string;
+  author: string;
+  keywords: string[];
+  repository: string | null;
+  readme: string | null;
+  changelog: string | null;
+  updatedAt: string;
+  crawledAt: string;
+}
+
 function PluginTableRow({
   plugin: p,
   selected,
@@ -35,7 +50,7 @@ function PluginTableRow({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [npmData, setNpmData] = useState<any>(null);
+  const [npmData, setNpmData] = useState<NpmCacheData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleExpand() {
@@ -50,8 +65,8 @@ function PluginTableRow({
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to fetch cache");
         setNpmData(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch");
       } finally {
         setLoading(false);
       }

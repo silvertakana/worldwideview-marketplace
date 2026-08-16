@@ -3,6 +3,18 @@ import { GET } from "./route";
 import { NextRequest } from "next/server";
 import * as jose from "jose";
 
+/** Shape of the mocked NextResponse.json return value in this spec. */
+interface MockJsonResponse<TBody> {
+    body: TBody;
+    init?: { status?: number; headers?: Record<string, string> };
+}
+
+/** Union of fields the endpoint can return across its success/error branches. */
+interface JwksResponseBody {
+    keys?: jose.JWK[];
+    error?: string;
+}
+
 vi.mock("next/server", async (importOriginal) => {
     const actual = await importOriginal<typeof import("next/server")>();
     return {
@@ -28,7 +40,7 @@ describe("JWKS Endpoint", () => {
         mockGetJwksPublicKeys.mockRejectedValueOnce(new Error("DB unavailable"));
 
         const req = new NextRequest("http://localhost/api/auth/jwks");
-        const res: any = await GET(req);
+        const res = (await GET(req)) as unknown as MockJsonResponse<JwksResponseBody>;
 
         expect(res.init?.status).toBe(500);
         expect(res.body).toEqual({ error: "Internal Server Error" });
@@ -40,14 +52,14 @@ describe("JWKS Endpoint", () => {
         mockGetJwksPublicKeys.mockResolvedValueOnce([publicJwk]);
 
         const req = new NextRequest("http://localhost/api/auth/jwks");
-        const res: any = await GET(req);
+        const res = (await GET(req)) as unknown as MockJsonResponse<JwksResponseBody>;
 
         expect(res.init?.status).toBe(200);
         const cacheControl: string = res.init?.headers?.["Cache-Control"] ?? "";
         expect(cacheControl).toContain("max-age=300");
         expect(cacheControl).toContain("stale-while-revalidate=60");
 
-        const keys = res.body.keys;
+        const keys = res.body.keys ?? [];
         expect(Array.isArray(keys)).toBe(true);
         expect(keys).toHaveLength(1);
         expect(keys[0].kid).toBe("test-kid-jwks");
@@ -65,11 +77,12 @@ describe("JWKS Endpoint", () => {
         mockGetJwksPublicKeys.mockResolvedValueOnce([activeJwk, retiringJwk]);
 
         const req = new NextRequest("http://localhost/api/auth/jwks");
-        const res: any = await GET(req);
+        const res = (await GET(req)) as unknown as MockJsonResponse<JwksResponseBody>;
 
         expect(res.init?.status).toBe(200);
-        expect(res.body.keys).toHaveLength(2);
-        const kids = res.body.keys.map((k: any) => k.kid);
+        const keys = res.body.keys ?? [];
+        expect(keys).toHaveLength(2);
+        const kids = keys.map((k) => k.kid);
         expect(kids).toContain("kid-active");
         expect(kids).toContain("kid-retiring");
     });

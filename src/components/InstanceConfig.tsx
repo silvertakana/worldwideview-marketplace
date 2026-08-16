@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { getInstanceUrl, setInstanceUrl } from "@/lib/instanceStore";
 import styles from "./InstanceConfig.module.css";
@@ -15,13 +15,9 @@ interface Props {
 type ConnectionStatus = "idle" | "testing" | "success" | "error" | "demo-blocked";
 
 export default function InstanceConfig({ onConfigured, onCancel, returnPath }: Props) {
-    const [url, setUrl] = useState("");
+    const [url, setUrl] = useState(() => getInstanceUrl() ?? "http://localhost:3000");
     const [status, setStatus] = useState<ConnectionStatus>("idle");
     const [errorMsg, setErrorMsg] = useState("");
-
-    useEffect(() => {
-        setUrl(getInstanceUrl() ?? "http://localhost:3000");
-    }, []);
 
     async function handleTest(e: React.MouseEvent) {
         e.preventDefault();

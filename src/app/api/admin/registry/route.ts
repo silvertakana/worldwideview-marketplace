@@ -119,8 +119,8 @@ export async function POST(request: NextRequest) {
       });
       
       results.push(plugin);
-    } catch (err: any) {
-      errors.push({ package: npmPackage, error: err.message });
+    } catch (err) {
+      errors.push({ package: npmPackage, error: err instanceof Error ? err.message : String(err) });
     }
   }
 

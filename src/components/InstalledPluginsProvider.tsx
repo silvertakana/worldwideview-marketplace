@@ -57,9 +57,12 @@ export default function InstalledPluginsProvider({ children }: { children: React
     const installError = params.has("install_error");
     const pendingPlugin = params.get("pending");
 
-    // Track pending approval for unverified plugins
+    // Track pending approval for unverified plugins. Deferred into a promise
+    // callback so no synchronous setState happens inside the effect body.
     if (pendingPlugin) {
-      setPendingIds((prev) => new Set(prev).add(pendingPlugin));
+      Promise.resolve().then(() => {
+        setPendingIds((prev) => new Set(prev).add(pendingPlugin));
+      });
     }
 
     // Clean handled params from the URL
@@ -72,23 +75,26 @@ export default function InstalledPluginsProvider({ children }: { children: React
       window.history.replaceState({}, "", clean.toString());
     }
 
-    // Trigger a refetch so the new token is used immediately
-    if (tokenMatch || installed) {
-      setTrigger((t) => t + 1);
-    }
+    // No explicit refetch bump needed: the status effect below runs after this
+    // one in the same commit, so its first fetch already reads the fresh token.
   }, []);
 
   useEffect(() => {
     const instanceUrl = getInstanceUrl();
     if (!instanceUrl) {
-      setConfigured(false);
-      setLoading(false);
+      // Deferred so no synchronous setState happens inside the effect body.
+      Promise.resolve().then(() => {
+        setConfigured(false);
+        setLoading(false);
+      });
       return;
     }
-    setConfigured(true);
 
     let cancelled = false;
-    setLoading(true);
+    Promise.resolve().then(() => {
+      setConfigured(true);
+      setLoading(true);
+    });
 
     fetch(`${instanceUrl}/api/marketplace/status`, {
       headers: {

@@ -10,7 +10,7 @@ function hashApiKey(rawKey: string): string {
 
 async function main() {
   const dbPath = process.env.DB_PATH || path.join(process.cwd(), "prisma", "registry.db");
-  const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` } as any);
+  const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
   const prisma = new PrismaClient({ adapter });
 
   for (const plugin of KNOWN_PLUGINS) {

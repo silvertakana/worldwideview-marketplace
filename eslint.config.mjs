@@ -17,13 +17,6 @@ const eslintConfig = defineConfig([
     "_query*.mjs",
     "local-scripts/**",
   ]),
-  {
-    rules: {
-      "react-hooks/set-state-in-effect": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "react/no-unescaped-entities": "off",
-    },
-  },
   security.configs.recommended,
 ]);
 
