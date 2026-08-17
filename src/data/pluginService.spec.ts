@@ -190,7 +190,7 @@ describe("getAllPlugins", () => {
         expect(cards[0].description).toBe("Real-time flight tracking data feed for the globe.");
     });
 
-    it("always reports installs as 0 regardless of db installs (current behavior)", async () => {
+    it("reports the plugin's real install count from the db", async () => {
         mockPlugin.findMany.mockResolvedValueOnce([
             makePlugin({ installs: 42 }),
         ]);
@@ -198,7 +198,7 @@ describe("getAllPlugins", () => {
 
         const cards = await getAllPlugins();
 
-        expect(cards[0].installs).toBe(0);
+        expect(cards[0].installs).toBe(42);
     });
 
     it("defaults author to WorldWideView without npm data", async () => {

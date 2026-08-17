@@ -80,7 +80,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: npx prisma generate
-      - run: pnpm exec vitest run --coverage || true
+      - run: pnpm exec vitest run --coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -92,6 +92,9 @@ jobs:
       - name: Coverage report comment
         if: github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2
+        # Informational only. A missing/partial summary (e.g. a transient
+        # vitest coverage glitch) must never flip a PR red.
+        continue-on-error: true
 
   build:
     name: Build

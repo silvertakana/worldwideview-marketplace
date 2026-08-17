@@ -41,6 +41,7 @@ const popularPlugins = featuredPlugins.map((p) => ({
   description: p.longDescription.slice(0, 80),
   category: p.category,
   icon: p.icon,
+  // Static homepage placeholders — no DB read, so no real install count is available here.
   installs: 0,
   author: "WorldWideView",
   version: "",
