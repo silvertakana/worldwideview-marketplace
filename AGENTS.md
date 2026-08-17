@@ -50,6 +50,7 @@ pnpm build  # Build the Next.js app
 
 - **Deployment**: Deploys via Docker multi-stage build (`Dockerfile`).
 - **Database**: Database state is contained in `registry.db`. Ensure migrations are synced if schema changes are made.
+- **Fresh worktree bootstrap**: worktrees start with no `node_modules` and no env files. Run `pnpm install`, then `DATABASE_URL=file:./prisma/registry.db npx prisma generate` (Prisma 7 needs the URL at generate time; the schema has no datasource `url`), then copy `.env.local`, plus `certs/` (the dev script's `--experimental-https` needs `certs/marketplace.wwv.local-key.pem` / `certs/marketplace.wwv.local.pem`), from the main checkout or a sibling worktree. The main checkout is read-only and often stale: read `origin/main` or use a worktree.
 
 ---
 
