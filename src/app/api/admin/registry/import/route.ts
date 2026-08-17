@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import type { Plugin } from "@prisma/client";
+import { adminLimiter, getClientIp } from "@/lib/rateLimiters";
 
 function isAuthorized(request: NextRequest): boolean {
   const authHeader = request.headers.get("authorization") ?? "";
@@ -14,6 +15,9 @@ function isAuthorized(request: NextRequest): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  const limiter = adminLimiter.check(getClientIp(request));
+  if (limiter) return limiter;
+
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

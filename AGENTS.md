@@ -51,3 +51,12 @@ pnpm build  # Build the Next.js app
 - **Deployment**: Deploys via Docker multi-stage build (`Dockerfile`).
 - **Database**: Database state is contained in `registry.db`. Ensure migrations are synced if schema changes are made.
 - **Fresh worktree bootstrap**: worktrees start with no `node_modules` and no env files. Run `pnpm install`, then `DATABASE_URL=file:./prisma/registry.db npx prisma generate` (Prisma 7 needs the URL at generate time; the schema has no datasource `url`), then copy `.env.local`, plus `certs/` (the dev script's `--experimental-https` needs `certs/marketplace.wwv.local-key.pem` / `certs/marketplace.wwv.local.pem`), from the main checkout or a sibling worktree. The main checkout is read-only and often stale: read `origin/main` or use a worktree.
+
+---
+
+## 6. Known CI Caveats
+
+- **size-label self-cancels** on every PR — cosmetic, known; ignore it.
+- **PR Preview fails on EVERY PR**: `pr-preview.yml` pins `shared-docker.yml@ci/infra-overhaul`, a dangling branch in the globe repo. Pre-existing and unrelated to PR content; known until pr-preview is repinned.
+- **Unit Tests can flake**: `signingKey` kid-a/kid-b race and the coverage-report ENOENT step; a re-run clears it.
+- **Docker Publish `startup_failure`**: caused by the globe's `shared-docker.yml` carrying `secrets` context in build-args `with:` (workflow-registration rejection); being fixed via globe PR #443. Once merged, that class should disappear.

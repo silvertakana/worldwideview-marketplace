@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import * as jose from "jose";
 import { prisma } from "@/lib/prisma";
 import { issueApiKey } from "@/lib/auth/apiKeyIssuance";
+import { connectDirectLimiter, getClientIp } from "@/lib/rateLimiters";
 
 export async function POST(request: Request) {
+    const limiter = connectDirectLimiter.check(getClientIp(request));
+    if (limiter) return limiter;
+
     const authHeader = request.headers.get("authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {

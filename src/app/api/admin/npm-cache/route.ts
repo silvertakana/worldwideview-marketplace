@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { fetchPackageMeta } from "@/data/npmRegistry";
+import { adminLimiter, getClientIp } from "@/lib/rateLimiters";
 
 function isAuthorized(request: NextRequest): boolean {
   const authHeader = request.headers.get("authorization") ?? "";
@@ -17,6 +18,9 @@ function isAuthorized(request: NextRequest): boolean {
 const CACHE_LIFESPAN_MS = 1000 * 60 * 60; // 1 hour
 
 export async function GET(request: NextRequest) {
+  const limiter = adminLimiter.check(getClientIp(request));
+  if (limiter) return limiter;
+
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -46,7 +50,7 @@ export async function GET(request: NextRequest) {
           repository: meta.repository,
           readme: meta.readme,
           changelog: meta.changelog,
-          updatedAt: meta.updatedAt,
+          updatedAt: meta.updatedAt ?? "unknown",
         },
         update: {
           name: meta.name,
@@ -57,7 +61,7 @@ export async function GET(request: NextRequest) {
           repository: meta.repository,
           readme: meta.readme,
           changelog: meta.changelog,
-          updatedAt: meta.updatedAt,
+          updatedAt: meta.updatedAt ?? "unknown",
           crawledAt: now,
         },
       });

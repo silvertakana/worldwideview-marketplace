@@ -3,8 +3,12 @@ import { timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import type { NpmPackageMeta } from "@/data/types";
 import { fetchAllPackageMeta } from "@/data/npmRegistry";
+import { adminLimiter, getClientIp } from "@/lib/rateLimiters";
 
 export async function GET(request: Request) {
+  const limiter = adminLimiter.check(getClientIp(request));
+  if (limiter) return limiter;
+
   const authHeader = request.headers.get("authorization");
   const adminPw = process.env.ADMIN_PASSWORD;
   if (!authHeader || !authHeader.startsWith("Bearer ") || !adminPw) {
@@ -87,7 +91,7 @@ export async function GET(request: Request) {
              version: rawObj.version || "0.0.0",
              author: rawObj.publisher?.username || rawObj.publisher?.email || "Unknown",
              keywords: rawObj.keywords || [],
-             updatedAt: rawObj.date || new Date().toISOString(),
+             updatedAt: rawObj.date ?? "unknown",
              repository: rawObj.links?.repository,
            });
         }

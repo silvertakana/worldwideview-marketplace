@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
+import { adminLimiter, getClientIp } from "@/lib/rateLimiters";
 
 /** Validate admin password from Authorization header. */
 function isAuthorized(request: NextRequest): boolean {
@@ -15,6 +16,9 @@ function isAuthorized(request: NextRequest): boolean {
 
 /** GET /api/admin/registry — list all plugins. */
 export async function GET(request: NextRequest) {
+  const limiter = adminLimiter.check(getClientIp(request));
+  if (limiter) return limiter;
+
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -46,6 +50,9 @@ export async function GET(request: NextRequest) {
  *  Bulk:   { plugins: [{ id }] }
  */
 export async function POST(request: NextRequest) {
+  const limiter = adminLimiter.check(getClientIp(request));
+  if (limiter) return limiter;
+
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -131,6 +138,9 @@ export async function POST(request: NextRequest) {
  *  Payload: { ids: string[], trust: string }
  */
 export async function PATCH(request: NextRequest) {
+  const limiter = adminLimiter.check(getClientIp(request));
+  if (limiter) return limiter;
+
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -156,6 +166,9 @@ export async function PATCH(request: NextRequest) {
  *  Bulk:   { ids: string[] }
  */
 export async function DELETE(request: NextRequest) {
+  const limiter = adminLimiter.check(getClientIp(request));
+  if (limiter) return limiter;
+
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

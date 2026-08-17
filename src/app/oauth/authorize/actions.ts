@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma'
 import { requireSupabaseUser } from '@/lib/auth/requireSession'
 import { getOrCreateMarketplaceUser } from '@/lib/auth/getOrCreateMarketplaceUser'
 import { classifyRedirectTier } from '@/lib/redirectTier'
+import { authorizeLimiter } from '@/lib/rateLimiters'
 
 const CODE_TTL_SECONDS = 60
 
@@ -28,6 +29,12 @@ export async function approveAuthorization(form: FormData) {
 
   const supabaseUser = await requireSupabaseUser(here)
   const marketplaceUser = await getOrCreateMarketplaceUser(supabaseUser)
+
+  // Per-user code-minting limiter (shared 30/min budget with the authorize page).
+  // Server actions cannot return a 429 Response — bounce back to the authorize
+  // page, which renders the friendly rate-limit message once the key is exhausted.
+  const limiter = authorizeLimiter.check(`user:${supabaseUser.id}`)
+  if (limiter) redirect(here)
 
   const code = randomBytes(32).toString('base64url')
   await prisma.oAuthAuthorizationCode.create({

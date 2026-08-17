@@ -104,7 +104,7 @@ function mergeToCard(
     description: npm?.description ?? dbPlugin.longDescription.slice(0, 80),
     category: dbPlugin.category,
     icon: dbPlugin.icon,
-    installs: 0, // No real install count from npm
+    installs: dbPlugin.installs, // Real count: incremented by /api/install/start (Plugin.installs)
     author: npm?.author ?? "WorldWideView",
     version: npm?.version ?? "0.0.0",
     format: dbPlugin.format as "bundle" | "static" | "declarative",

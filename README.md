@@ -13,7 +13,7 @@ pnpm install
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the marketplace.
+Open [https://marketplace.wwv.local:3002](https://marketplace.wwv.local:3002) to view the marketplace.
 
 ## Stack
 

@@ -2,6 +2,7 @@ import { stripe } from "@/lib/stripe/client";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { checkoutLimiter } from "@/lib/rateLimiters";
 
 export async function POST(req: Request) {
     let body: { priceId?: string };
@@ -16,6 +17,10 @@ export async function POST(req: Request) {
     if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Per-user limiter (10/min) — caps Stripe session-creation cost surface.
+    const limiter = checkoutLimiter.check(`user:${user.id}`);
+    if (limiter) return limiter;
 
     const marketplaceUser = await prisma.user.findFirst({
         where: { supabaseUserId: user.id },
