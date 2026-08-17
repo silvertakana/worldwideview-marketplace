@@ -190,7 +190,7 @@ describe("getAllPlugins", () => {
         expect(cards[0].description).toBe("Real-time flight tracking data feed for the globe.");
     });
 
-    it("always reports installs as 0 regardless of db installs (current behavior)", async () => {
+    it("reports the plugin's real install count from the db", async () => {
         mockPlugin.findMany.mockResolvedValueOnce([
             makePlugin({ installs: 42 }),
         ]);
@@ -198,7 +198,7 @@ describe("getAllPlugins", () => {
 
         const cards = await getAllPlugins();
 
-        expect(cards[0].installs).toBe(0);
+        expect(cards[0].installs).toBe(42);
     });
 
     it("defaults author to WorldWideView without npm data", async () => {
@@ -235,6 +235,17 @@ describe("getAllPlugins", () => {
         const cards = await getAllPlugins();
 
         expect(cards[0].updatedAt).toBe("—");
+    });
+
+    it("surfaces the stored unknown updatedAt when the npm cache has no date", async () => {
+        mockPlugin.findMany.mockResolvedValueOnce([makePlugin()]);
+        mockNpmCache.findMany.mockResolvedValueOnce([
+            makeCache({ updatedAt: "unknown" }),
+        ]);
+
+        const cards = await getAllPlugins();
+
+        expect(cards[0].updatedAt).toBe("unknown");
     });
 
     it("filters by category when a category is given", async () => {

@@ -168,9 +168,12 @@ describe("rotateKey", () => {
         expect(resultA.oldKid).toBe("kid-old");
         expect(resultB.oldKid).toBe("kid-old");
 
-        // Each call created a new unique key
-        expect(resultA.newKid).toBe("kid-a");
-        expect(resultB.newKid).toBe("kid-b");
+        // Each call created a new unique key. Which concurrent call consumes
+        // which queued once-value is non-deterministic (async jose key
+        // generation resolves out of order), so assert the SET of created
+        // keys rather than per-call order — the invariant is "two distinct
+        // keys created", not "call A got kid-a".
+        expect([resultA.newKid, resultB.newKid].sort()).toEqual(["kid-a", "kid-b"].sort());
 
         // Exactly 2 update+create pairs executed (one per call)
         expect(mockSigningKey.findFirst).toHaveBeenCalledTimes(2);
