@@ -38,3 +38,57 @@ export const revokeLimiter = new RateLimiter({
     windowMs: 60_000,
     maxRequests: 10,
 });
+
+/**
+ * Sensitive-route limiters. These guard non-OAuth endpoints that mint
+ * credentials, hit third-party cost surfaces, or write shared state.
+ * Same singleton pattern: one instance per limiter, shared across requests.
+ */
+
+/** POST /api/connect/direct — mints an API key from the shared HS256 secret. Generous IP ceiling avoids fleet/NAT lockout. */
+export const connectDirectLimiter = new RateLimiter({
+    windowMs: 60_000,
+    maxRequests: 60,
+});
+
+/** POST /api/plugins/submit — outbound NPM fetch + DB write + webhook per call. */
+export const pluginSubmitLimiter = new RateLimiter({
+    windowMs: 60_000,
+    maxRequests: 10,
+});
+
+/** POST /api/billing/checkout — Stripe session-creation cost surface; per-user, generous. */
+export const checkoutLimiter = new RateLimiter({
+    windowMs: 60_000,
+    maxRequests: 10,
+});
+
+/** GET /api/install/start — fire-and-forget install-counter inflation. Generous IP ceiling. */
+export const installStartLimiter = new RateLimiter({
+    windowMs: 60_000,
+    maxRequests: 60,
+});
+
+/** /api/admin/* — brute-force guard for the shared ADMIN_PASSWORD / CRON_SECRET bearer. */
+export const adminLimiter = new RateLimiter({
+    windowMs: 60_000,
+    maxRequests: 10,
+});
+
+/** POST /api/instances/link — idempotent LinkedInstance upsert. */
+export const instancesLinkLimiter = new RateLimiter({
+    windowMs: 60_000,
+    maxRequests: 30,
+});
+
+/** POST /api/internal/delete-user — brute-force guard for the MARKETPLACE_INTERNAL_SECRET bearer + destructive $transaction. */
+export const deleteUserLimiter = new RateLimiter({
+    windowMs: 60_000,
+    maxRequests: 10,
+});
+
+/** POST /api/billing/portal — Stripe portal-session creation cost surface; per-user, generous. */
+export const portalLimiter = new RateLimiter({
+    windowMs: 60_000,
+    maxRequests: 10,
+});

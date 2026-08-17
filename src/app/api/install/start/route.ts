@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/requireSession'
 import { getOrCreateMarketplaceUser } from '@/lib/auth/getOrCreateMarketplaceUser'
 import { prisma } from '@/lib/prisma'
+import { installStartLimiter, getClientIp } from '@/lib/rateLimiters'
 
 /**
  * GET /api/install/start
@@ -18,6 +19,9 @@ import { prisma } from '@/lib/prisma'
  *   redirectTo  — the marketplace page to return to after install
  */
 export async function GET(request: NextRequest) {
+  const limiter = installStartLimiter.check(getClientIp(request))
+  if (limiter) return limiter
+
   const { searchParams } = request.nextUrl
   const pluginId = searchParams.get('pluginId')
   const version = searchParams.get('version')

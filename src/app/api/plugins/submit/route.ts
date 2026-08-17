@@ -3,8 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { getSupabaseUser } from "@/lib/auth/requireSession";
 import { getOrCreateMarketplaceUser } from "@/lib/auth/getOrCreateMarketplaceUser";
 import { firePluginSubmitWebhook } from "@/lib/webhooks";
+import { pluginSubmitLimiter, getClientIp } from "@/lib/rateLimiters";
 
 export async function POST(req: Request) {
+  const limiter = pluginSubmitLimiter.check(getClientIp(req));
+  if (limiter) return limiter;
+
   const supabaseUser = await getSupabaseUser();
   if (!supabaseUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

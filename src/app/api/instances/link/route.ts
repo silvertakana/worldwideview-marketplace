@@ -3,6 +3,7 @@ import { getSupabaseUser } from '@/lib/auth/requireSession'
 import { getOrCreateMarketplaceUser } from '@/lib/auth/getOrCreateMarketplaceUser'
 import { prisma } from '@/lib/prisma'
 import { validateInstanceUrl } from '@/lib/instanceValidation'
+import { instancesLinkLimiter, getClientIp } from '@/lib/rateLimiters'
 
 /**
  * POST /api/instances/link
@@ -17,6 +18,9 @@ import { validateInstanceUrl } from '@/lib/instanceValidation'
  * session - both call sites just fire the request and ignore the response.
  */
 export async function POST(request: NextRequest) {
+  const limiter = instancesLinkLimiter.check(getClientIp(request))
+  if (limiter) return limiter
+
   const supabaseUser = await getSupabaseUser()
   if (!supabaseUser) {
     return NextResponse.json({ error: 'unauthenticated' }, { status: 401 })
