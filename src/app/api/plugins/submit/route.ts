@@ -52,7 +52,18 @@ export async function POST(req: Request) {
       }, { status: 400 });
     }
 
-    const capabilities = format === "bundle" ? ["data:own", "network:fetch"] : ["data:own"];
+    // Honor capabilities declared in the npm manifest's worldwideview block
+    // (e.g. ["data:own","ui:sidebar","network:fetch"]); fall back to the
+    // format-based defaults when they are absent or not a string array.
+    const declaredCapabilities = wwvBlock.capabilities;
+    const capabilities =
+      Array.isArray(declaredCapabilities) &&
+      declaredCapabilities.length > 0 &&
+      declaredCapabilities.every((c: unknown) => typeof c === "string")
+        ? declaredCapabilities
+        : format === "bundle"
+          ? ["data:own", "network:fetch"]
+          : ["data:own"];
 
     const plugin = await prisma.plugin.create({
       data: {
