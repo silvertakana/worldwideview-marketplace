@@ -45,7 +45,8 @@ export interface NpmPackageMeta {
   version: string;
   author: string;
   keywords: string[];
-  updatedAt: string;
+  /** "YYYY-MM-DD"; undefined when the npm packument publishes no date. */
+  updatedAt?: string;
   repository?: string;
   readme?: string;
   changelog?: string;

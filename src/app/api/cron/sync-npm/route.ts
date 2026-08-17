@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
                 repository: meta.repository,
                 readme: meta.readme,
                 changelog: meta.changelog,
-                updatedAt: meta.updatedAt,
+                updatedAt: meta.updatedAt ?? "unknown",
               },
               update: {
                 name: meta.name,
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
                 repository: meta.repository,
                 readme: meta.readme,
                 changelog: meta.changelog,
-                updatedAt: meta.updatedAt,
+                updatedAt: meta.updatedAt ?? "unknown",
                 crawledAt: new Date(),
               },
             });

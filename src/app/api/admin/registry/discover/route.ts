@@ -87,7 +87,7 @@ export async function GET(request: Request) {
              version: rawObj.version || "0.0.0",
              author: rawObj.publisher?.username || rawObj.publisher?.email || "Unknown",
              keywords: rawObj.keywords || [],
-             updatedAt: rawObj.date || new Date().toISOString(),
+             updatedAt: rawObj.date ?? "unknown",
              repository: rawObj.links?.repository,
            });
         }

@@ -126,14 +126,12 @@ describe("fetchPackageMeta", () => {
         expect(meta?.updatedAt).toBe("2026-07-02");
     });
 
-    it("falls back to today's date when no time data exists", async () => {
-        vi.useFakeTimers();
-        vi.setSystemTime(new Date("2026-08-16T12:00:00.000Z"));
+    it("returns undefined updatedAt when no time data exists", async () => {
         stubFetch(true, makeManifest({ time: undefined }));
 
         const meta = await fetchPackageMeta("@worldwideview/wwv-plugin-aviation");
 
-        expect(meta?.updatedAt).toBe("2026-08-16");
+        expect(meta?.updatedAt).toBeUndefined();
     });
 
     it("extracts a string author", async () => {
