@@ -1,9 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { Plugin, NpmCache } from "@prisma/client";
+import type { PluginCard } from "@/data/types";
+import type { PluginListPage } from "@/data/pluginService";
 
 const mockPlugin = {
     findMany: vi.fn(),
     findUnique: vi.fn(),
+    count: vi.fn(),
 };
 
 const mockNpmCache = {
@@ -248,15 +251,17 @@ describe("getAllPlugins", () => {
         expect(cards[0].updatedAt).toBe("unknown");
     });
 
-    it("filters by category when a category is given", async () => {
+    it("pushes the category filter into the database query", async () => {
         mockPlugin.findMany.mockResolvedValueOnce([
-            makePlugin(),
             makePlugin({ id: "storms", category: "weather" }),
         ]);
         mockNpmCache.findMany.mockResolvedValueOnce([]);
 
         const cards = await getAllPlugins("weather");
 
+        expect(mockPlugin.findMany).toHaveBeenCalledWith({
+            where: { trust: { not: "pending" }, category: "weather" },
+        });
         expect(cards.map((c) => c.id)).toEqual(["storms"]);
     });
 
@@ -381,54 +386,264 @@ describe("getPluginById", () => {
     });
 });
 
-describe("searchPlugins", () => {
-    it("matches by name, case-insensitively", async () => {
+
+describe("getAllPlugins pagination", () => {
+    it("bounds the query with skip/take and counts when a page is requested", async () => {
         mockPlugin.findMany.mockResolvedValueOnce([makePlugin()]);
+        mockPlugin.count.mockResolvedValueOnce(120);
         mockNpmCache.findMany.mockResolvedValueOnce([]);
 
-        const results = await searchPlugins("AVIATION");
+        const result = await getAllPlugins(undefined, { page: 3 });
 
-        expect(results.map((r) => r.id)).toEqual(["aviation"]);
+        expect(mockPlugin.findMany).toHaveBeenCalledWith({
+            where: { trust: { not: "pending" } },
+            orderBy: { id: "asc" },
+            skip: 100,
+            take: 50,
+        });
+        expect(mockPlugin.count).toHaveBeenCalledWith({
+            where: { trust: { not: "pending" } },
+        });
+        expect(result).toEqual({
+            plugins: [expect.objectContaining({ id: "aviation" })],
+            page: 3,
+            pageSize: 50,
+            total: 120,
+            totalPages: 3,
+        });
     });
 
-    it("matches by description substring", async () => {
+    it("honors a custom pageSize", async () => {
         mockPlugin.findMany.mockResolvedValueOnce([makePlugin()]);
-        mockNpmCache.findMany.mockResolvedValueOnce([
-            makeCache({ description: "Live aircraft position feed" }),
-        ]);
+        mockPlugin.count.mockResolvedValueOnce(11);
+        mockNpmCache.findMany.mockResolvedValueOnce([]);
 
-        const results = await searchPlugins("aircraft");
+        const result = (await getAllPlugins(undefined, {
+            page: 2,
+            pageSize: 10,
+        })) as PluginListPage;
 
-        expect(results.map((r) => r.id)).toEqual(["aviation"]);
+        expect(mockPlugin.findMany).toHaveBeenCalledWith({
+            where: { trust: { not: "pending" } },
+            orderBy: { id: "asc" },
+            skip: 10,
+            take: 10,
+        });
+        expect(result.totalPages).toBe(2);
     });
 
-    it("matches by tag substring", async () => {
-        mockPlugin.findMany.mockResolvedValueOnce([makePlugin()]);
-        mockNpmCache.findMany.mockResolvedValueOnce([makeCache()]);
+    it("returns an empty page when the page is beyond the end", async () => {
+        mockPlugin.findMany.mockResolvedValueOnce([]);
+        mockPlugin.count.mockResolvedValueOnce(5);
+        mockNpmCache.findMany.mockResolvedValueOnce([]);
 
-        const results = await searchPlugins("flight");
+        const result = (await getAllPlugins(undefined, {
+            page: 99,
+        })) as PluginListPage;
 
-        expect(results.map((r) => r.id)).toEqual(["aviation"]);
+        expect(result.plugins).toEqual([]);
+        expect(result.page).toBe(99);
+        expect(result.total).toBe(5);
+        expect(result.totalPages).toBe(1);
     });
 
-    it("returns an empty list when nothing matches", async () => {
-        mockPlugin.findMany.mockResolvedValueOnce([makePlugin()]);
-        mockNpmCache.findMany.mockResolvedValueOnce([makeCache()]);
+    it("returns an empty page for an empty registry", async () => {
+        mockPlugin.findMany.mockResolvedValueOnce([]);
+        mockPlugin.count.mockResolvedValueOnce(0);
+        mockNpmCache.findMany.mockResolvedValueOnce([]);
+
+        const result = (await getAllPlugins(undefined, {
+            page: 1,
+        })) as PluginListPage;
+
+        expect(result).toEqual({
+            plugins: [],
+            page: 1,
+            pageSize: 50,
+            total: 0,
+            totalPages: 0,
+        });
+    });
+
+    it("applies the category filter inside the paged count query", async () => {
+        mockPlugin.findMany.mockResolvedValueOnce([]);
+        mockPlugin.count.mockResolvedValueOnce(1);
+        mockNpmCache.findMany.mockResolvedValueOnce([]);
+
+        await getAllPlugins("weather", { page: 1 });
+
+        expect(mockPlugin.count).toHaveBeenCalledWith({
+            where: { trust: { not: "pending" }, category: "weather" },
+        });
+    });
+});
+
+describe("searchPlugins", () => {
+    function mockSearchFlow(opts: {
+        cacheMatches?: Array<{ npmPackage: string }>;
+        plugins?: Plugin[];
+        mergeCache?: NpmCache[];
+    }) {
+        mockNpmCache.findMany
+            .mockResolvedValueOnce(opts.cacheMatches ?? [])
+            .mockResolvedValueOnce(opts.mergeCache ?? []);
+        mockPlugin.findMany.mockResolvedValueOnce(opts.plugins ?? []);
+        mockPlugin.count.mockResolvedValue((opts.plugins ?? []).length);
+    }
+
+    it("pushes the query into a native npm cache OR-contains filter", async () => {
+        mockSearchFlow({});
+
+        await searchPlugins("AVIATION");
+
+        expect(mockNpmCache.findMany).toHaveBeenNthCalledWith(1, {
+            where: {
+                OR: [
+                    { name: { contains: "AVIATION" } },
+                    { description: { contains: "AVIATION" } },
+                    { keywords: { contains: "AVIATION" } },
+                ],
+            },
+            select: { npmPackage: true },
+        });
+    });
+
+    it("pushes the search into the plugin where-clause", async () => {
+        mockSearchFlow({
+            cacheMatches: [{ npmPackage: "@worldwideview/wwv-plugin-aviation" }],
+        });
+
+        await searchPlugins("aviation");
+
+        expect(mockPlugin.findMany).toHaveBeenCalledWith({
+            where: {
+                trust: { not: "pending" },
+                OR: [
+                    {
+                        npmPackage: {
+                            in: ["@worldwideview/wwv-plugin-aviation"],
+                        },
+                    },
+                    { id: { contains: "aviation" } },
+                    { longDescription: { contains: "aviation" } },
+                ],
+            },
+        });
+    });
+
+    it("returns merged cards for plugins matched by name", async () => {
+        mockSearchFlow({
+            cacheMatches: [{ npmPackage: "@worldwideview/wwv-plugin-aviation" }],
+            plugins: [makePlugin()],
+            mergeCache: [makeCache()],
+        });
+
+        const results = (await searchPlugins("aviation")) as PluginCard[];
+
+        expect(results.map((r) => r.id)).toEqual(["aviation"]);
+        expect(results[0]).toMatchObject({
+            name: "Aviation",
+            description: "Live aviation data feed",
+            tags: ["flights", "aviation"],
+        });
+    });
+
+    it("passes the category filter into the plugin where-clause", async () => {
+        mockSearchFlow({
+            plugins: [makePlugin({ id: "storms", category: "weather" })],
+        });
+
+        const results = (await searchPlugins("storms", "weather")) as PluginCard[];
+
+        expect(mockPlugin.findMany).toHaveBeenCalledWith({
+            where: {
+                trust: { not: "pending" },
+                category: "weather",
+                OR: [
+                    { npmPackage: { in: [] } },
+                    { id: { contains: "storms" } },
+                    { longDescription: { contains: "storms" } },
+                ],
+            },
+        });
+        expect(results.map((r) => r.id)).toEqual(["storms"]);
+    });
+
+    it("sends a no-match query through the native filters", async () => {
+        mockSearchFlow({});
 
         const results = await searchPlugins("zzz-no-match");
 
+        // The mocked prisma does not execute the where-clause; what these
+        // assertions pin down is that a non-matching query reaches the database
+        // as native filters (empty cache matches, empty plugin result).
+        expect(mockNpmCache.findMany).toHaveBeenNthCalledWith(1, {
+            where: {
+                OR: [
+                    { name: { contains: "zzz-no-match" } },
+                    { description: { contains: "zzz-no-match" } },
+                    { keywords: { contains: "zzz-no-match" } },
+                ],
+            },
+            select: { npmPackage: true },
+        });
         expect(results).toEqual([]);
     });
 
-    it("passes the category filter through to getAllPlugins", async () => {
-        mockPlugin.findMany.mockResolvedValueOnce([
-            makePlugin(),
-            makePlugin({ id: "storms", category: "weather" }),
-        ]);
+    it("delegates an empty query to the unfiltered listing", async () => {
+        mockPlugin.findMany.mockResolvedValueOnce([makePlugin()]);
         mockNpmCache.findMany.mockResolvedValueOnce([]);
 
-        const results = await searchPlugins("storms", "weather");
+        const results = await searchPlugins("   ");
 
-        expect(results.map((r) => r.id)).toEqual(["storms"]);
+        expect(mockNpmCache.findMany).toHaveBeenCalledTimes(1);
+        expect(mockPlugin.findMany).toHaveBeenCalledWith({
+            where: { trust: { not: "pending" } },
+        });
+        expect(results).toHaveLength(1);
+    });
+
+    it("supports pagination on top of the search filter", async () => {
+        mockSearchFlow({ plugins: [makePlugin()] });
+        mockPlugin.count.mockResolvedValueOnce(7);
+
+        const result = (await searchPlugins("aviation", undefined, {
+            page: 2,
+            pageSize: 5,
+        })) as PluginListPage;
+
+        expect(mockPlugin.findMany).toHaveBeenCalledWith({
+            where: {
+                trust: { not: "pending" },
+                OR: [
+                    { npmPackage: { in: [] } },
+                    { id: { contains: "aviation" } },
+                    { longDescription: { contains: "aviation" } },
+                ],
+            },
+            orderBy: { id: "asc" },
+            skip: 5,
+            take: 5,
+        });
+        expect(result).toEqual({
+            plugins: [expect.objectContaining({ id: "aviation" })],
+            page: 2,
+            pageSize: 5,
+            total: 7,
+            totalPages: 2,
+        });
+    });
+
+    it("returns an empty page for a search that matches nothing", async () => {
+        mockSearchFlow({});
+        mockPlugin.count.mockResolvedValueOnce(0);
+
+        const result = (await searchPlugins("zzz", undefined, {
+            page: 1,
+        })) as PluginListPage;
+
+        expect(result.plugins).toEqual([]);
+        expect(result.total).toBe(0);
+        expect(result.totalPages).toBe(0);
     });
 });

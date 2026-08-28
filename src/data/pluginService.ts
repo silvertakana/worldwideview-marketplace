@@ -1,39 +1,156 @@
 import type { PluginCard, PluginDetail, NpmPackageMeta } from "./types";
 import { prisma } from "@/lib/prisma";
-import type { Plugin, NpmCache } from "@prisma/client";
+import type { Prisma, Plugin, NpmCache } from "@prisma/client";
+
+/** Default page size when a caller paginates without specifying one. */
+export const DEFAULT_PAGE_SIZE = 50;
+
+export interface PaginationOptions {
+  page?: number;
+  pageSize?: number;
+}
+
+export interface PluginListPage {
+  plugins: PluginCard[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+interface CardsResult {
+  cards: PluginCard[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
+/** Where-clause for the public registry listing (pending plugins are hidden). */
+function pluginWhere(category?: string): Prisma.PluginWhereInput {
+  const where: Prisma.PluginWhereInput = { trust: { not: "pending" } };
+  if (category && category !== "All") where.category = category;
+  return where;
+}
+
+function resolvePagination(pagination?: PaginationOptions) {
+  const page = Math.max(1, Math.floor(pagination?.page ?? 1));
+  const pageSize = Math.max(1, Math.floor(pagination?.pageSize ?? DEFAULT_PAGE_SIZE));
+  return { page, pageSize };
+}
 
 /**
- * Build PluginCard objects by merging database metadata with local crawler cache (NpmCache).
- * Falls back to sensible defaults when cache is missing.
+ * Run the (already filtered) where-clause against the database, merging npm
+ * cache metadata into cards. When pagination is requested the query is bounded
+ * with skip/take and paired with a count; otherwise the full list is returned
+ * so existing consumers keep their behavior.
  */
+async function fetchCards(
+  where: Prisma.PluginWhereInput,
+  pagination?: PaginationOptions,
+): Promise<CardsResult> {
+  const paged = pagination?.page !== undefined;
+  const { page, pageSize } = resolvePagination(pagination);
+
+  const findManyArgs: Prisma.PluginFindManyArgs = paged
+    ? { where, orderBy: { id: "asc" }, skip: (page - 1) * pageSize, take: pageSize }
+    : { where };
+  const [dbPlugins, total] = await Promise.all([
+    prisma.plugin.findMany(findManyArgs),
+    paged ? prisma.plugin.count({ where }) : Promise.resolve(0),
+  ]);
+
+  const cacheRecords = await prisma.npmCache.findMany({
+    where: { npmPackage: { in: dbPlugins.map((p) => p.npmPackage) } },
+  });
+  const metaMap = new Map<string, NpmPackageMeta>();
+  cacheRecords.forEach((c) => metaMap.set(c.npmPackage, mapCacheToMeta(c)));
+
+  return {
+    cards: dbPlugins.map((dbPlugin) =>
+      mergeToCard(dbPlugin, metaMap.get(dbPlugin.npmPackage) ?? null),
+    ),
+    page,
+    pageSize,
+    total: paged ? total : dbPlugins.length,
+  };
+}
+
+/**
+ * Build PluginCard objects by merging database metadata with local crawler
+ * cache (NpmCache). Without pagination this returns the full list (PluginCard[]);
+ * with `pagination.page` set it returns a PluginListPage envelope.
+ */
+export async function getAllPlugins(category?: string): Promise<PluginCard[]>;
+export async function getAllPlugins(
+  category: string | undefined,
+  pagination: PaginationOptions | undefined,
+): Promise<PluginCard[] | PluginListPage>;
 export async function getAllPlugins(
   category?: string,
-): Promise<PluginCard[]> {
-  const dbPlugins = await prisma.plugin.findMany({
-    where: { 
-      trust: { not: "pending" },
-    }
+  pagination?: PaginationOptions,
+): Promise<PluginCard[] | PluginListPage> {
+  const result = await fetchCards(pluginWhere(category), pagination);
+  if (pagination?.page === undefined) return result.cards;
+  return toPage(result);
+}
+
+/**
+ * Search plugins by query string using database-side filtering (no in-memory
+ * post-filtering): matches npm cache name/description/keywords via a native
+ * OR-contains clause, plus the plugin id and longDescription fallbacks that the
+ * card merge uses when npm metadata is absent. Same pagination contract as
+ * getAllPlugins.
+ */
+export async function searchPlugins(
+  query: string,
+  category?: string,
+): Promise<PluginCard[]>;
+export async function searchPlugins(
+  query: string,
+  category: string | undefined,
+  pagination: PaginationOptions | undefined,
+): Promise<PluginCard[] | PluginListPage>;
+export async function searchPlugins(
+  query: string,
+  category?: string,
+  pagination?: PaginationOptions,
+): Promise<PluginCard[] | PluginListPage> {
+  const q = query.trim();
+  if (!q) return getAllPlugins(category, pagination);
+
+  const cacheMatches = await prisma.npmCache.findMany({
+    where: {
+      OR: [
+        { name: { contains: q } },
+        { description: { contains: q } },
+        { keywords: { contains: q } },
+      ],
+    },
+    select: { npmPackage: true },
   });
 
-  const npmPackages = dbPlugins.map((p) => p.npmPackage);
-  const cacheRecords = await prisma.npmCache.findMany({
-    where: { npmPackage: { in: npmPackages } }
-  });
+  const where: Prisma.PluginWhereInput = {
+    ...pluginWhere(category),
+    OR: [
+      { npmPackage: { in: cacheMatches.map((c) => c.npmPackage) } },
+      { id: { contains: q } },
+      { longDescription: { contains: q } },
+    ],
+  };
 
-  const metaMap = new Map<string, NpmPackageMeta>();
-  cacheRecords.forEach((c) => {
-    metaMap.set(c.npmPackage, mapCacheToMeta(c));
-  });
+  const result = await fetchCards(where, pagination);
+  if (pagination?.page === undefined) return result.cards;
+  return toPage(result);
+}
 
-  let cards = dbPlugins.map((dbPlugin) => {
-    const npm = metaMap.get(dbPlugin.npmPackage);
-    return mergeToCard(dbPlugin, npm ?? null);
-  });
-
-  if (category && category !== "All") {
-    cards = cards.filter((c) => c.category === category);
-  }
-  return cards;
+function toPage(result: CardsResult): PluginListPage {
+  return {
+    plugins: result.cards,
+    page: result.page,
+    pageSize: result.pageSize,
+    total: result.total,
+    totalPages: Math.ceil(result.total / result.pageSize),
+  };
 }
 
 /** Return a single plugin's full detail by marketplace id. */
@@ -44,30 +161,11 @@ export async function getPluginById(
   if (!dbPlugin || dbPlugin.trust === "pending") return null;
 
   const cacheRecord = await prisma.npmCache.findUnique({
-    where: { npmPackage: dbPlugin.npmPackage }
+    where: { npmPackage: dbPlugin.npmPackage },
   });
 
   const npm = cacheRecord ? mapCacheToMeta(cacheRecord) : null;
   return mergeToDetail(dbPlugin, npm);
-}
-
-/**
- * Search plugins by query string (matches name or description)
- * and optional category filter.
- */
-export async function searchPlugins(
-  query: string,
-  category?: string,
-): Promise<PluginCard[]> {
-  const all = await getAllPlugins(category);
-  const q = query.toLowerCase();
-
-  return all.filter(
-    (p) =>
-      p.name.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q) ||
-      p.tags.some((t) => t.includes(q)),
-  );
 }
 
 /* ---------- helpers ---------- */

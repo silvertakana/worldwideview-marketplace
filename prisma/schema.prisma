@@ -19,6 +19,9 @@ model Plugin {
   addedAt         DateTime        @default(now())
   installs        Int             @default(0)
   pluginInstalls  PluginInstall[]
+
+  // Registry listing queries filter trust (always) + category (browse tab).
+  @@index([trust, category])
 }
 
 model PluginInstall {
