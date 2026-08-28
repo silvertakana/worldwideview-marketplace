@@ -8,13 +8,13 @@ on:
       - '.gitignore'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
   build-preview:
     if: github.event.action != 'closed'
-    uses: silvertakana/worldwideview/.github/workflows/shared-docker.yml@ci/infra-overhaul
+    uses: silvertakana/worldwideview/.github/workflows/shared-docker.yml@main
     with:
       tags: |
         type=ref,event=pr

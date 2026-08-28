@@ -1,6 +1,6 @@
 {
   "name": "worldwideview-marketplace",
-  "version": "1.16.1",
+  "version": "1.16.2",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=26.0.0"
@@ -66,6 +66,7 @@
       "brace-expansion@<2": "^1.1.18",
       "brace-expansion@>=4": "^5.0.9",
       "defu": ">=6.1.5",
+      "deepmerge-ts": "^8.0.0",
       "fast-uri": "^3.1.5",
       "hono": "4.12.25",
       "js-yaml": "^4.3.0",
