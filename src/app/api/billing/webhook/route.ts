@@ -1,3 +1,4 @@
+import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe/client";
 import { NextResponse } from "next/server";
 
@@ -19,6 +20,19 @@ export async function POST(req: Request) {
         );
     } catch (err) {
         return new NextResponse(`Webhook Error: ${err instanceof Error ? err.message : "Unknown signature error"}`, { status: 400 });
+    }
+
+    // Idempotency: skip events we have already fully processed (Stripe retries
+    // deliveries, so the same event.id can arrive more than once).
+    try {
+        const seen = await prisma.stripeEvent.findUnique({ where: { id: event.id } });
+        if (seen) {
+            return new NextResponse(null, { status: 200 });
+        }
+    } catch (err) {
+        console.error(`[webhook] Dedup lookup failed for ${event.id}:`, err);
+        // Lookup failure: fall through and process. Prefers a rare duplicate
+        // side effect over silently dropping a valid event.
     }
 
     try {
@@ -61,6 +75,21 @@ export async function POST(req: Request) {
         }
     } catch (err) {
         console.error(`[webhook] Error handling ${event.type}:`, err);
+        // Handling failed: do NOT record the event as processed, so a Stripe
+        // retry re-runs the side effect. Still return 200 (no lost events).
+        return new NextResponse(null, { status: 200 });
+    }
+
+    // Record the event as processed only AFTER handling succeeded. A crash
+    // before this insert leaves the event unrecorded, letting Stripe retry.
+    try {
+        await prisma.stripeEvent.create({ data: { id: event.id, type: event.type } });
+    } catch (err) {
+        if ((err as { code?: string }).code === "P2002") {
+            // Concurrent delivery of the same event already recorded it.
+            return new NextResponse(null, { status: 200 });
+        }
+        console.error(`[webhook] Failed to record event ${event.id}:`, err);
     }
 
     return new NextResponse(null, { status: 200 });
