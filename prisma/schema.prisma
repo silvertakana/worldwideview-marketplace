@@ -111,6 +111,17 @@ model SigningKey {
   @@index([status])
 }
 
+/// Stripe webhook events that have been processed, keyed by Stripe's event.id.
+/// Written only AFTER the event's side effect completes, so a crash before the
+/// insert leaves the event unprocessed and Stripe's retry can re-run it.
+model StripeEvent {
+  id        String   @id // Stripe event.id (evt_...)
+  type      String
+  createdAt DateTime @default(now())
+
+  @@map("stripe_events")
+}
+
 model NpmCache {
   npmPackage  String   @id // The npm package name, acting as PK
   name        String
