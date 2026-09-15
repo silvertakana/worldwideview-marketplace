@@ -43,7 +43,7 @@
     "eslint-plugin-security": "^4.0.1",
     "size-limit": "^12.1.0",
     "typescript": "^6",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "size-limit": [
     {
