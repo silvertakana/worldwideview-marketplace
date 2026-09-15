@@ -12,6 +12,7 @@ vi.mock('@/lib/auth/getOrCreateMarketplaceUser', () => ({
 vi.mock('@/lib/prisma', () => ({
   prisma: {
     pluginInstall: {
+      findUnique: vi.fn(),
       upsert: vi.fn(),
     },
     plugin: {
@@ -31,6 +32,7 @@ import { prisma } from '@/lib/prisma'
 
 const mockGetSupabaseUser = vi.mocked(getSupabaseUser)
 const mockGetOrCreate = vi.mocked(getOrCreateMarketplaceUser)
+const mockFindUnique = vi.mocked(prisma.pluginInstall.findUnique)
 const mockUpsert = vi.mocked(prisma.pluginInstall.upsert)
 const mockPluginUpdate = vi.mocked(prisma.plugin.update)
 const mockLinkedInstanceUpsert = vi.mocked(prisma.linkedInstance.upsert)
@@ -187,6 +189,47 @@ describe('GET /api/install/start', () => {
     // DB failure in linkedInstance.upsert is swallowed by the shared .catch()
     expect(res.status).toBe(307)
     expect(res.headers.get('location')).toContain('install-redirect')
+  })
+
+  it('increments Plugin.installs on first install (no existing PluginInstall row)', async () => {
+    mockGetSupabaseUser.mockResolvedValue({ id: 'user-abc' } as never)
+    mockGetOrCreate.mockResolvedValue({ id: 'mkt-user-1' } as never)
+    mockFindUnique.mockResolvedValue(null as never)
+    mockUpsert.mockResolvedValue({} as never)
+    mockPluginUpdate.mockResolvedValue({} as never)
+    mockLinkedInstanceUpsert.mockResolvedValue({} as never)
+
+    const req = makeValidRequest()
+    const res = await GET(req)
+
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(res.status).toBe(307)
+    expect(mockPluginUpdate).toHaveBeenCalledOnce()
+    expect(mockPluginUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'test-plugin' },
+        data: { installs: { increment: 1 } },
+      }),
+    )
+  })
+
+  it('does NOT increment Plugin.installs on re-install (existing PluginInstall row)', async () => {
+    mockGetSupabaseUser.mockResolvedValue({ id: 'user-abc' } as never)
+    mockGetOrCreate.mockResolvedValue({ id: 'mkt-user-1' } as never)
+    mockFindUnique.mockResolvedValue({ id: 'existing-install-1' } as never)
+    mockUpsert.mockResolvedValue({} as never)
+    mockPluginUpdate.mockResolvedValue({} as never)
+    mockLinkedInstanceUpsert.mockResolvedValue({} as never)
+
+    const req = makeValidRequest()
+    const res = await GET(req)
+
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(res.status).toBe(307)
+    expect(mockUpsert).toHaveBeenCalledOnce()
+    expect(mockPluginUpdate).not.toHaveBeenCalled()
   })
 
   it('does NOT call linkedInstance.upsert for unauthenticated requests', async () => {

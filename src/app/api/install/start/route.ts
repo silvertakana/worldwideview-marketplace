@@ -65,27 +65,38 @@ export async function GET(request: NextRequest) {
   const marketplaceUser = await getOrCreateMarketplaceUser(user)
 
   // Fire-and-forget install tracking: upsert PluginInstall row + increment Plugin.installs counter.
-  // DB failures are swallowed so they never block the install redirect (TRACK-04).
+  // The counter only increments on a user's FIRST install of a plugin (no existing row);
+  // re-installs and retries just refresh the install record. DB failures are swallowed so
+  // they never block the install redirect (TRACK-04).
   void Promise.resolve()
     .then(() =>
-      prisma.pluginInstall.upsert({
+      prisma.pluginInstall.findUnique({
         where: { userId_pluginId: { userId: marketplaceUser.id, pluginId } },
-        update: { pluginVersion: version, instanceUrl },
-        create: {
-          userId: marketplaceUser.id,
-          pluginId,
-          pluginSlug: pluginId,
-          pluginVersion: version,
-          instanceUrl,
-        },
-      })
+        select: { id: true },
+      }),
     )
-    .then(() =>
-      prisma.plugin.update({
+    .then((existingInstall) =>
+      prisma.pluginInstall
+        .upsert({
+          where: { userId_pluginId: { userId: marketplaceUser.id, pluginId } },
+          update: { pluginVersion: version, instanceUrl },
+          create: {
+            userId: marketplaceUser.id,
+            pluginId,
+            pluginSlug: pluginId,
+            pluginVersion: version,
+            instanceUrl,
+          },
+        })
+        .then(() => existingInstall),
+    )
+    .then((existingInstall) => {
+      if (existingInstall) return undefined
+      return prisma.plugin.update({
         where: { id: pluginId },
         data: { installs: { increment: 1 } },
       })
-    )
+    })
     .then(() =>
       prisma.linkedInstance.upsert({
         where: { userId_url: { userId: marketplaceUser.id, url: parsedInstance.origin } },
