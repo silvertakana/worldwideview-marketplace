@@ -1,6 +1,6 @@
 {
   "name": "worldwideview-marketplace",
-  "version": "1.16.6",
+  "version": "1.16.7",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=26.0.0"
