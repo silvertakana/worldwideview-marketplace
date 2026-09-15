@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { freeSubscription, readSubscription } from "@/lib/billing/subscription";
 
+/**
+ * The signed-in user's subscription, read from the hub's durable billing
+ * record through their own session. See src/lib/billing/subscription.ts for
+ * why the marketplace reads the shared table directly instead of calling the
+ * hub's session-only /api/account route.
+ */
 export async function GET() {
     try {
         const supabase = await createClient();
@@ -9,68 +16,17 @@ export async function GET() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const authHost = process.env.NEXT_PUBLIC_AUTH_HOST_URL;
-        const apiKey = process.env.PROVISIONING_API_KEY;
-
-        if (!authHost || !apiKey) {
-            // Fallback: no upstream configured
-            return NextResponse.json({
-                tier: "free",
-                effectiveTier: "free",
-                hasSubscription: false,
-                stripeCustomerId: null,
-                stripeCurrentPeriodEnd: null,
-            });
-        }
-
-        const response = await fetch(
-            `${authHost}/api/account?userId=${user.id}`,
-            {
-                headers: {
-                    "x-api-key": apiKey,
-                    "Content-Type": "application/json",
-                },
-                // Timeout after 5 seconds to avoid hanging
-                signal: AbortSignal.timeout(5000),
-            },
-        );
-
-        if (!response.ok) {
-            // Upstream error — fallback to free
-            return NextResponse.json({
-                tier: "free",
-                effectiveTier: "free",
-                hasSubscription: false,
-                stripeCustomerId: null,
-                stripeCurrentPeriodEnd: null,
-            });
-        }
-
-        const data = await response.json();
-        const account = data.account;
-        const plan = account?.plan ?? "free";
-        const effectiveTier = plan;
-        const hasSubscription = !!(account?.stripeSubscriptionId);
-        const isTrialing = account?.isTrialing ?? false;
-
-        return NextResponse.json({
-            tier: plan,
-            effectiveTier: effectiveTier,
-            hasSubscription: hasSubscription || isTrialing,
-            stripeCustomerId: account?.stripeCustomerId ?? null,
-            stripeCurrentPeriodEnd: account?.trialEndsAt ?? null, // approximate end date from trial
-            trialDaysRemaining: account?.trialDaysRemaining ?? null,
-            plan: plan, // alias for backward compat
+        const subscription = await readSubscription(supabase, user);
+        return NextResponse.json(subscription, {
+            headers: { "Cache-Control": "no-store" },
         });
     } catch (error) {
-        // Network error or timeout — fallback to free
-        console.error("Subscription fetch failed (upstream):", error);
-        return NextResponse.json({
-            tier: "free",
-            effectiveTier: "free",
-            hasSubscription: false,
-            stripeCustomerId: null,
-            stripeCurrentPeriodEnd: null,
+        // A throw here (client construction, cookie access) is a read failure,
+        // not evidence that the user pays for nothing, so it reports the same
+        // distinguishable fail-safe. The 200 keeps the billing page rendering.
+        console.error("[billing] subscription route failed:", error);
+        return NextResponse.json(freeSubscription("read-error"), {
+            headers: { "Cache-Control": "no-store" },
         });
     }
 }
