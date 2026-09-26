@@ -95,6 +95,8 @@ model MarketplaceApiKey {
   createdAt  DateTime  @default(now())
   lastUsedAt DateTime?
   revokedAt  DateTime?
+  scope      String? // Space-separated permission tokens this key may mint, e.g. "plugins:read:earthquakes" (null = the tier default)
+  tier       String? // Tier label carried on tickets minted from this key (null = "free")
   user       User      @relation(fields: [userId], references: [id])
 
   @@index([userId])
