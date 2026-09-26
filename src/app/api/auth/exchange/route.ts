@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import * as jose from "jose";
 import { prisma } from "@/lib/prisma";
 import { hashApiKey } from "@/lib/auth/apiKeyHash";
-import { scopeFor } from "@/lib/auth/tierScope";
+import { resolveTicketAccess } from "@/lib/auth/tierScope";
+import { resolveAudience } from "@/lib/auth/ticketAudience";
 import { getActiveKey } from "@/lib/auth/signingKey";
 import { exchangeLimiter, getClientIp } from "@/lib/rateLimiters";
 
@@ -16,6 +17,13 @@ export async function POST(req: NextRequest) {
 
         if (!apiKey) {
             return NextResponse.json({ error: "apiKey is required" }, { status: 400 });
+        }
+
+        // The caller names the engine the ticket is for, so the value is checked
+        // for shape rather than against an allowlist (other engines exist).
+        const resolvedAudience = resolveAudience(audience);
+        if (resolvedAudience === null) {
+            return NextResponse.json({ error: "Unsupported audience" }, { status: 400 });
         }
 
         const keyHash = hashApiKey(apiKey);
@@ -42,19 +50,24 @@ export async function POST(req: NextRequest) {
             data: { lastUsedAt: new Date() },
         }).catch((err: Error) => console.warn("lastUsedAt update failed:", err.message));
 
+        // The ticket is instance-scoped: it carries the scope recorded on the
+        // presenting key, never a list of plugins. A caller that names a plugin
+        // (the globe does, to label its cache entry) does not narrow the ticket;
+        // the engine enforces per-channel access from the scope claim on every
+        // subscribe.
         const { kid, privateKey } = await getActiveKey();
         const now = Math.floor(Date.now() / 1000);
 
-        // Marketplace no longer stores tier locally — default to "free".
-        // Phase 60 will add the proxy-based plan read if needed.
-        const jwt = await new jose.SignJWT({
-            tier: "free",
-            scope: scopeFor("free"),
-        })
+        // Tier and scope come from the key that presented itself. A key with
+        // neither keeps the historical free/read-only ticket, so a marketplace
+        // that has not been given a scope behaves exactly as before.
+        const { tier, scope } = resolveTicketAccess(apiKeyRecord);
+
+        const jwt = await new jose.SignJWT({ tier, scope })
             .setProtectedHeader({ alg: "EdDSA", typ: "JWT", kid })
             .setIssuer(process.env.JWT_ISSUER ?? "https://marketplace.worldwideview.dev")
             .setSubject(apiKeyRecord.userId)
-            .setAudience(audience ?? "wwv-data-engine")
+            .setAudience(resolvedAudience)
             .setExpirationTime(now + 300)
             .setNotBefore(now)
             .setIssuedAt(now)

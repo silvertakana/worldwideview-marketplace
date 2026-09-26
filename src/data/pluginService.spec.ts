@@ -34,6 +34,7 @@ function makePlugin(overrides: Partial<Plugin> = {}): Plugin {
         icon: "Plane",
         category: "transportation",
         format: "bundle",
+        dataMode: "engine",
         trust: "verified",
         capabilities: JSON.stringify(["data:own", "network:fetch"]),
         longDescription: "Real-time flight tracking data feed for the globe.",
@@ -98,6 +99,23 @@ describe("getAllPlugins", () => {
             tags: ["flights", "aviation"],
             updatedAt: "2026-07-01",
         });
+    });
+
+    it("carries the plugin's data mode, reading an unknown stored value as engine", async () => {
+        mockPlugin.findMany.mockResolvedValueOnce([
+            makePlugin({ id: "aviation", dataMode: "bundled" }),
+            makePlugin({
+                id: "legacy",
+                npmPackage: "@worldwideview/wwv-plugin-legacy",
+                dataMode: "something-new",
+            }),
+        ]);
+        mockNpmCache.findMany.mockResolvedValueOnce([]);
+
+        const cards = await getAllPlugins();
+
+        expect(cards[0].dataMode).toBe("bundled");
+        expect(cards[1].dataMode).toBe("engine");
     });
 
     it("queries npm cache for exactly the discovered npm packages", async () => {

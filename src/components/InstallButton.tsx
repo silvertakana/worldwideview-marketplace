@@ -13,6 +13,7 @@ import {
 } from "@/lib/instanceStore";
 import { KNOWN_PLUGINS } from "@/data/knownPlugins";
 import { getInstallManifest } from "@/data/pluginManifests";
+import { parseDataMode } from "@/data/dataMode";
 import { useInstalledIds } from "./InstalledPluginsProvider";
 import InstanceConfig from "./InstanceConfig";
 import InstancePicker from "./InstancePicker";
@@ -105,6 +106,7 @@ export default function InstallButton({ plugin, isAuthed }: Props) {
             description: plugin.description ?? "",
             version: plugin.version,
             format: plugin.format ?? "bundle",
+            dataMode: parseDataMode(plugin.dataMode),
             trust: plugin.trust ?? "unverified",
             capabilities: plugin.capabilities ?? ["data:own"],
             category: plugin.category ?? "Custom",

@@ -12,6 +12,7 @@ model Plugin {
   icon            String          // lucide-react icon name e.g. "Plane"
   category        String
   format          String          // "bundle" | "static" | "dynamic"
+  dataMode        String          @default("engine") // "bundled" | "engine" | "hosted" - see src/data/dataMode.ts
   trust           String          @default("pending") // "built-in", "verified", "unverified", "pending"
   capabilities    String          // JSON string array of capabilities
   longDescription String
@@ -95,6 +96,8 @@ model MarketplaceApiKey {
   createdAt  DateTime  @default(now())
   lastUsedAt DateTime?
   revokedAt  DateTime?
+  scope      String? // Space-separated permission tokens this key may mint, e.g. "plugins:read:earthquakes" (null = the tier default)
+  tier       String? // Tier label carried on tickets minted from this key (null = "free")
   user       User      @relation(fields: [userId], references: [id])
 
   @@index([userId])

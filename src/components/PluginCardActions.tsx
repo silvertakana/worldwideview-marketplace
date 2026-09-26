@@ -10,6 +10,7 @@ import {
 } from "@/lib/instanceStore";
 import InstancePicker from "./InstancePicker";
 import { getInstallManifest } from "@/data/pluginManifests";
+import { parseDataMode } from "@/data/dataMode";
 import { useInstalledIds } from "./InstalledPluginsProvider";
 import InstanceConfig from "./InstanceConfig";
 import styles from "./PluginCardActions.module.css";
@@ -61,6 +62,7 @@ export default function PluginCardActions({ plugin, isAuthed }: Props) {
       description: plugin.description ?? "",
       version: plugin.version,
       format: plugin.format ?? "bundle",
+      dataMode: parseDataMode(plugin.dataMode),
       trust: plugin.trust ?? "unverified",
       capabilities: plugin.capabilities ?? ["data:own"],
       category: plugin.category ?? "Custom",
