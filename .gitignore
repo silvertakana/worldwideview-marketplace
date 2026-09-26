@@ -46,6 +46,9 @@ registry.db
 # planning
 .planning/
 
+# generated output from a local analysis tool, not source
+/graphify-out/
+
 # Removed artifacts
 /check.js
 /package.json.tmp
