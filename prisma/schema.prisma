@@ -12,6 +12,7 @@ model Plugin {
   icon            String          // lucide-react icon name e.g. "Plane"
   category        String
   format          String          // "bundle" | "static" | "dynamic"
+  dataMode        String          @default("engine") // "bundled" | "engine" | "hosted" - see src/data/dataMode.ts
   trust           String          @default("pending") // "built-in", "verified", "unverified", "pending"
   capabilities    String          // JSON string array of capabilities
   longDescription String

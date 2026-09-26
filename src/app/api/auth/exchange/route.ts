@@ -50,6 +50,11 @@ export async function POST(req: NextRequest) {
             data: { lastUsedAt: new Date() },
         }).catch((err: Error) => console.warn("lastUsedAt update failed:", err.message));
 
+        // The ticket is instance-scoped: it carries the scope recorded on the
+        // presenting key, never a list of plugins. A caller that names a plugin
+        // (the globe does, to label its cache entry) does not narrow the ticket;
+        // the engine enforces per-channel access from the scope claim on every
+        // subscribe.
         const { kid, privateKey } = await getActiveKey();
         const now = Math.floor(Date.now() / 1000);
 

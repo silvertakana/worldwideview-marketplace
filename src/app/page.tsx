@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { KNOWN_PLUGINS } from "@/data/knownPlugins";
+import { parseDataMode } from "@/data/dataMode";
 import PluginCard from "@/components/PluginCard";
 import PluginIcon from "@/components/PluginIcon";
 import styles from "./page.module.css";
@@ -46,6 +47,7 @@ const popularPlugins = featuredPlugins.map((p) => ({
   author: "WorldWideView",
   version: "",
   format: p.format,
+  dataMode: parseDataMode(p.dataMode),
   trust: p.trust,
   tags: [],
   updatedAt: "",

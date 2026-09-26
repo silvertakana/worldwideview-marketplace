@@ -1,4 +1,5 @@
 import type { PluginCard, PluginDetail, NpmPackageMeta } from "./types";
+import { parseDataMode } from "./dataMode";
 import { prisma } from "@/lib/prisma";
 import type { Prisma, Plugin, NpmCache } from "@prisma/client";
 
@@ -206,6 +207,7 @@ function mergeToCard(
     author: npm?.author ?? "WorldWideView",
     version: npm?.version ?? "0.0.0",
     format: dbPlugin.format as "bundle" | "static" | "declarative",
+    dataMode: parseDataMode(dbPlugin.dataMode),
     trust: dbPlugin.trust as "built-in" | "verified" | "unverified",
     tags: npm?.keywords ?? [],
     updatedAt: npm?.updatedAt ?? "—",

@@ -5,11 +5,15 @@ export interface KnownPlugin {
   icon: string;
   category: string;
   format: "declarative" | "static" | "bundle";
+  /** Omitted for a plugin whose data mode has not been recorded; reads as engine. */
+  dataMode?: DataMode;
   trust: "built-in" | "verified" | "unverified";
   capabilities: string[];
   longDescription: string;
   changelog: string;
 }
+
+import type { DataMode } from "./dataMode";
 
 /** Data used to render a plugin card on the browse page. */
 export interface PluginCard {
@@ -23,6 +27,8 @@ export interface PluginCard {
   author: string;
   version: string;
   format: "declarative" | "static" | "bundle";
+  /** How this plugin's data arrives; drives which tier can install it. */
+  dataMode: DataMode;
   trust: "built-in" | "verified" | "unverified";
   tags: string[];
   updatedAt: string;
