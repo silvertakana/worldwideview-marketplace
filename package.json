@@ -1,6 +1,6 @@
 {
   "name": "worldwideview-marketplace",
-  "version": "1.16.9",
+  "version": "1.16.10",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=26.0.0"
@@ -32,6 +32,8 @@
   },
   "devDependencies": {
     "@size-limit/preset-app": "^12.1.0",
+    "@stryker-mutator/core": "^10.0.0",
+    "@stryker-mutator/vitest-runner": "^10.0.0",
     "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^26",
     "@types/react": "^19",
