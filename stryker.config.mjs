@@ -52,7 +52,11 @@ const config = {
   timeoutMS: 30000,
   tempDirName: '.stryker-tmp',
   cleanTempDir: true,
-  ignorePatterns: ['coverage', '.next', 'reports', '.stryker-tmp', 'node_modules'],
+  // `.claude` is a checked-in symlink to `.agents`, and Stryker's sandbox copy
+  // cannot copy a symlink to a directory: the run dies with
+  // "EISDIR: illegal operation on a directory, copyfile '/.../.claude'".
+  // It is contributor tooling, not project source, so keep it out of the sandbox.
+  ignorePatterns: ['coverage', '.next', 'reports', '.stryker-tmp', 'node_modules', '.claude'],
 
   // The workflow caches this file, so a weekly run only re-tests what changed.
   incremental: true,
