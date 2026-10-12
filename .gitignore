@@ -49,6 +49,10 @@ registry.db
 # generated output from a local analysis tool, not source
 /graphify-out/
 
+# Mutation testing (Stryker)
+/.stryker-tmp/
+/reports/
+
 # Removed artifacts
 /check.js
 /package.json.tmp
