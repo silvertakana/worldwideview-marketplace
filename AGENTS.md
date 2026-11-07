@@ -60,3 +60,11 @@ pnpm build  # Build the Next.js app
 - **PR Preview fails on EVERY PR**: `pr-preview.yml` pins `shared-docker.yml@ci/infra-overhaul`, a dangling branch in the globe repo. Pre-existing and unrelated to PR content; known until pr-preview is repinned.
 - **Unit Tests can flake**: `signingKey` kid-a/kid-b race and the coverage-report ENOENT step; a re-run clears it.
 - **Docker Publish `startup_failure`**: caused by the globe's `shared-docker.yml` carrying `secrets` context in build-args `with:` (workflow-registration rejection); being fixed via globe PR #443. Once merged, that class should disappear.
+
+---
+
+## Internal material is not kept here
+
+This repository is public. Agent skills, session plans, research notes and internal planning
+documents do not live here and must not be added: `.agents/` and `.planning/` are ignored on
+purpose. Repo-specific build, test and review rules belong in this file.
