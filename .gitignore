@@ -59,3 +59,8 @@ registry.db
 /dev-server.log
 /marketplace-dev.log
 /.dev-server.log
+
+# internal agentic + planning material - kept in a private workspace repository,
+# never published from here. One directory rule, no re-includes.
+/.agents/
+.planning/
